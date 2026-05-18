@@ -30,4 +30,4 @@ jobs:
           git add .
           git commit -m "sync fork" || echo "No changes"
 
-          git push fork HEAD:main
+          git push fork HEAD:main --force
