@@ -34,7 +34,7 @@ class OAuth2SuccessHandlerTest {
         request = mock(HttpServletRequest::class.java)
         response = mock(HttpServletResponse::class.java)
         authentication = mock(Authentication::class.java)
-        successHandler = OAuth2SuccessHandler(refreshTokenUtil, refreshTokenRepository)
+        successHandler = OAuth2SuccessHandler(refreshTokenUtil, refreshTokenRepository, "http://localhost:3000")
     }
 
     @Test

@@ -11,12 +11,15 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.beans.factory.annotation.Value
 import java.util.UUID
 
 @Component
 class OAuth2SuccessHandler(
     private val refreshTokenUtil: RefreshTokenUtil,
     private val refreshTokenRepository: RefreshTokenRepository,
+    @Value("\${app.frontend-url:http://localhost:3000}")
+    private val frontendUrl: String
 ) : SimpleUrlAuthenticationSuccessHandler() {
 
     @Transactional
@@ -34,7 +37,7 @@ class OAuth2SuccessHandler(
         refreshTokenRepository.save(RefreshToken.create(user, uuid))
         refreshTokenUtil.add(response, uuid.toString())
 
-        response.sendRedirect("http://localhost:3000?oauth=success")
+        response.sendRedirect("$frontendUrl?oauth=success")
     }
 
     companion object {
