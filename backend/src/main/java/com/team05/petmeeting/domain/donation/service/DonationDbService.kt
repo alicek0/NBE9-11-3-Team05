@@ -11,6 +11,8 @@ import com.team05.petmeeting.domain.donation.errorCode.DonationErrorCode
 import com.team05.petmeeting.domain.donation.repository.DonationRepository
 import com.team05.petmeeting.domain.user.dto.profile.UserDonationRes
 import com.team05.petmeeting.domain.user.service.UserService
+import com.team05.petmeeting.domain.campaign.enums.CampaignStatus
+import com.team05.petmeeting.domain.campaign.errorCode.CampaignErrorCode
 import com.team05.petmeeting.global.exception.BusinessException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -24,12 +26,15 @@ class DonationDbService(
     private val userService: UserService,
     private val campaignRepository: CampaignRepository,
 ) {
-
     @Transactional
     fun prepareDonation(userId: Long, req: PrepareReq): PrepareRes {
         val paymentId = "donate-" + UUID.randomUUID().toString().replace("-", "")
         val user = userService.findById(userId)
         val campaign = campaignService.findById(req.campaignId)
+
+        if (campaign.status != CampaignStatus.ACTIVE) {
+            throw BusinessException(CampaignErrorCode.CAMPAIGN_CLOSED)
+        }
 
         val donation = Donation.create(user, campaign, paymentId, req.amount)
         donationRepository.save(donation)
@@ -55,8 +60,10 @@ class DonationDbService(
         }
 
         donation.complete()
-        campaignRepository.addDonationAmount(donation.campaign.id!!, paidAmount)
-//        donation.campaign.addAmount(paidAmount)
+        val campaignId = donation.campaign.id
+        campaignRepository.addDonationAmount(campaignId, paidAmount)
+        campaignRepository.updateStatusIfTargetReached(campaignId)
+
         donationRepository.save(donation)
 
         return CompleteRes(
@@ -76,6 +83,9 @@ class DonationDbService(
             donation.fail()
         } else {
             donation.complete()
+            val campaignId = donation.campaign.id!!
+            campaignRepository.addDonationAmount(campaignId, paidAmount)
+            campaignRepository.updateStatusIfTargetReached(campaignId)
         }
         donationRepository.save(donation)
     }

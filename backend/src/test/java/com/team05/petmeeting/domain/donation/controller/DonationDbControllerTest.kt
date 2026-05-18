@@ -78,7 +78,7 @@ class DonationDbServiceTest {
         assertThat(result.amount).isEqualTo(reqAmount)
         assertThat(result.paymentId).startsWith("donate-")
 
-        val savedDonation = donationRepository.findByPaymentId(result.paymentId)
+        val savedDonation = donationRepository.findByPaymentId(result.paymentId)!!
         assertThat(savedDonation.amount).isEqualTo(reqAmount)
         assertThat(savedDonation.status).isEqualTo(DonationStatus.PENDING)
     }
@@ -104,7 +104,7 @@ class DonationDbServiceTest {
         assertThat(result.status).isEqualTo(DonationStatus.PAID)
         assertThat(result.amount).isEqualTo(reqAmount)
 
-        val updatedDonation = donationRepository.findByPaymentId(paymentId)
+        val updatedDonation = donationRepository.findByPaymentId(paymentId)!!
         assertThat(updatedDonation.status).isEqualTo(DonationStatus.PAID)
 
         val updatedCampaign = campaignRepository.findById(campaign.id!!).get()
@@ -129,7 +129,7 @@ class DonationDbServiceTest {
 
         assertThat(exception.errorCode).isEqualTo(DonationErrorCode.PAYMENT_NOT_PAID)
 
-        val failedDonation = donationRepository.findByPaymentId(paymentId)
+        val failedDonation = donationRepository.findByPaymentId(paymentId)!!
         assertThat(failedDonation.status).isEqualTo(DonationStatus.FAILED)
     }
 
@@ -151,7 +151,7 @@ class DonationDbServiceTest {
 
         assertThat(exception.errorCode).isEqualTo(DonationErrorCode.AMOUNT_MISMATCH)
 
-        val failedDonation = donationRepository.findByPaymentId(paymentId)
+        val failedDonation = donationRepository.findByPaymentId(paymentId)!!
         assertThat(failedDonation.status).isEqualTo(DonationStatus.FAILED)
     }
 

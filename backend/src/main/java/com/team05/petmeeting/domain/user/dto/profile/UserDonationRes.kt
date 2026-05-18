@@ -6,7 +6,7 @@ import com.team05.petmeeting.domain.donation.enums.DonationStatus
 data class UserDonationRes(
     val donationCount: Int,
     val donationTotalAmount: Int,
-    val donations: MutableList<UserDonationItem>
+    val donations: List<UserDonationItem>
 ) {
 
     data class UserDonationItem(
@@ -33,7 +33,7 @@ data class UserDonationRes(
         fun of(
             donationCount: Int,
             donationTotalAmount: Int,
-            donations: MutableList<Donation>
+            donations: List<Donation>
         ): UserDonationRes {
             val items = donations.stream()
                 .map { donation: Donation -> UserDonationItem.from(donation) }

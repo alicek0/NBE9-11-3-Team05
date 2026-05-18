@@ -25,4 +25,8 @@ interface CampaignRepository : JpaRepository<Campaign, Long> {
     @Modifying(clearAutomatically = true)
     @Query("UPDATE Campaign c SET c.currentAmount = c.currentAmount + :amount WHERE c.id = :campaignId")
     fun addDonationAmount(@Param("campaignId") campaignId: Long, @Param("amount") amount: Int)
+
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE Campaign c SET c.status = 'COMPLETE' WHERE c.id = :campaignId AND c.currentAmount >= c.targetAmount AND c.status = 'ACTIVE'")
+    fun updateStatusIfTargetReached(@Param("campaignId") campaignId: Long)
 }
