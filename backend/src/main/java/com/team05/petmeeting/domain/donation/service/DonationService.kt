@@ -23,13 +23,19 @@ import org.springframework.beans.factory.ObjectProvider
 import org.springframework.beans.factory.annotation.Value
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import lombok.extern.slf4j.Slf4j
+import org.slf4j.LoggerFactory
 
 @Service
+@Slf4j
 class DonationService(
     private val paymentClient: PaymentClient,
     private val webhookVerifierProvider: ObjectProvider<WebhookVerifier>,
     private val donationDbService: DonationDbService // Inject the DB service
 ) {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     @Value("\${portone.store-id}")
     private val storeId: String? = null
 
@@ -90,7 +96,15 @@ class DonationService(
                 val paymentId = webhook.data.paymentId
 
                 // PortOne API Call (Network)
-                val payment = paymentClient.getPayment(paymentId)
+                val payment = try {
+                    paymentClient.getPayment(paymentId)
+                } catch (e: PaymentNotFoundException) {
+                    // PortOne webhook test or invalid payment
+                    logger.info("Ignoring unknown paymentId: {}", paymentId)
+                    return
+                } catch (e: Exception) {
+                    throw BusinessException(DonationErrorCode.PAYMENT_NOT_FOUND)
+                }
 
                 if (payment is Payment.Recognized && payment is PaidPayment) {
                     val paidAmount = payment.amount.total.toInt()
