@@ -22,7 +22,6 @@ class PortOneConfig {
     @Bean
     fun paymentClient(): PaymentClient {
         return PaymentClient(apiSecret = apiSecret)
-        return PaymentClient(apiSecret = apiSecret)
     }
 
 
