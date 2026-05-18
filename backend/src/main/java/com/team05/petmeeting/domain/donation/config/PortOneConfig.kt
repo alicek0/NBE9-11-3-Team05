@@ -21,7 +21,7 @@ class PortOneConfig {
 
     @Bean
     fun paymentClient(): PaymentClient {
-        println("API Secret: '$apiSecret'")  // 실제 값 출력
+        return PaymentClient(apiSecret = apiSecret)
         return PaymentClient(apiSecret = apiSecret)
     }
 
