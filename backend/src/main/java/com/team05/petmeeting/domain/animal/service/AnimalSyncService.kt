@@ -70,7 +70,7 @@ class AnimalSyncService(
 
         try {
             val startedAt = Instant.now()
-            val savedCount = fetchAndSaveMonthlyAnimalsFrom2008(numOfRows, Int.MAX_VALUE)
+            val savedCount = fetchAndSaveMonthlyAnimalsFromStartDate(numOfRows, Int.MAX_VALUE)
             // 모든 월별 적재가 정상 종료된 뒤에만 최초 적재 성공 시각을 갱신한다.
             updateSyncState(AnimalSyncType.INITIAL)
 
@@ -123,7 +123,7 @@ class AnimalSyncService(
     }
 
     // 최초 적재 범위를 월별로 순회하면서 저장 건수를 누적한다.
-    fun fetchAndSaveMonthlyAnimalsFrom2008(numOfRows: Int, maxSaveCount: Int): Int {
+    fun fetchAndSaveMonthlyAnimalsFromStartDate(numOfRows: Int, maxSaveCount: Int): Int {
         val today = LocalDate.now()
         var currentMonthStart = animalSyncProperties.initial.startDate.withDayOfMonth(1)
         var totalSavedCount = 0

@@ -30,7 +30,7 @@ class AnimalSyncController(
 
     // 2008년 1월부터 현재까지 월 단위 최초 적재를 수행한다.
     @PostMapping("/sync/initial")
-    fun syncMonthlyFrom2008(
+    fun syncInitialMonthly(
         @RequestParam(required = false) numOfRows: Int?,
     ): ResponseEntity<AnimalSyncRes> =
         ResponseEntity.ok(animalSyncService.runInitialMonthlySync(numOfRows ?: animalSyncProperties.initial.numOfRows))
