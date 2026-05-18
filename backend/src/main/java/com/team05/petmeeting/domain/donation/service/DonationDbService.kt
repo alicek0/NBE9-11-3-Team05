@@ -55,7 +55,7 @@ class DonationDbService(
         }
 
         donation.complete()
-        campaignRepository.addDonationAmount(donation.campaign.id ,paidAmount)
+        campaignRepository.addDonationAmount(donation.campaign.id!!, paidAmount)
 //        donation.campaign.addAmount(paidAmount)
         donationRepository.save(donation)
 
