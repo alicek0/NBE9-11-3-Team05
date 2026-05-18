@@ -61,6 +61,24 @@ class AnimalSyncControllerTest {
     }
 
     @Test
+    @DisplayName("유기동물 페이지 동기화 요청 시 파라미터가 없으면 설정 기본값을 사용한다")
+    void syncAnimals_usesConfiguredDefaults() throws Exception {
+        AnimalSyncRes response = new AnimalSyncRes("동기화 완료", 1, 50L);
+        given(animalSyncProperties.getDefaultPageNo()).willReturn(1);
+        given(animalSyncProperties.getDefaultNumOfRows()).willReturn(10);
+        given(animalSyncService.fetchAndSaveAnimals(1, 10)).willReturn(response);
+
+        mockMvc.perform(post("/api/v1/animals/sync")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("동기화 완료"))
+                .andExpect(jsonPath("$.savedCount").value(1))
+                .andExpect(jsonPath("$.elapsedMs").value(50L));
+
+        verify(animalSyncService).fetchAndSaveAnimals(1, 10);
+    }
+
+    @Test
     @DisplayName("초기 월별 동기화 요청 성공")
     void syncInitialMonthly() throws Exception {
         AnimalSyncRes response = new AnimalSyncRes("초기 동기화 완료", 10, 300L);
