@@ -64,11 +64,12 @@ class Feed protected constructor() : BaseEntity() {
         this.animal = animal
     }
 
-    fun update(category: FeedCategory, title: String, content: String, imageUrl: String?) {
+    fun update(category: FeedCategory, title: String, content: String, imageUrl: String?, animal: Animal?) {
         this.category = category
         this.title = title
         this.content = content
         this.imageUrl = imageUrl
+        this.animal = animal
     }
 
     // 테스트용 생성자

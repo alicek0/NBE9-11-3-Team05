@@ -38,8 +38,8 @@ class AdsService(
             ) ?: throw IllegalStateException("인스타그램 미디어 컨테이너 응답이 비어있습니다.")
             val containerId = extractId(containerResponse)
 
-            // 3. 인스타그램 이미지 처리 대기 (5초)
-            Thread.sleep(5000)
+            // 3. 인스타그램 이미지 처리 완료 대기
+            waitUntilContainerReady(containerId)
 
             // 4. 게시
             instagramClient.publishMedia(containerId)
@@ -57,9 +57,45 @@ class AdsService(
         }
     }
 
+    private fun waitUntilContainerReady(containerId: String) {
+        repeat(MAX_STATUS_CHECK_COUNT) {
+            val statusResponse = instagramClient.getContainerStatus(containerId)
+            val statusCode = extractStatusCode(statusResponse)
+
+            if (statusCode == "FINISHED") {
+                return
+            }
+
+            if (statusCode == "ERROR") {
+                throw IllegalStateException("인스타그램 미디어 컨테이너 처리 실패")
+            }
+
+            Thread.sleep(STATUS_CHECK_INTERVAL_MILLIS)
+        }
+
+        throw IllegalStateException("인스타그램 미디어 컨테이너 처리 시간 초과")
+    }
+
+    private fun extractStatusCode(response: String): String {
+        return try {
+            objectMapper.readTree(response)
+                .path("status_code")
+                .asText(null)
+                ?: throw IllegalStateException("인스타그램 응답에서 status_code를 찾을 수 없습니다.")
+        } catch (e: Exception) {
+            throw IllegalStateException("인스타그램 미디어 컨테이너 상태 추출 실패", e)
+        }
+    }
+
     // @Scheduled(cron = "0 0 9 * * MON") // 매주 월요일 오전 9시 스프링이 직접 자동 실행하는 어노테이션, 일단 주석처리
     @Throws(InterruptedException::class)
     fun scheduledWeeklyAds() {
-        runWeeklyAds(3)
+        runWeeklyAds(DEFAULT_WEEKLY_ADS_COUNT)
+    }
+
+    companion object {
+        private const val DEFAULT_WEEKLY_ADS_COUNT = 3
+        private const val MAX_STATUS_CHECK_COUNT = 5
+        private const val STATUS_CHECK_INTERVAL_MILLIS = 3000L
     }
 }

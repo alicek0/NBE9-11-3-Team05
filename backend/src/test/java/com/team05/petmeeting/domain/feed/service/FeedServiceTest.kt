@@ -204,6 +204,50 @@ internal class FeedServiceTest {
     }
 
     @Test
+    @DisplayName("modify - ADOPTION_REVIEW인데 animalId 없으면 예외 발생")
+    fun modify_adoption_review_without_animal_throws_exception() {
+        val feedId = 1L
+        val req = FeedReq(FeedCategory.ADOPTION_REVIEW, "입양후기", "수정된 내용", null, null)
+        val existingFeed = Feed(user, FeedCategory.FREE, "원래 제목", "원래 내용", null, null)
+        setId(existingFeed, feedId)
+
+        Mockito.`when`(feedRepository.findById(feedId)).thenReturn(Optional.of(existingFeed))
+
+        assertThatThrownBy { feedService.modify(feedId, req, user) }
+            .isInstanceOf(BusinessException::class.java)
+            .extracting { (it as BusinessException).errorCode }
+            .isEqualTo(FeedErrorCode.ANIMAL_REQUIRED)
+    }
+
+    @Test
+    @DisplayName("modify - ADOPTION_REVIEW + 승인된 동물이면 수정 성공")
+    fun modify_adoption_review_approved_success() {
+        val feedId = 1L
+        val animalId = 1L
+        val req = FeedReq(FeedCategory.ADOPTION_REVIEW, "입양후기", "수정된 내용", null, animalId)
+        val animal = Animal()
+        val existingFeed = Feed(user, FeedCategory.FREE, "원래 제목", "원래 내용", null, null)
+        setId(animal, animalId)
+        setId(existingFeed, feedId)
+
+        Mockito.`when`(feedRepository.findById(feedId)).thenReturn(Optional.of(existingFeed))
+        Mockito.`when`(animalRepository.findById(animalId)).thenReturn(Optional.of(animal))
+        Mockito.`when`(
+            adoptionApplicationRepository.existsByUser_IdAndAnimal_IdAndStatus(
+                requireNotNull(user.id),
+                animalId,
+                AdoptionStatus.Approved
+            )
+        ).thenReturn(true)
+        Mockito.`when`(feedLikeRepository.countByFeed(existingFeed)).thenReturn(0L)
+
+        val res = feedService.modify(feedId, req, user)
+
+        assertThat(res.category).isEqualTo(FeedCategory.ADOPTION_REVIEW)
+        assertThat(res.animalId).isEqualTo(animalId)
+    }
+
+    @Test
     @DisplayName("modify - 존재하지 않는 피드 수정 시 예외 발생")
     fun modify_feed_not_found_throws_exception() {
         val feedId = 999L
@@ -323,13 +367,13 @@ internal class FeedServiceTest {
             "test-image".toByteArray()
         )
 
-        Mockito.`when`(s3Service.upload(file.bytes, "feed.png", "feed"))
+        Mockito.`when`(s3Service.upload(file.bytes, "feed.png", "feed", MediaType.IMAGE_PNG_VALUE))
             .thenReturn("https://s3-url.com/feed.png")
 
         val imageUrl = feedService.uploadImage(file)
 
         assertThat(imageUrl).isEqualTo("https://s3-url.com/feed.png")
-        verify(s3Service).upload(file.bytes, "feed.png", "feed")
+        verify(s3Service).upload(file.bytes, "feed.png", "feed", MediaType.IMAGE_PNG_VALUE)
     }
 
     @Test
@@ -346,5 +390,34 @@ internal class FeedServiceTest {
             .isInstanceOf(IllegalArgumentException::class.java)
             .hasMessage("업로드할 이미지 파일이 비어있습니다.")
     }
-}
 
+    @Test
+    @DisplayName("uploadImage - 이미지가 아닌 파일이면 예외 발생")
+    fun uploadImage_not_image_file_fail() {
+        val file = MockMultipartFile(
+            "file",
+            "feed.txt",
+            MediaType.TEXT_PLAIN_VALUE,
+            "text-file".toByteArray()
+        )
+
+        assertThatThrownBy { feedService.uploadImage(file) }
+            .isInstanceOf(IllegalArgumentException::class.java)
+            .hasMessage("이미지 파일만 업로드할 수 있습니다.")
+    }
+
+    @Test
+    @DisplayName("uploadImage - 5MB 초과 파일이면 예외 발생")
+    fun uploadImage_too_large_file_fail() {
+        val file = MockMultipartFile(
+            "file",
+            "large.png",
+            MediaType.IMAGE_PNG_VALUE,
+            ByteArray((5 * 1024 * 1024) + 1)
+        )
+
+        assertThatThrownBy { feedService.uploadImage(file) }
+            .isInstanceOf(IllegalArgumentException::class.java)
+            .hasMessage("이미지 파일은 5MB 이하만 업로드할 수 있습니다.")
+    }
+}

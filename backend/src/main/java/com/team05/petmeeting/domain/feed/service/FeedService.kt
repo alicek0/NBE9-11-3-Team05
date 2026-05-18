@@ -2,6 +2,7 @@ package com.team05.petmeeting.domain.feed.service
 
 import com.team05.petmeeting.domain.adoption.entity.AdoptionStatus
 import com.team05.petmeeting.domain.adoption.repository.AdoptionApplicationRepository
+import com.team05.petmeeting.domain.animal.entity.Animal
 import com.team05.petmeeting.domain.animal.errorCode.AnimalErrorCode
 import com.team05.petmeeting.domain.animal.repository.AnimalRepository
 import com.team05.petmeeting.domain.feed.dto.AdoptedAnimalRes
@@ -30,23 +31,14 @@ class FeedService(
     private val adoptionApplicationRepository: AdoptionApplicationRepository,
     private val s3Service: S3Service
 ) {
+    companion object {
+        private const val MAX_IMAGE_SIZE = 5 * 1024 * 1024L
+    }
+
 
     @Transactional
     fun write(request: FeedReq, user: User): FeedRes {
-        val animalId = request.animalId
-
-        if (request.category == FeedCategory.ADOPTION_REVIEW && animalId == null) {
-            throw BusinessException(FeedErrorCode.ANIMAL_REQUIRED)
-        }
-
-        val animal = animalId?.let {
-            animalRepository.findById(it)
-                .orElseThrow { BusinessException(AnimalErrorCode.ANIMAL_NOT_FOUND) }
-        }
-
-        if (request.category == FeedCategory.ADOPTION_REVIEW) {
-            validateAdoptedAnimal(user, animalId!!)
-        }
+        val animal = validateAndGetAnimal(request, user)
 
         val feed = Feed(
             user = user,
@@ -67,7 +59,9 @@ class FeedService(
         val feed = findByFeedId(feedId)
 
         feed.checkModify(user)
-        feed.update(request.category, request.title, request.content, request.imageUrl)
+
+        val animal = validateAndGetAnimal(request, user)
+        feed.update(request.category, request.title, request.content, request.imageUrl, animal)
 
         val likeCount = feedLikeRepository.countByFeed(feed).toInt()
 
@@ -126,15 +120,42 @@ class FeedService(
         }
     }
 
+    private fun validateAndGetAnimal(request: FeedReq, user: User): Animal? {
+        val animalId = request.animalId
+
+        if (request.category == FeedCategory.ADOPTION_REVIEW && animalId == null) {
+            throw BusinessException(FeedErrorCode.ANIMAL_REQUIRED)
+        }
+
+        val animal = animalId?.let {
+            animalRepository.findById(it)
+                .orElseThrow { BusinessException(AnimalErrorCode.ANIMAL_NOT_FOUND) }
+        }
+
+        if (request.category == FeedCategory.ADOPTION_REVIEW) {
+            validateAdoptedAnimal(user, requireNotNull(animalId))
+        }
+
+        return animal
+    }
+
     fun uploadImage(file: MultipartFile): String {
         if (file.isEmpty) {
             throw IllegalArgumentException("업로드할 이미지 파일이 비어있습니다.")
         }
 
+        if (file.size > MAX_IMAGE_SIZE) {
+            throw IllegalArgumentException("이미지 파일은 5MB 이하만 업로드할 수 있습니다.")
+        }
+
+        val contentType = file.contentType
+            ?.takeIf { it.startsWith("image/") }
+            ?: throw IllegalArgumentException("이미지 파일만 업로드할 수 있습니다.")
+
         val fileName = file.originalFilename
             ?.takeIf { it.isNotBlank() }
             ?: "feed-image.png"
 
-        return s3Service.upload(file.bytes, fileName, "feed")
+        return s3Service.upload(file.bytes, fileName, "feed", contentType)
     }
 }

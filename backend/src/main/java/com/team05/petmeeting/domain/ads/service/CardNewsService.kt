@@ -23,7 +23,7 @@ class CardNewsService(
         val finalImage = createCombinedImage(animal.popfile1, caption, animal)
 
         val fileName = animal.desertionNo + ".png"
-        val uploadedUrl = s3Service.upload(finalImage, fileName, "cardnews")
+        val uploadedUrl = s3Service.upload(finalImage, fileName, "cardnews", "image/png")
 
         return CardNewsResult(uploadedUrl, caption)
     }

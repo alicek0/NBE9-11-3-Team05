@@ -77,6 +77,9 @@ internal class AdsServiceTest {
             )
         ).thenReturn("{ \"id\" : \"container-123\" }")
 
+        Mockito.`when`(instagramClient.getContainerStatus("container-123"))
+            .thenReturn("{ \"status_code\" : \"FINISHED\" }")
+
         adsService.runWeeklyAds(1)
 
         Mockito.verify(instagramClient).publishMedia("container-123")

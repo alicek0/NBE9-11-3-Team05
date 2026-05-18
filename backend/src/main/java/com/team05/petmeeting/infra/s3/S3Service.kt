@@ -14,12 +14,17 @@ class S3Service(
     @param:Value("\${cloud.aws.s3.bucket}")
     private val bucket: String
 ) {
-    fun upload(bytes: ByteArray, fileName: String, directory: String): String {
+    fun upload(
+        bytes: ByteArray,
+        fileName: String,
+        directory: String,
+        contentType: String = "application/octet-stream"
+    ): String {
         val key = directory.trim('/') + "/" + UUID.randomUUID() + "_" + fileName
 
         val metadata = ObjectMetadata()
         metadata.contentLength = bytes.size.toLong()
-        metadata.contentType = "image/png"
+        metadata.contentType = contentType
 
         try {
             amazonS3.putObject(

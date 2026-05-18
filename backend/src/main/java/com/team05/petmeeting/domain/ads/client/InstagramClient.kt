@@ -40,7 +40,10 @@ class InstagramClient(
     // 2단계: 미디어 게시
     fun publishMedia(containerId: String): String? {
         val userId = requireInstagramProperty(properties.userId, "Instagram User ID")
-        val accessToken = requireInstagramProperty(properties.accessToken, "Instagram Access Token")
+        val accessToken = requireInstagramProperty(
+            properties.accessToken,
+            "Instagram Access Token"
+        )
         val url = "$BASE_URL/$userId/media_publish"
 
         val body = "creation_id=$containerId&access_token=$accessToken"
@@ -56,6 +59,34 @@ class InstagramClient(
         } catch (e: RestClientResponseException) {
             throw IllegalStateException(
                 "미디어 게시 실패: ${e.responseBodyAsString}", e
+            )
+        }
+    }
+
+    fun getContainerStatus(containerId: String): String {
+        val accessToken = requireInstagramProperty(
+            properties.accessToken,
+            "Instagram Access Token"
+        )
+        val url = UriComponentsBuilder
+            .fromUriString("$BASE_URL/$containerId")
+            .queryParam("fields", "status_code")
+            .queryParam("access_token", accessToken)
+            .build()
+            .toUriString()
+
+        try {
+            val response = RestClient.create()
+                .get()
+                .uri(url)
+                .retrieve()
+                .body(String::class.java)
+
+            return response ?: throw IllegalStateException("인스타그램 컨테이너 상태 응답이 비어있습니다.")
+        } catch (e: RestClientResponseException) {
+            throw IllegalStateException(
+                "인스타그램 컨테이너 상태 조회 실패: ${e.responseBodyAsString}",
+                e
             )
         }
     }

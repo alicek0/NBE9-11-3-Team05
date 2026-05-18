@@ -117,10 +117,10 @@ internal class FeedControllerTest {
     @Test
     @DisplayName("피드 작성 성공")
     fun write_success() {
-        val req = FeedReq(FeedCategory.FREE, "새 피드 제목", "새 피드 내용", null, null)
+        val req = FeedReq(FeedCategory.FREE, "새 피드 제목", "새 피드 내용입니다.", null, null)
         val res = feedRes(
             title = "새 피드 제목",
-            content = "새 피드 내용"
+            content = "새 피드 내용입니다."
         )
 
         Mockito.`when`(feedService.write(req, user)).thenReturn(res)
@@ -135,7 +135,29 @@ internal class FeedControllerTest {
             .andExpect(handler().methodName("write"))
             .andExpect(status().isCreated)
             .andExpect(jsonPath("$.title").value("새 피드 제목"))
-            .andExpect(jsonPath("$.content").value("새 피드 내용"))
+            .andExpect(jsonPath("$.content").value("새 피드 내용입니다."))
+    }
+
+    @Test
+    @DisplayName("피드 작성 실패 - 제목이 비어있으면 400 응답")
+    fun write_blank_title_fail() {
+        val request = FeedReq(
+            category = FeedCategory.FREE,
+            title = "",
+            content = "10자 이상인 테스트 내용입니다.",
+            imageUrl = null,
+            animalId = null
+        )
+
+        mvc.perform(
+            post("/api/v1/feeds")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+                .with(authentication(auth()))
+        )
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("$.code").value("INVALID_INPUT"))
+            .andExpect(jsonPath("$.details[0].field").value("title"))
     }
 
     @Test
@@ -187,8 +209,8 @@ internal class FeedControllerTest {
     @Test
     @DisplayName("피드 수정 성공")
     fun modify_success() {
-        val req = FeedReq(FeedCategory.FREE, "수정된 제목", "수정된 내용", null, null)
-        val res = feedRes(title = "수정된 제목", content = "수정된 내용")
+        val req = FeedReq(FeedCategory.FREE, "수정된 제목", "수정된 내용입니다.", null, null)
+        val res = feedRes(title = "수정된 제목", content = "수정된 내용입니다.")
 
         Mockito.`when`(feedService.modify(feedId, req, user)).thenReturn(res)
 
@@ -202,13 +224,13 @@ internal class FeedControllerTest {
             .andExpect(handler().methodName("modify"))
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.title").value("수정된 제목"))
-            .andExpect(jsonPath("$.content").value("수정된 내용"))
+            .andExpect(jsonPath("$.content").value("수정된 내용입니다."))
     }
 
     @Test
     @DisplayName("피드 수정 실패 - 없는 피드")
     fun modify_not_found() {
-        val req = FeedReq(FeedCategory.FREE, "수정된 제목", "수정된 내용", null, null)
+        val req = FeedReq(FeedCategory.FREE, "수정된 제목", "수정된 내용입니다.", null, null)
 
         Mockito.`when`(feedService.modify(999L, req, user))
             .thenThrow(BusinessException(FeedErrorCode.FEED_NOT_FOUND))
@@ -255,7 +277,7 @@ internal class FeedControllerTest {
     @Test
     @DisplayName("피드 수정 실패 - 다른 사람 피드 수정 시도 → 403")
     fun modify_forbidden() {
-        val req = FeedReq(FeedCategory.FREE, "수정된 제목", "수정된 내용", null, null)
+        val req = FeedReq(FeedCategory.FREE, "수정된 제목", "수정된 내용입니다.", null, null)
 
         Mockito.`when`(feedService.modify(feedId, req, user))
             .thenThrow(BusinessException(FeedErrorCode.FORBIDDEN))
