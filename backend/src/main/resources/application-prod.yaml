@@ -1,0 +1,31 @@
+spring:
+  datasource:
+    url: jdbc:mysql://13.125.26.41:3306/my_project_db?serverTimezone=Asia/Seoul&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+
+animal:
+  api:
+    base-url: ${ANIMAL_API_BASE_URL}
+    service-key: ${ANIMAL_API_SERVICE_KEY}
+    return-type: ${ANIMAL_API_RETURN_TYPE:json}
+    timeout-ms: ${ANIMAL_API_TIMEOUT_MS:5000}
+  sync:
+    initial:
+      num-of-rows: ${ANIMAL_SYNC_INITIAL_NUM_OF_ROWS:500}
+    update:
+      num-of-rows: ${ANIMAL_SYNC_UPDATE_NUM_OF_ROWS:500}
+      delay-ms: ${ANIMAL_SYNC_UPDATE_DELAY_MS:300}
+
+logging:
+  level:
+    com.team05.petmeeting.domain.animal: INFO
