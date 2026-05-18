@@ -3,7 +3,11 @@ package com.team05.petmeeting.domain.donation.errorCode
 import com.team05.petmeeting.global.exception.ErrorCode
 import org.springframework.http.HttpStatus
 
-enum class DonationErrorCode(private val status: HttpStatus, private val code: String, private val message: String) : ErrorCode {
+enum class DonationErrorCode(
+    override val status: HttpStatus,
+    override val code: String,
+    override val message: String,
+) : ErrorCode {
     DONATION_NOT_FOUND(HttpStatus.NOT_FOUND, "DO-001", "후원 내역이 없습니다."),
     INVALID_AMOUNT(HttpStatus.BAD_REQUEST, "DO-002", "유효하지 않은 금액입니다."),
     ALREADY_PROCESSED(HttpStatus.BAD_REQUEST, "DO-003", "이미 처리된 결제입니다."),
@@ -16,16 +20,4 @@ enum class DonationErrorCode(private val status: HttpStatus, private val code: S
     INVALID_REQUEST(HttpStatus.BAD_REQUEST, "DO-010", "잘못된 결제 요청입니다."),
     INVALID_WEBHOOK(HttpStatus.BAD_REQUEST, "DO-011", "유효하지 않은 웹훅입니다."),
     ;
-
-    override fun getStatus(): HttpStatus {
-        return this.status
-    }
-
-    override fun getCode(): String {
-        return this.code
-    }
-
-    override fun getMessage(): String {
-        return this.message
-    }
 }

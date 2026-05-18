@@ -18,7 +18,7 @@ data class UserProfileRes(
                 user.nickname,
                 user.email,
                 user.realname,
-                user.createdAt
+                requireNotNull(user.createdAt)
             )
         }
 

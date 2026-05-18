@@ -54,9 +54,8 @@ class UserProfileControllerTest {
     @Test
     fun changeNickname_success() {
         val req = NicknameReq("newNick")
-        val user = User.create("email", "newNick", "name").apply {
-            createdAt = LocalDateTime.now()
-        }
+        val user = User.create("email", "newNick", "name")
+        setCreatedAt(user, LocalDateTime.now())
         val res = UserProfileRes.from(user)
 
         doReturn(res).`when`(userProfileService).modifyNickname(100L, "newNick")
@@ -196,5 +195,11 @@ class UserProfileControllerTest {
 
         mockMvc.perform(get("/api/v1/me/donations"))
             .andExpect(status().isOk)
+    }
+
+    private fun setCreatedAt(user: User, createdAt: LocalDateTime) {
+        val createdAtField = user.javaClass.superclass.getDeclaredField("createdAt")
+        createdAtField.isAccessible = true
+        createdAtField.set(user, createdAt)
     }
 }

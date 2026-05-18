@@ -57,8 +57,9 @@ class NamingService(
         candidateRepository
             .findByAnimalIdAndProposedName(animalId, proposedName)
             ?.let { candidate ->
-                vote(candidate.id, userId) // 내부 투표 로직 호출
-                return NameProposalRes(candidate.id, proposedName)
+                val candidateId = requireNotNull(candidate.id)
+                vote(candidateId, userId) // 내부 투표 로직 호출
+                return NameProposalRes(candidateId, proposedName)
             }
 
         val proposer = userRepository.findById(userId)
@@ -66,10 +67,11 @@ class NamingService(
 
         val newCandidate = AnimalNameCandidate(animal, proposer, proposedName)
         val savedCandidate = candidateRepository.save<AnimalNameCandidate>(newCandidate)
+        val savedCandidateId = requireNotNull(savedCandidate.id)
 
         // 4. 제안자 본인의 첫 투표 처리
-        vote(savedCandidate.id, userId)
-        return NameProposalRes(savedCandidate.id, proposedName)
+        vote(savedCandidateId, userId)
+        return NameProposalRes(savedCandidateId, proposedName)
     }
 
     fun vote(candidateId: Long, userId: Long) {
@@ -83,7 +85,7 @@ class NamingService(
             .orElseThrow{ BusinessException(UserErrorCode.USER_NOT_FOUND) }
 
         // 중복 투표 방지 -> 한 유저는 한 동물당 한번만 투표 가능
-        if (voteHistoryRepository.existsByUserIdAndAnimalId(userId, candidate.animal.id)) {
+        if (voteHistoryRepository.existsByUserIdAndAnimalId(userId, requireNotNull(candidate.animal.id))) {
             throw BusinessException(NamingErrorCode.ALREADY_VOTED)
         }
 
@@ -141,7 +143,7 @@ class NamingService(
     // 금칙어 관리 (BadWordService를 거쳐 DB와 Redis 동시 처리)
     fun getBadWords(): BadWordListRes {
         val words = badWordService.findAll().map { bw ->
-            BadWordDto(bw.id, bw.word, bw.createdAt.toString())
+            BadWordDto(requireNotNull(bw.id), bw.word, requireNotNull(bw.createdAt).toString())
         }
         return BadWordListRes(words, words.size)
     }
@@ -150,7 +152,11 @@ class NamingService(
     fun addBadWord(word: String): BadWordAddRes {
         // BadWordService 내부에서 DB 저장 + Redis 추가를 모두 처리하고 저장된 엔티티 반환
         val savedBadWord = badWordService.register(word)
-        return BadWordAddRes(savedBadWord.id, savedBadWord.word, savedBadWord.createdAt)
+        return BadWordAddRes(
+            requireNotNull(savedBadWord.id),
+            savedBadWord.word,
+            requireNotNull(savedBadWord.createdAt)
+        )
     }
 
     @Transactional

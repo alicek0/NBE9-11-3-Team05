@@ -19,10 +19,10 @@ data class UserDonationRes(
             @JvmStatic
             fun from(donation: Donation): UserDonationItem {
                 return UserDonationItem(
-                    donation.id,
+                    requireNotNull(donation.id),
                     donation.amount,
                     donation.status,
-                    donation.campaign.id
+                    requireNotNull(donation.campaign.id)
                 )
             }
         }

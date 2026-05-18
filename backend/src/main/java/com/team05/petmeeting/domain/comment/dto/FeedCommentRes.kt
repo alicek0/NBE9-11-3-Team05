@@ -18,13 +18,13 @@ data class FeedCommentRes(
         @JvmStatic
         fun from(comment: FeedComment): FeedCommentRes {
             return FeedCommentRes(
-                comment.user.id,
+                requireNotNull(comment.user.id),
                 comment.user.nickname,
                 comment.user.profileImageUrl,
-                comment.id,
+                requireNotNull(comment.id),
                 comment.content,
-                comment.feed.id,
-                comment.createdAt
+                requireNotNull(comment.feed.id),
+                requireNotNull(comment.createdAt)
             )
         }
     }

@@ -65,9 +65,13 @@ internal class FeedServiceTest {
     @DisplayName("write - 일반 카테고리(FREE) 피드 작성 성공")
     fun write_free_category_success() {
         val req = FeedReq(FeedCategory.FREE, "제목", "내용", null, null)
-        val savedFeed = Feed(user, FeedCategory.FREE, "제목", "내용", null, null)
 
-        Mockito.`when`(feedRepository.save(any(Feed::class.java))).thenReturn(savedFeed)
+        Mockito.`when`(feedRepository.save(any(Feed::class.java)))
+            .thenAnswer { invocation ->
+                val feed = invocation.getArgument<Feed>(0)
+                setId(feed, 1L)
+                feed
+            }
 
         val res = feedService.write(req, user)
 
@@ -88,13 +92,17 @@ internal class FeedServiceTest {
         Mockito.`when`(animalRepository.findById(animalId)).thenReturn(Optional.of(animal))
         Mockito.`when`(
             adoptionApplicationRepository.existsByUser_IdAndAnimal_IdAndStatus(
-                user.id,
+                requireNotNull(user.id),
                 animalId,
                 AdoptionStatus.Approved
             )
         ).thenReturn(true)
         Mockito.`when`(feedRepository.save(any(Feed::class.java)))
-            .thenReturn(Feed(user, FeedCategory.ADOPTION_REVIEW, "입양후기", "내용", null, animal))
+            .thenAnswer { invocation ->
+                val feed = invocation.getArgument<Feed>(0)
+                setId(feed, 1L)
+                feed
+            }
 
         val res = feedService.write(req, user)
 
@@ -111,7 +119,7 @@ internal class FeedServiceTest {
 
         assertThatThrownBy { feedService.write(req, user) }
             .isInstanceOf(BusinessException::class.java)
-            .extracting { (it as BusinessException).getErrorCode() }
+            .extracting { (it as BusinessException).errorCode }
             .isEqualTo(FeedErrorCode.ANIMAL_REQUIRED)
     }
 
@@ -125,7 +133,7 @@ internal class FeedServiceTest {
 
         assertThatThrownBy { feedService.write(req, user) }
             .isInstanceOf(BusinessException::class.java)
-            .extracting { (it as BusinessException).getErrorCode() }
+            .extracting { (it as BusinessException).errorCode }
             .isEqualTo(AnimalErrorCode.ANIMAL_NOT_FOUND)
     }
 
@@ -139,7 +147,7 @@ internal class FeedServiceTest {
         Mockito.`when`(animalRepository.findById(animalId)).thenReturn(Optional.of(animal))
         Mockito.`when`(
             adoptionApplicationRepository.existsByUser_IdAndAnimal_IdAndStatus(
-                user.id,
+                requireNotNull(user.id),
                 animalId,
                 AdoptionStatus.Approved
             )
@@ -147,7 +155,7 @@ internal class FeedServiceTest {
 
         assertThatThrownBy { feedService.write(req, user) }
             .isInstanceOf(BusinessException::class.java)
-            .extracting { (it as BusinessException).getErrorCode() }
+            .extracting { (it as BusinessException).errorCode }
             .isEqualTo(FeedErrorCode.NOT_ADOPTED_ANIMAL)
     }
 
@@ -162,13 +170,17 @@ internal class FeedServiceTest {
         Mockito.`when`(animalRepository.findById(animalId)).thenReturn(Optional.of(animal))
         Mockito.`when`(
             adoptionApplicationRepository.existsByUser_IdAndAnimal_IdAndStatus(
-                user.id,
+                requireNotNull(user.id),
                 animalId,
                 AdoptionStatus.Approved
             )
         ).thenReturn(true)
         Mockito.`when`(feedRepository.save(any(Feed::class.java)))
-            .thenAnswer { invocation -> invocation.getArgument(0) }
+            .thenAnswer { invocation ->
+                val feed = invocation.getArgument<Feed>(0)
+                setId(feed, 1L)
+                feed
+            }
 
         assertThatCode { feedService.write(req, user) }
             .doesNotThrowAnyException()
@@ -180,6 +192,7 @@ internal class FeedServiceTest {
         val feedId = 1L
         val req = FeedReq(FeedCategory.FREE, "수정된 제목", "수정된 내용", null, null)
         val existingFeed = Feed(user, FeedCategory.FREE, "원래 제목", "원래 내용", null, null)
+        setId(existingFeed, feedId)
 
         Mockito.`when`(feedRepository.findById(feedId)).thenReturn(Optional.of(existingFeed))
         Mockito.`when`(feedLikeRepository.countByFeed(existingFeed)).thenReturn(0L)
@@ -200,7 +213,7 @@ internal class FeedServiceTest {
 
         assertThatThrownBy { feedService.modify(feedId, req, user) }
             .isInstanceOf(BusinessException::class.java)
-            .extracting { (it as BusinessException).getErrorCode() }
+            .extracting { (it as BusinessException).errorCode }
             .isEqualTo(FeedErrorCode.FEED_NOT_FOUND)
     }
 
@@ -217,7 +230,7 @@ internal class FeedServiceTest {
 
         assertThatThrownBy { feedService.modify(feedId, req, user) }
             .isInstanceOf(BusinessException::class.java)
-            .extracting { (it as BusinessException).getErrorCode() }
+            .extracting { (it as BusinessException).errorCode }
             .isEqualTo(FeedErrorCode.FORBIDDEN)
     }
 
@@ -226,6 +239,7 @@ internal class FeedServiceTest {
     fun delete_success() {
         val feedId = 1L
         val existingFeed = Feed(user, FeedCategory.FREE, "제목", "내용", null, null)
+        setId(existingFeed, feedId)
 
         Mockito.`when`(feedRepository.findById(feedId)).thenReturn(Optional.of(existingFeed))
 
@@ -243,7 +257,7 @@ internal class FeedServiceTest {
 
         assertThatThrownBy { feedService.delete(feedId, user) }
             .isInstanceOf(BusinessException::class.java)
-            .extracting { (it as BusinessException).getErrorCode() }
+            .extracting { (it as BusinessException).errorCode }
             .isEqualTo(FeedErrorCode.FEED_NOT_FOUND)
     }
 
@@ -259,7 +273,7 @@ internal class FeedServiceTest {
 
         assertThatThrownBy { feedService.delete(feedId, user) }
             .isInstanceOf(BusinessException::class.java)
-            .extracting { (it as BusinessException).getErrorCode() }
+            .extracting { (it as BusinessException).errorCode }
             .isEqualTo(FeedErrorCode.FORBIDDEN)
     }
 
@@ -268,6 +282,7 @@ internal class FeedServiceTest {
     fun getFeed_success() {
         val feedId = 1L
         val existingFeed = Feed(user, FeedCategory.FREE, "제목", "내용", null, null)
+        setId(existingFeed, feedId)
 
         Mockito.`when`(feedRepository.findById(feedId)).thenReturn(Optional.of(existingFeed))
         Mockito.`when`(feedLikeRepository.countByFeed(existingFeed)).thenReturn(5L)
@@ -287,7 +302,7 @@ internal class FeedServiceTest {
 
         assertThatThrownBy { feedService.getFeed(feedId) }
             .isInstanceOf(BusinessException::class.java)
-            .extracting { (it as BusinessException).getErrorCode() }
+            .extracting { (it as BusinessException).errorCode }
             .isEqualTo(FeedErrorCode.FEED_NOT_FOUND)
     }
 

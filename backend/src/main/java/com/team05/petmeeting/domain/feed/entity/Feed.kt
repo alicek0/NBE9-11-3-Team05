@@ -80,13 +80,13 @@ class Feed protected constructor() : BaseEntity() {
     }
 
     fun checkModify(user: User) {
-        if (this.user.getId() != user.getId()) {
+        if (requireNotNull(this.user.id) != requireNotNull(user.id)) {
             throw BusinessException(FeedErrorCode.FORBIDDEN)
         }
     }
 
     fun checkDelete(user: User) {
-        if (this.user.getId() != user.getId()) {
+        if (requireNotNull(this.user.id) != requireNotNull(user.id)) {
             throw BusinessException(FeedErrorCode.FORBIDDEN)
         }
     }

@@ -87,7 +87,7 @@ internal class NamingRepositoryTest {
         em.clear()
 
         // when
-        val result = candidateRepository.getCandidates(animal.id, user.id)
+        val result = candidateRepository.getCandidates(requireNotNull(animal.id), requireNotNull(user.id))
 
         // then: 득표순으로 정렬되었는지, 모든 후보가 나왔는지 검증
         val list: List<CandidateDto> = result.candidateDtoList
@@ -116,7 +116,7 @@ internal class NamingRepositoryTest {
         em.clear()
 
         // when
-        val result = candidateRepository.getCandidates(animal.getId(), user.getId())
+        val result = candidateRepository.getCandidates(requireNotNull(animal.id), requireNotNull(user.id))
 
         // then
         Assertions.assertThat(result.candidateDtoList[0].isVoted).isTrue() // 투표 여부 확인
@@ -133,7 +133,7 @@ internal class NamingRepositoryTest {
         em.clear()
 
         // when: userId를 null로 전달 (비로그인 상태)
-        val result = candidateRepository.getCandidates(animal.id, null)
+        val result = candidateRepository.getCandidates(requireNotNull(animal.id), null)
 
         // then
         Assertions.assertThat(result.candidateDtoList[0].isVoted).isFalse()
