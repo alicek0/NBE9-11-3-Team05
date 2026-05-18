@@ -100,6 +100,7 @@ export const API_ENDPOINTS = {
   updateCampaignStatus: (campaignId: number) => `${API_BASE_URL}/campaigns/${campaignId}/status`,
 
   // Shelters
+  shelters: `${API_BASE_URL}/shelters/`,
   shelterDetail: (shelterId: string) => `${API_BASE_URL}/shelters/${shelterId}`,
 }
 
@@ -613,6 +614,22 @@ export const updateCampaignStatus = async (campaignId: number) => {
 };
 
 // Shelters
+export interface ShelterListRes {
+  shelters: Shelter[];
+  totalCount: number;
+  page: number;
+  size: number;
+  totalPages: number;
+}
+
+export const getShelters = async (page = 0, size = 20) => {
+  const queryParams = new URLSearchParams({
+    page: String(page),
+    size: String(size),
+  });
+  return await apiRequest<ShelterListRes>(`${API_ENDPOINTS.shelters}?${queryParams.toString()}`);
+};
+
 export const getShelterDetail = async (shelterId: string) => {
   return await apiRequest<Shelter>(API_ENDPOINTS.shelterDetail(shelterId));
 };

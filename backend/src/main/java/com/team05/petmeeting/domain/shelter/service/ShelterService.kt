@@ -1,6 +1,7 @@
 package com.team05.petmeeting.domain.shelter.service
 
 import com.team05.petmeeting.domain.shelter.dto.ShelterCommand
+import com.team05.petmeeting.domain.shelter.dto.ShelterListRes
 import com.team05.petmeeting.domain.shelter.dto.ShelterRes
 import com.team05.petmeeting.domain.shelter.entity.Shelter
 import com.team05.petmeeting.domain.shelter.entity.Shelter.Companion.create
@@ -9,6 +10,7 @@ import com.team05.petmeeting.domain.shelter.repository.ShelterRepository
 import com.team05.petmeeting.global.exception.BusinessException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.data.domain.Pageable
 import java.util.function.Function
 import java.util.function.Supplier
 import java.util.stream.Collectors
@@ -78,5 +80,17 @@ class ShelterService(private val shelterRepository: ShelterRepository) {
         return shelterRepository.findById(shelterId)
             .map { shelter -> ShelterRes.from(shelter) }
             .orElseThrow { BusinessException(ShelterErrorCode.SHELTER_NOT_FOUND) }
+    }
+
+    fun getAllShelters(pageable: Pageable): ShelterListRes {
+        val page = shelterRepository.findAll(pageable)
+
+        return ShelterListRes(
+            shelters = page.content.map { ShelterRes.from(it) },
+            totalCount = page.totalElements,
+            page = page.number,
+            size = page.size,
+            totalPages = page.totalPages
+        )
     }
 }
