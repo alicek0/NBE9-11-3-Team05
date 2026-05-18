@@ -39,18 +39,18 @@ export const API_ENDPOINTS = {
   confirmNamingCandidate: (candidateId: number) =>
     `${API_BASE_URL}/naming/candidates/${candidateId}/confirm`,
   adminShelterApplications: (careRegNo: string) =>
-    `${getApiServerOrigin()}/adoptions/admin/shelters/${encodeURIComponent(careRegNo)}/applications`,
+    `${API_BASE_URL}/adoptions/admin/shelters/${encodeURIComponent(careRegNo)}/applications`,
   adminShelterApplicationDetail: (careRegNo: string, applicationId: number) =>
-    `${getApiServerOrigin()}/adoptions/admin/shelters/${encodeURIComponent(careRegNo)}/applications/${applicationId}`,
+    `${API_BASE_URL}/adoptions/admin/shelters/${encodeURIComponent(careRegNo)}/applications/${applicationId}`,
   reviewAdminShelterApplication: (careRegNo: string, applicationId: number) =>
-    `${getApiServerOrigin()}/adoptions/admin/shelters/${encodeURIComponent(careRegNo)}/applications/${applicationId}/review`,
+    `${API_BASE_URL}/adoptions/admin/shelters/${encodeURIComponent(careRegNo)}/applications/${applicationId}/review`,
   applyAdoption: (animalId: number) =>
-    `${getApiServerOrigin()}/adoptions/${animalId}`,
-  myAdoptions: `${getApiServerOrigin()}/adoptions/me`,
+    `${API_BASE_URL}/adoptions/${animalId}`,
+  myAdoptions: `${API_BASE_URL}/adoptions/me`,
   myAdoptionDetail: (applicationId: number) =>
-    `${getApiServerOrigin()}/adoptions/${applicationId}`,
+    `${API_BASE_URL}/adoptions/${applicationId}`,
   cancelMyAdoption: (applicationId: number) =>
-    `${getApiServerOrigin()}/adoptions/${applicationId}`,
+    `${API_BASE_URL}/adoptions/${applicationId}`,
   // Animals
   animals: `${API_BASE_URL}/animals`,
   animalDetail: (id: number) => `${API_BASE_URL}/animals/${id}`,
