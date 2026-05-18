@@ -45,7 +45,8 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_KEY }}
           script: |
-            cd NBE9-11-3-Team05/backend
+            mkdir -p ~/app
+            cd ~/app
             echo "${{ secrets.ENV_FILE }}" > .env
 
             docker compose -f docker-compose.prod.yml pull
