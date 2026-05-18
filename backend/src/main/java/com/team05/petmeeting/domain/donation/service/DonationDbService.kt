@@ -1,5 +1,7 @@
 package com.team05.petmeeting.domain.donation.service
 
+import com.team05.petmeeting.domain.campaign.enums.CampaignStatus
+import com.team05.petmeeting.domain.campaign.errorCode.CampaignErrorCode
 import com.team05.petmeeting.domain.campaign.repository.CampaignRepository
 import com.team05.petmeeting.domain.campaign.service.CampaignService
 import com.team05.petmeeting.domain.donation.dto.CompleteRes
@@ -11,12 +13,10 @@ import com.team05.petmeeting.domain.donation.errorCode.DonationErrorCode
 import com.team05.petmeeting.domain.donation.repository.DonationRepository
 import com.team05.petmeeting.domain.user.dto.profile.UserDonationRes
 import com.team05.petmeeting.domain.user.service.UserService
-import com.team05.petmeeting.domain.campaign.enums.CampaignStatus
-import com.team05.petmeeting.domain.campaign.errorCode.CampaignErrorCode
 import com.team05.petmeeting.global.exception.BusinessException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.UUID
+import java.util.*
 
 @Service
 @Transactional(readOnly = true) // Default to read-only for safety
@@ -60,7 +60,7 @@ class DonationDbService(
         }
 
         donation.complete()
-        val campaignId = donation.campaign.id
+        val campaignId = requireNotNull(donation.campaign.id)
         campaignRepository.addDonationAmount(campaignId, paidAmount)
         campaignRepository.updateStatusIfTargetReached(campaignId)
 
