@@ -84,6 +84,7 @@ export const API_ENDPOINTS = {
 
   // Feeds
   feeds: `${API_BASE_URL}/feeds`,
+  feedImages: `${API_BASE_URL}/feeds/images`,
   feedDetail: (feedId: number) => `${API_BASE_URL}/feeds/${feedId}`,
   feedComments: (feedId: number) => `${API_BASE_URL}/feeds/${feedId}/comments`,
   feedCommentDetail: (feedId: number, commentId: number) => `${API_BASE_URL}/feeds/${feedId}/comments/${commentId}`,
@@ -203,6 +204,49 @@ export async function apiRequest<T>(
     }
 
     return initialResponse
+  } catch (error) {
+    return { data: null, error: error instanceof Error ? error.message : "Network error" }
+  }
+}
+
+export async function uploadFeedImage(file: File): Promise<ApiResult<{ imageUrl: string }>> {
+  try {
+    const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null
+    const formData = new FormData()
+    formData.append("file", file)
+
+    const headers: Record<string, string> = {}
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`
+    }
+
+    const response = await fetch(API_ENDPOINTS.feedImages, {
+      method: "POST",
+      headers,
+      body: formData,
+      credentials: "include",
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => "")
+      let errorData: Record<string, any> = {}
+      if (errorText) {
+        try {
+          errorData = JSON.parse(errorText)
+        } catch {
+          errorData = {}
+        }
+      }
+      return {
+        data: null,
+        error: errorData.message || `Error: ${response.status}`,
+        errorCode: errorData.code || errorData.errorCode || errorData.status,
+        status: response.status,
+      }
+    }
+
+    const data = await response.json()
+    return { data, error: null, status: response.status }
   } catch (error) {
     return { data: null, error: error instanceof Error ? error.message : "Network error" }
   }

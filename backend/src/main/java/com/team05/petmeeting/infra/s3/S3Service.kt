@@ -14,8 +14,8 @@ class S3Service(
     @param:Value("\${cloud.aws.s3.bucket}")
     private val bucket: String
 ) {
-    fun upload(bytes: ByteArray, fileName: String): String {
-        val key = "cardnews/" + UUID.randomUUID() + "_" + fileName
+    fun upload(bytes: ByteArray, fileName: String, directory: String): String {
+        val key = directory.trim('/') + "/" + UUID.randomUUID() + "_" + fileName
 
         val metadata = ObjectMetadata()
         metadata.contentLength = bytes.size.toLong()

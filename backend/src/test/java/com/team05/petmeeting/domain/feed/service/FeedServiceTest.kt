@@ -15,6 +15,7 @@ import com.team05.petmeeting.domain.user.entity.User
 import com.team05.petmeeting.domain.user.entity.User.Companion.create
 import com.team05.petmeeting.global.entity.BaseEntity
 import com.team05.petmeeting.global.exception.BusinessException
+import com.team05.petmeeting.infra.s3.S3Service
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -28,6 +29,8 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.verify
 import org.mockito.junit.jupiter.MockitoExtension
+import org.springframework.http.MediaType
+import org.springframework.mock.web.MockMultipartFile
 import java.util.Optional
 
 @ExtendWith(MockitoExtension::class)
@@ -46,6 +49,9 @@ internal class FeedServiceTest {
 
     @Mock
     private lateinit var adoptionApplicationRepository: AdoptionApplicationRepository
+
+    @Mock
+    private lateinit var s3Service: S3Service
 
     private lateinit var user: User
 
@@ -290,4 +296,40 @@ internal class FeedServiceTest {
         idField.isAccessible = true
         idField.set(entity, id)
     }
+
+
+    @Test
+    @DisplayName("uploadImage - 이미지 업로드 성공")
+    fun uploadImage_success() {
+        val file = MockMultipartFile(
+            "file",
+            "feed.png",
+            MediaType.IMAGE_PNG_VALUE,
+            "test-image".toByteArray()
+        )
+
+        Mockito.`when`(s3Service.upload(file.bytes, "feed.png", "feed"))
+            .thenReturn("https://s3-url.com/feed.png")
+
+        val imageUrl = feedService.uploadImage(file)
+
+        assertThat(imageUrl).isEqualTo("https://s3-url.com/feed.png")
+        verify(s3Service).upload(file.bytes, "feed.png", "feed")
+    }
+
+    @Test
+    @DisplayName("uploadImage - 빈 파일이면 예외 발생")
+    fun uploadImage_empty_file_fail() {
+        val file = MockMultipartFile(
+            "file",
+            "empty.png",
+            MediaType.IMAGE_PNG_VALUE,
+            ByteArray(0)
+        )
+
+        assertThatThrownBy { feedService.uploadImage(file) }
+            .isInstanceOf(IllegalArgumentException::class.java)
+            .hasMessage("업로드할 이미지 파일이 비어있습니다.")
+    }
 }
+

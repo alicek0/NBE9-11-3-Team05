@@ -43,7 +43,8 @@ internal class CardNewsServiceTest {
         Mockito.`when`(animal.age).thenReturn("2살")
         Mockito.`when`(animal.sexCd).thenReturn("M")
         Mockito.`when`(animal.careNm).thenReturn("서울보호소")
-        Mockito.`when`(s3Service.upload(anyByteArray(), eqString("123.png")))
+        Mockito.`when`(s3Service.upload(anyByteArray(), eqString("123.png"),
+            eqString("cardnews")))
             .thenReturn("https://s3-url.com/image.png")
 
         val result = cardNewsService.generateCardNews(animal)

@@ -33,6 +33,7 @@ import org.springframework.context.annotation.Import
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.http.MediaType
+import org.springframework.mock.web.MockMultipartFile
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication
@@ -40,11 +41,13 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.handler
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import org.springframework.web.multipart.MultipartFile
 import java.util.Optional
 
 @WebMvcTest(FeedController::class)
@@ -85,6 +88,31 @@ internal class FeedControllerTest {
         user = create("test@test.com", "테스터", "홍길동")
         Mockito.`when`(userRepository.findById(userId)).thenReturn(Optional.of(user))
     }
+
+    @Test
+    @DisplayName("피드 이미지 업로드 성공")
+    fun uploadImage_success() {
+        val file = MockMultipartFile(
+            "file",
+            "feed.png",
+            MediaType.IMAGE_PNG_VALUE,
+            "test-image".toByteArray()
+        )
+
+        Mockito.`when`(feedService.uploadImage(anyMultipartFile()))
+            .thenReturn("https://s3-url.com/feed.png")
+
+        mvc.perform(
+            multipart("/api/v1/feeds/images")
+                .file(file)
+                .with(authentication(auth()))
+        )
+            .andExpect(handler().handlerType(FeedController::class.java))
+            .andExpect(handler().methodName("uploadImage"))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.imageUrl").value("https://s3-url.com/feed.png"))
+    }
+
 
     @Test
     @DisplayName("피드 작성 성공")
@@ -283,6 +311,13 @@ internal class FeedControllerTest {
 
     private fun anyPageable(): Pageable {
         return any(Pageable::class.java) ?: Pageable.unpaged()
+    }
+
+    private fun anyMultipartFile(): MultipartFile {
+        return any(MultipartFile::class.java) ?: MockMultipartFile(
+            "file",
+            ByteArray(0)
+        )
     }
 
     private fun feedRes(

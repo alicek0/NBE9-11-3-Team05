@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { type ChangeEvent, useEffect, useRef, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -13,7 +13,7 @@ import { Header } from "@/components/header"
 import { Pagination } from "@/components/pagination"
 import { useAuth } from "@/lib/auth-context"
 import { cn, formatDate } from "@/lib/utils"
-import { createFeed, updateFeed, FeedPayload, deleteFeed, FeedCategoryFilter, toggleFeedLike, getFeeds, apiRequest, API_ENDPOINTS, getAdoptableAnimals, AdoptedAnimalItem, getAnimalDetail } from "@/lib/api"
+import { createFeed, updateFeed, FeedPayload, deleteFeed, FeedCategoryFilter, toggleFeedLike, getFeeds, apiRequest, API_ENDPOINTS, getAdoptableAnimals, AdoptedAnimalItem, getAnimalDetail, uploadFeedImage } from "@/lib/api"
 
 interface CommunityComment {
   id: number
@@ -506,6 +506,7 @@ function CommunityPostCard({
 
 function CreatePostModal({ onClose, onSubmit }: { onClose: () => void; onSubmit: (post: Omit<CommunityPost, "feedId" | "createdAt">) => void }) {
   const { user } = useAuth()
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
   const [category, setCategory] = useState<PostCategory>("자유게시판")
   const [title, setTitle] = useState("")
   const [content, setContent] = useState("")
@@ -514,6 +515,7 @@ function CreatePostModal({ onClose, onSubmit }: { onClose: () => void; onSubmit:
   const [selectedAnimalId, setSelectedAnimalId] = useState<number | "">("")
   const [isAnimalsLoading, setIsAnimalsLoading] = useState(false)
   const [hasLoadedAnimals, setHasLoadedAnimals] = useState(false)
+  const [isImageUploading, setIsImageUploading] = useState(false)
 
   useEffect(() => {
     if (category !== "입양후기" || hasLoadedAnimals) return
@@ -533,6 +535,23 @@ function CreatePostModal({ onClose, onSubmit }: { onClose: () => void; onSubmit:
 
     fetchAnimals()
   }, [category, hasLoadedAnimals])
+
+  const handleImageFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    setIsImageUploading(true)
+    const { data, error } = await uploadFeedImage(file)
+    setIsImageUploading(false)
+    event.target.value = ""
+
+    if (error || !data?.imageUrl) {
+      alert(error || "이미지 업로드에 실패했습니다.")
+      return
+    }
+
+    setImageUrl(data.imageUrl)
+  }
 
   const handleSubmit = () => {
     if (!title.trim() || !content.trim()) {
@@ -634,13 +653,28 @@ function CreatePostModal({ onClose, onSubmit }: { onClose: () => void; onSubmit:
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">이미지 URL (선택)</label>
             <div className="flex gap-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleImageFileChange}
+              />
               <Input
                 value={imageUrl}
                 onChange={(e) => setImageUrl(e.target.value)}
                 placeholder="https://..."
                 className="rounded-xl bg-secondary/50 border-0"
               />
-              <Button variant="outline" size="icon" className="shrink-0 rounded-xl">
+              <Button
+                variant="outline"
+                size="icon"
+                className="shrink-0 rounded-xl"
+                disabled={isImageUploading}
+                aria-label="이미지 파일 업로드"
+                title="이미지 파일 업로드"
+                onClick={() => fileInputRef.current?.click()}
+              >
                 <ImageIcon className="w-4 h-4" />
               </Button>
             </div>
@@ -660,6 +694,7 @@ function CreatePostModal({ onClose, onSubmit }: { onClose: () => void; onSubmit:
 }
 
 function UpdatePostModal({ post, onClose, onSubmit }: { post: CommunityPost; onClose: () => void; onSubmit: (data: { category: PostCategory, title: string, content: string, imageUrl?: string, animalId?: number }) => void }) {
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
   const [category, setCategory] = useState<PostCategory>(post.category)
   const [title, setTitle] = useState(post.title)
   const [content, setContent] = useState(post.content)
@@ -668,6 +703,7 @@ function UpdatePostModal({ post, onClose, onSubmit }: { post: CommunityPost; onC
   const [selectedAnimalId, setSelectedAnimalId] = useState<number | "">(post.animalId ?? "")
   const [isAnimalsLoading, setIsAnimalsLoading] = useState(false)
   const [hasLoadedAnimals, setHasLoadedAnimals] = useState(false)
+  const [isImageUploading, setIsImageUploading] = useState(false)
 
   useEffect(() => {
     if (category !== "입양후기" || hasLoadedAnimals) return
@@ -687,6 +723,23 @@ function UpdatePostModal({ post, onClose, onSubmit }: { post: CommunityPost; onC
 
     fetchAnimals()
   }, [category, hasLoadedAnimals])
+
+  const handleImageFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    setIsImageUploading(true)
+    const { data, error } = await uploadFeedImage(file)
+    setIsImageUploading(false)
+    event.target.value = ""
+
+    if (error || !data?.imageUrl) {
+      alert(error || "이미지 업로드에 실패했습니다.")
+      return
+    }
+
+    setImageUrl(data.imageUrl)
+  }
 
   const handleSubmit = () => {
     if (!title.trim() || !content.trim()) {
@@ -782,13 +835,28 @@ function UpdatePostModal({ post, onClose, onSubmit }: { post: CommunityPost; onC
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">이미지 URL (선택)</label>
             <div className="flex gap-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleImageFileChange}
+              />
               <Input
                 value={imageUrl}
                 onChange={(e) => setImageUrl(e.target.value)}
                 placeholder="https://..."
                 className="rounded-xl bg-secondary/50 border-0"
               />
-              <Button variant="outline" size="icon" className="shrink-0 rounded-xl">
+              <Button
+                variant="outline"
+                size="icon"
+                className="shrink-0 rounded-xl"
+                disabled={isImageUploading}
+                aria-label="이미지 파일 업로드"
+                title="이미지 파일 업로드"
+                onClick={() => fileInputRef.current?.click()}
+              >
                 <ImageIcon className="w-4 h-4" />
               </Button>
             </div>

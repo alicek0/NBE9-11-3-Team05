@@ -15,17 +15,20 @@ import com.team05.petmeeting.domain.feed.repository.FeedLikeRepository
 import com.team05.petmeeting.domain.feed.repository.FeedRepository
 import com.team05.petmeeting.domain.user.entity.User
 import com.team05.petmeeting.global.exception.BusinessException
+import com.team05.petmeeting.infra.s3.S3Service
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.multipart.MultipartFile
 
 @Service
 class FeedService(
     private val feedRepository: FeedRepository,
     private val feedLikeRepository: FeedLikeRepository,
     private val animalRepository: AnimalRepository,
-    private val adoptionApplicationRepository: AdoptionApplicationRepository
+    private val adoptionApplicationRepository: AdoptionApplicationRepository,
+    private val s3Service: S3Service
 ) {
 
     @Transactional
@@ -121,5 +124,17 @@ class FeedService(
         if (!isApproved) {
             throw BusinessException(FeedErrorCode.NOT_ADOPTED_ANIMAL)
         }
+    }
+
+    fun uploadImage(file: MultipartFile): String {
+        if (file.isEmpty) {
+            throw IllegalArgumentException("업로드할 이미지 파일이 비어있습니다.")
+        }
+
+        val fileName = file.originalFilename
+            ?.takeIf { it.isNotBlank() }
+            ?: "feed-image.png"
+
+        return s3Service.upload(file.bytes, fileName, "feed")
     }
 }

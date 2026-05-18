@@ -18,9 +18,11 @@ import jakarta.validation.Valid
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
 
 @RestController
 @RequestMapping("/api/v1/feeds")
@@ -76,6 +78,15 @@ class FeedController(
         val list = commentService.getFeedComments(feedId)
         val res = FeedCommentListRes.from(list)
         return ResponseEntity.ok(res)
+    }
+
+    @Operation(summary = "피드 이미지 업로드")
+    @PostMapping("/images", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    fun uploadImage(
+        @RequestPart file: MultipartFile
+    ): ResponseEntity<FeedImageUploadRes> {
+        val imageUrl = feedService.uploadImage(file)
+        return ResponseEntity.ok(FeedImageUploadRes(imageUrl))
     }
 
     @Operation(summary = "피드 글 작성")
