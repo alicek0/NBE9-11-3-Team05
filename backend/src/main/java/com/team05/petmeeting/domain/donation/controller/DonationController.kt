@@ -13,6 +13,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
@@ -36,5 +37,17 @@ class DonationController(private val donationService: DonationService) {
     ): ResponseEntity<CompleteRes> {
         val res = donationService.donate(userDetails.userId, req)
         return ResponseEntity.ok(res)
+    }
+
+    @Operation(summary = "웹훅 처리")
+    @PostMapping("/webhook")
+    suspend fun handleWebhook(
+        @RequestBody body: String,
+        @RequestHeader("webhook-id") webhookId: String,
+        @RequestHeader("webhook-signature") webhookSignature: String,
+        @RequestHeader("webhook-timestamp") webhookTimestamp: String
+    ): ResponseEntity<Unit> {
+        donationService.handleWebhook(body, webhookId, webhookSignature, webhookTimestamp)
+        return ResponseEntity.ok().build()
     }
 }
