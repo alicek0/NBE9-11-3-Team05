@@ -19,11 +19,9 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      # 2. ADDED: Grant execute permissions to the Gradle wrapper
       - name: Grant Execute Permission for Gradlew
         run: chmod +x ./gradlew 
 
-      # 3. RENAMED: This step builds the application, not the Docker image
       - name: Build Backend with Gradle
         run: ./gradlew build -x test -p backend
 
