@@ -1,5 +1,6 @@
 package com.team05.petmeeting.domain.animal.service
 
+import com.team05.petmeeting.domain.animal.config.AnimalSyncProperties
 import com.team05.petmeeting.domain.animal.dto.AnimalSyncRes
 import com.team05.petmeeting.domain.animal.dto.external.AnimalApiResponse
 import com.team05.petmeeting.domain.animal.dto.external.AnimalBody
@@ -34,6 +35,7 @@ import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.Spy
 import org.springframework.test.util.ReflectionTestUtils
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -59,6 +61,9 @@ class AnimalSyncServiceTest {
 
     @Mock
     private lateinit var shelterService: ShelterService
+
+    @Spy
+    private var animalSyncProperties: AnimalSyncProperties = AnimalSyncProperties()
 
     @Test
     @DisplayName("업데이트 동기화 - 마지막 UPDATE 시점 이후 데이터를 기존 동물 갱신과 신규 동물 저장으로 반영한다")

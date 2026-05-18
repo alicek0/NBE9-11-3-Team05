@@ -19,5 +19,7 @@ class AnimalSyncProperties {
         var numOfRows: Int = 500
         // 업데이트 페이지 호출 간 대기 시간
         var delayMs: Long = 300L
+        // 업데이트 조회 실패 시 최대 재시도 횟수
+        var maxRetryCount: Int = 3
     }
 }

@@ -1,5 +1,6 @@
 package com.team05.petmeeting.domain.animal.service
 
+import com.team05.petmeeting.domain.animal.config.AnimalSyncProperties
 import com.team05.petmeeting.domain.animal.dto.AnimalSyncRes
 import com.team05.petmeeting.domain.animal.dto.external.AnimalApiResponse
 import com.team05.petmeeting.domain.animal.dto.external.AnimalItem
@@ -32,6 +33,7 @@ class AnimalSyncService(
     private val syncStateRepository: SyncStateRepository,
     private val shelterRepository: ShelterRepository,
     private val shelterService: ShelterService,
+    private val animalSyncProperties: AnimalSyncProperties,
 ) {
     private data class SyncPageResult(
         val message: String,
@@ -172,12 +174,14 @@ class AnimalSyncService(
         bgupd: LocalDate,
         enupd: LocalDate,
     ): AnimalApiResponse? {
-        repeat(UPDATE_SYNC_MAX_RETRY_COUNT) { attempt ->
+        val maxRetryCount = animalSyncProperties.update.maxRetryCount
+
+        repeat(maxRetryCount) { attempt ->
             try {
                 return animalExternalService.fetchAnimalsByUpdatedDate(pageNo, numOfRows, bgupd, enupd)
             } catch (e: RuntimeException) {
                 val retryAttempt = attempt + 1
-                if (retryAttempt >= UPDATE_SYNC_MAX_RETRY_COUNT) {
+                if (retryAttempt >= maxRetryCount) {
                     throw e
                 }
 
@@ -188,7 +192,7 @@ class AnimalSyncService(
                     bgupd,
                     enupd,
                     retryAttempt,
-                    UPDATE_SYNC_MAX_RETRY_COUNT,
+                    maxRetryCount,
                     e,
                 )
                 waitForRetry()
@@ -389,7 +393,7 @@ class AnimalSyncService(
     // 업데이트 API를 연속 호출할 때 외부 서버 부담을 줄이기 위해 잠시 대기한다.
     private fun waitForNextUpdatePage() {
         try {
-            Thread.sleep(UPDATE_SYNC_DELAY_MS)
+            Thread.sleep(animalSyncProperties.update.delayMs)
         } catch (e: InterruptedException) {
             Thread.currentThread().interrupt()
             throw IllegalStateException("업데이트 동기화 대기 중 인터럽트가 발생했습니다.", e)
@@ -399,7 +403,7 @@ class AnimalSyncService(
     // 재시도 전 잠시 대기해 외부 API의 일시적 오류에 바로 연속 타격하지 않도록 한다.
     private fun waitForRetry() {
         try {
-            Thread.sleep(UPDATE_SYNC_DELAY_MS)
+            Thread.sleep(animalSyncProperties.update.delayMs)
         } catch (e: InterruptedException) {
             Thread.currentThread().interrupt()
             throw IllegalStateException("업데이트 동기화 재시도 대기 중 인터럽트가 발생했습니다.", e)
@@ -431,8 +435,6 @@ class AnimalSyncService(
             .appendFraction(ChronoField.NANO_OF_SECOND, 1, 9, true)
             .optionalEnd()
             .toFormatter()
-        private const val UPDATE_SYNC_DELAY_MS = 300L
-        private const val UPDATE_SYNC_MAX_RETRY_COUNT = 3
         private const val SYNC_PAGE_MESSAGE = "유기동물 데이터 동기화 완료"
         private const val INITIAL_SYNC_MESSAGE = "INITIAL_MONTHLY_SYNC_OK"
         private const val UPDATE_SYNC_MESSAGE = "UPDATE_SYNC_OK"

@@ -79,6 +79,7 @@ animal:
     update:
       num-of-rows: ${ANIMAL_SYNC_UPDATE_NUM_OF_ROWS:500}
       delay-ms: ${ANIMAL_SYNC_UPDATE_DELAY_MS:300}
+      max-retry-count: ${ANIMAL_SYNC_UPDATE_MAX_RETRY_COUNT:3}
 
 # jwt access token 관련 설정
 jwt:
