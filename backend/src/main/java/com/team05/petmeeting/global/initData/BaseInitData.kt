@@ -103,7 +103,7 @@ class BaseInitData(
         )
 
         commentService.createFeedComment(
-            user.id,
+            requireNotNull(user.id),
             res1.feedId,
             CommentReq("댓글1")
         )
@@ -145,7 +145,7 @@ class BaseInitData(
 
         campaignService.createCampaign(
             shelter.careRegNo,
-            user.id,
+            requireNotNull(user.id),
             CampaignCreateReq(
                 "예시 캠페인",
                 "description",

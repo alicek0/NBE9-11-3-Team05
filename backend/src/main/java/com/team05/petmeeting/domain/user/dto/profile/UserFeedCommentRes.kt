@@ -21,11 +21,11 @@ data class UserFeedCommentRes(
             @JvmStatic
             fun from(comment: FeedComment): ProfileCommentItem {
                 return ProfileCommentItem(
-                    comment.feed.id,
+                    requireNotNull(comment.feed.id),
                     comment.feed.category,
                     comment.content,
-                    comment.createdAt,
-                    comment.updatedAt
+                    requireNotNull(comment.createdAt),
+                    requireNotNull(comment.updatedAt)
                 )
             }
         }

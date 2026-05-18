@@ -19,11 +19,11 @@ data class UserAnimalCommentRes(
             @JvmStatic
             fun from(comment: AnimalComment): AnimalCommentItem {
                 return AnimalCommentItem(
-                    comment.animal.id,
+                    requireNotNull(comment.animal.id),
                     comment.animal.desertionNo,
                     comment.content,
-                    comment.createdAt,
-                    comment.updatedAt
+                    requireNotNull(comment.createdAt),
+                    requireNotNull(comment.updatedAt)
                 )
             }
         }

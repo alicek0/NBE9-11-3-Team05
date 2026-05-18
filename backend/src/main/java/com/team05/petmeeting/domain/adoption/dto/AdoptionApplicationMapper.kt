@@ -4,7 +4,7 @@ import com.team05.petmeeting.domain.adoption.entity.AdoptionApplication
 
 fun AdoptionApplication.toApplyRes(): AdoptionApplyRes =
     AdoptionApplyRes(
-        getId(),
+        requireNotNull(id),
         status,
         AdoptionApplyRes.AnimalInfo(
             animal.desertionNo,
@@ -16,10 +16,10 @@ fun AdoptionApplication.toApplyRes(): AdoptionApplyRes =
 
 fun AdoptionApplication.toDetailRes(): AdoptionDetailRes =
     AdoptionDetailRes(
-        getId(),
+        requireNotNull(id),
         status,
         applyReason,
-        getCreatedAt(),
+        createdAt,
         reviewedAt,
         rejectionReason,
         applyTel,

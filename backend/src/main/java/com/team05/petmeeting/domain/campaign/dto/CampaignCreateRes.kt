@@ -13,7 +13,7 @@ data class CampaignCreateRes(
         @JvmStatic
         fun from(campaign: Campaign): CampaignCreateRes {
             return CampaignCreateRes(
-                campaign.id,
+                requireNotNull(campaign.id),
                 campaign.title,
                 campaign.targetAmount,
                 campaign.status

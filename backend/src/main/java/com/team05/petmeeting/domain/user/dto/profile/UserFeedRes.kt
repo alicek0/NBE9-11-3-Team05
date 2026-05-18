@@ -18,10 +18,10 @@ data class UserFeedRes(
             @JvmStatic
             fun from(feed: Feed): ProfileFeedItem {
                 return ProfileFeedItem(
-                    feed.id,
+                    requireNotNull(feed.id),
                     feed.category.toString(),
                     feed.title,
-                    feed.createdAt.format(DateTimeFormatter.ofPattern("yyyy. MM. dd."))
+                    requireNotNull(feed.createdAt).format(DateTimeFormatter.ofPattern("yyyy. MM. dd."))
                 )
             }
         }

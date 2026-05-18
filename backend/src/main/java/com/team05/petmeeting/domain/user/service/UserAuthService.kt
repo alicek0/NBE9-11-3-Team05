@@ -126,7 +126,7 @@ class UserAuthService(
         }
 
         val user = savedToken.user
-        val newAccessToken = jwtUtil.createToken(user.id, listOf(user.role.name))
+        val newAccessToken = jwtUtil.createToken(requireNotNull(user.id), listOf(user.role.name))
 
         refreshTokenRepository.delete(savedToken)
 
@@ -148,7 +148,7 @@ class UserAuthService(
     }
 
     private fun issueToken(user: User): LoginAndRefreshRes {
-        val accessToken = jwtUtil.createToken(user.id, listOf(user.role.name))
+        val accessToken = jwtUtil.createToken(requireNotNull(user.id), listOf(user.role.name))
         val uuid = UUID.randomUUID()
 
         refreshTokenRepository.save(RefreshToken.create(user, uuid))

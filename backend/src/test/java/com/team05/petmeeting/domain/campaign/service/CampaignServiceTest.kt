@@ -68,7 +68,7 @@ class CampaignServiceTest {
     //        shelter.assignUser(user);
     //
     //        // when
-    //        campaignService.createCampaign("123", user.getId(), new CampaignCreateReq("사료 후원", "사료 후원 설명", 1000000));
+    //        campaignService.createCampaign("123", requireNotNull(user.id), new CampaignCreateReq("사료 후원", "사료 후원 설명", 1000000));
     //
     //        // then
     //        Campaign result = campaignRepository
@@ -81,12 +81,12 @@ class CampaignServiceTest {
         // 보호소 관리자 유저
         var user = create("test@test.com", "테스터", "홍길동")
         user = userRepository!!.save<User>(user)
-        userId = user.getId()
+        userId = user.id
 
         // 다른 유저 (권한 없음)
         var otherUser = create("other@test.com", "다른유저", "김철수")
         otherUser = userRepository!!.save<User>(otherUser)
-        otherUserId = otherUser.getId()
+        otherUserId = otherUser.id
 
         // 보호소 생성 및 유저 연결
         val cmd = ShelterCommand(

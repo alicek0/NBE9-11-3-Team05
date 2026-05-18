@@ -28,7 +28,7 @@ data class FeedRes(
             return FeedRes(
                 profileImageUrl = user.profileImageUrl,
                 nickname = user.nickname,
-                feedId = feed.id,
+                feedId = requireNotNull(feed.id),
                 userId = user.id,
                 animalId = feed.animal?.id,
                 category = feed.category,

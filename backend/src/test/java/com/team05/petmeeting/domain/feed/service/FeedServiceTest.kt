@@ -92,7 +92,7 @@ internal class FeedServiceTest {
         Mockito.`when`(animalRepository.findById(animalId)).thenReturn(Optional.of(animal))
         Mockito.`when`(
             adoptionApplicationRepository.existsByUser_IdAndAnimal_IdAndStatus(
-                user.id,
+                requireNotNull(user.id),
                 animalId,
                 AdoptionStatus.Approved
             )
@@ -147,7 +147,7 @@ internal class FeedServiceTest {
         Mockito.`when`(animalRepository.findById(animalId)).thenReturn(Optional.of(animal))
         Mockito.`when`(
             adoptionApplicationRepository.existsByUser_IdAndAnimal_IdAndStatus(
-                user.id,
+                requireNotNull(user.id),
                 animalId,
                 AdoptionStatus.Approved
             )
@@ -170,7 +170,7 @@ internal class FeedServiceTest {
         Mockito.`when`(animalRepository.findById(animalId)).thenReturn(Optional.of(animal))
         Mockito.`when`(
             adoptionApplicationRepository.existsByUser_IdAndAnimal_IdAndStatus(
-                user.id,
+                requireNotNull(user.id),
                 animalId,
                 AdoptionStatus.Approved
             )
