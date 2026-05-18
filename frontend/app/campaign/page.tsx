@@ -134,12 +134,13 @@ export default function CampaignPage() {
                     </Link>
                     <Button 
                       className="flex-1 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300 shadow-md shadow-primary/10"
+                      disabled={campaign.status !== "ACTIVE"}
                       onClick={() => {
                         setSelectedCampaign(campaign)
                         setIsDonationModalOpen(true)
                       }}
                     >
-                      후원하기
+                      {campaign.status === "ACTIVE" ? "후원하기" : "마감됨"}
                     </Button>
                   </div>
                 </Card>

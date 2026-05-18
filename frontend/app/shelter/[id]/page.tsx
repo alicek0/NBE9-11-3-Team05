@@ -195,12 +195,13 @@ export default function ShelterPage({ params }: { params: Promise<{ id: string }
                         <div className="flex flex-col sm:flex-row gap-4 pt-4">
                           <Button 
                             className="w-full rounded-xl h-12 text-lg font-bold"
+                            disabled={campaign.status !== "ACTIVE"}
                             onClick={() => {
                               setSelectedCampaign(campaign)
                               setIsDonationModalOpen(true)
                             }}
                           >
-                            후원하기
+                            {campaign.status === "ACTIVE" ? "후원하기" : "마감됨"}
                           </Button>
                         </div>
                       </CardContent>
