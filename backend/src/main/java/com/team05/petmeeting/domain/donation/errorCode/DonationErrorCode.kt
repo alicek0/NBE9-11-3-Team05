@@ -14,6 +14,7 @@ enum class DonationErrorCode(private val status: HttpStatus, private val code: S
     FORBIDDEN(HttpStatus.FORBIDDEN, "DO-008", "접근 권한이 없습니다."),
     PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "DO-009", "결제 정보를 찾을 수 없습니다."),
     INVALID_REQUEST(HttpStatus.BAD_REQUEST, "DO-010", "잘못된 결제 요청입니다."),
+    INVALID_WEBHOOK(HttpStatus.BAD_REQUEST, "DO-011", "유효하지 않은 웹훅입니다."),
     ;
 
     override fun getStatus(): HttpStatus {

@@ -6,6 +6,12 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
+import { apiRequest, API_BASE_URL } from "@/lib/api"
+import { useAuth } from "@/lib/auth-context"
+import * as PortOne from "@portone/browser-sdk/v2"
+
+const STORE_ID = process.env.NEXT_PUBLIC_STORE_ID
+const CHANNEL_KEY = process.env.NEXT_PUBLIC_CHANNEL_KEY
 
 interface DonationModalProps {
   isOpen: boolean
@@ -18,6 +24,7 @@ interface DonationModalProps {
 export function DonationModal({ isOpen, onClose, campaignTitle, campaignId, onSuccess }: DonationModalProps) {
   const [amount, setAmount] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const { user } = useAuth()
 
   if (!isOpen) return null
 
@@ -27,14 +34,88 @@ export function DonationModal({ isOpen, onClose, campaignTitle, campaignId, onSu
       return
     }
 
+    if (!STORE_ID || !CHANNEL_KEY) {
+      alert("결제 설정이 누락되었습니다. 관리자에게 문의해주세요.")
+      return
+    }
+
     setIsLoading(true)
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    
-    setIsLoading(false)
-    alert(`${campaignTitle} 캠페인에 ${Number(amount).toLocaleString()}원이 후원되었습니다. 감사합니다!`)
-    onSuccess?.()
-    onClose()
+
+    try {
+      // 1. 백엔드에서 paymentId 발급
+      const prepareRes = await apiRequest<{ paymentId: string }>(`${API_BASE_URL}/donations/prepare`, {
+        method: "POST",
+        body: JSON.stringify({
+          campaignId: campaignId,
+          amount: Number(amount)
+        })
+      });
+
+      if (prepareRes.error || !prepareRes.data) {
+        alert("결제 준비 실패: " + (prepareRes.error || "알 수 없는 오류"));
+        return;
+      }
+      const { paymentId } = prepareRes.data;
+
+      // 이메일 형식 검증 (정규식)
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      let finalEmail = "test@gmail.com";
+
+      if (user?.email && emailRegex.test(user.email)) {
+        finalEmail = user.email;
+      }
+
+      console.log("결제 요청 유저 정보", {
+        originalEmail: user?.email,
+        finalEmail: finalEmail,
+        name: user?.name
+      });
+
+      const paymentRequest = {
+        storeId: STORE_ID,
+        paymentId,
+        orderName: `Campaign ${campaignId} Donation`,
+        totalAmount: Number(amount),
+        currency: "CURRENCY_KRW",
+        channelKey: CHANNEL_KEY,
+        payMethod: "CARD",
+        redirectUrl: window.location.href,
+        customer: {
+          email: finalEmail,
+          fullName: user?.name || "익명 후원자",
+          phoneNumber: "01000000000",
+        }
+      } as Parameters<typeof PortOne.requestPayment>[0]
+
+      // 2. 포트원 결제창 호출
+      const response = await PortOne.requestPayment(paymentRequest);
+
+      // 3. 결제 실패 처리
+      if (response?.code) {
+        alert("결제 실패: " + response.message)
+        return
+      }
+
+      // 4. 백엔드에 결제 완료 요청 (검증)
+      const completeRes = await apiRequest(`${API_BASE_URL}/donations/complete`, {
+        method: "POST",
+        body: JSON.stringify({ paymentId: response?.paymentId || paymentId })
+      });
+
+      if (completeRes.error) {
+        alert("결제 검증 실패: " + completeRes.error)
+        return
+      }
+
+      alert(`${campaignTitle} 캠페인에 ${Number(amount).toLocaleString()}원이 후원되었습니다. 감사합니다!`)
+      onSuccess?.()
+      onClose()
+    } catch (error) {
+      console.error('결제 오류:', error)
+      alert("결제 중 오류가 발생했습니다.")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -51,7 +132,7 @@ export function DonationModal({ isOpen, onClose, campaignTitle, campaignId, onSu
             <X className="w-5 h-5" />
           </Button>
         </CardHeader>
-        
+
         <CardContent className="pt-6 space-y-6">
           <div className="space-y-4">
             <div>
@@ -102,7 +183,7 @@ export function DonationModal({ isOpen, onClose, campaignTitle, campaignId, onSu
           </div>
 
           <div className="pt-4">
-            <Button 
+            <Button
               className={cn(
                 "w-full h-14 rounded-2xl text-lg font-bold shadow-lg shadow-primary/20 transition-all duration-300",
                 isLoading ? "opacity-70" : "hover:scale-[1.02] active:scale-100"
@@ -120,7 +201,7 @@ export function DonationModal({ isOpen, onClose, campaignTitle, campaignId, onSu
               )}
             </Button>
             <p className="text-center text-[10px] text-muted-foreground mt-4 leading-relaxed">
-              * 후원금은 보호소 운영 및 아이들의 치료/간식비로 전액 사용됩니다.<br/>
+              * 후원금은 보호소 운영 및 아이들의 치료/간식비로 전액 사용됩니다.<br />
               결제 시 이용약관 및 개인정보 처리방침에 동의한 것으로 간주됩니다.
             </p>
           </div>

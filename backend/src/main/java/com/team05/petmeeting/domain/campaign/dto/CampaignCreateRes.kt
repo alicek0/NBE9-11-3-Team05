@@ -13,10 +13,10 @@ data class CampaignCreateRes(
         @JvmStatic
         fun from(campaign: Campaign): CampaignCreateRes {
             return CampaignCreateRes(
-                campaign.getId(),
-                campaign.getTitle(),
-                campaign.getTargetAmount(),
-                campaign.getStatus()
+                campaign.id,
+                campaign.title,
+                campaign.targetAmount,
+                campaign.status
             )
         }
     }

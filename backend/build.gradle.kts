@@ -75,6 +75,7 @@ dependencies {
 
     testImplementation("org.mockito.kotlin:mockito-kotlin:3.2.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
 }
 
 tasks.withType<Test> {

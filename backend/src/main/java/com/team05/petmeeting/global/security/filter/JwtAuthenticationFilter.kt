@@ -54,4 +54,6 @@ class JwtAuthenticationFilter(
         request.getHeader("Authorization")
             ?.takeIf { it.startsWith("Bearer ") }
             ?.replace("Bearer ", "")
+
+    override fun shouldNotFilterAsyncDispatch(): Boolean = false
 }

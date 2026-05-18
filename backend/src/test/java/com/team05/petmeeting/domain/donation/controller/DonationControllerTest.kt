@@ -25,11 +25,14 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPat
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.any
+import org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientAutoConfiguration
 import org.springframework.security.test.context.support.WithAnonymousUser
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.request
 
 @WebMvcTest(
     controllers = [DonationController::class],
-    excludeAutoConfiguration = [SecurityAutoConfiguration::class],
+    excludeAutoConfiguration = [SecurityAutoConfiguration::class, OAuth2ClientAutoConfiguration::class],
     excludeFilters = [ComponentScan.Filter(
         type = FilterType.REGEX,
         pattern = ["com\\.team05\\.petmeeting\\.global\\.security\\..*"]
@@ -73,12 +76,18 @@ class DonationControllerTest {
 
         whenever(donationService.donate(eq(100L), any())).thenReturn(res)
 
-        mvc.perform(
+        val mvcResult = mvc.perform(
             post("/api/v1/donations/complete")
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req))
         )
+            .andExpect(status().isOk())
+            .andExpect(request().asyncStarted())  // async 시작됐는지 확인
+            .andReturn()
+
+        // async 결과 기다리기
+        mvc.perform(asyncDispatch(mvcResult))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id").value(1L))
             .andExpect(jsonPath("$.amount").value(10000))

@@ -65,3 +65,4 @@ cloud:
 portone:
   api-secret: test-secret
   store-id: test-store-id
+  webhook-secret: whsec_dGVzdC1zZWNyZXQ=

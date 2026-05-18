@@ -24,17 +24,21 @@ class DonationController(private val donationService: DonationService) {
         @AuthenticationPrincipal userDetails: CustomUserDetails,
         @Valid @RequestBody req: PrepareReq
     ): ResponseEntity<PrepareRes> {
+        println("1. /prepare 엔드포인트 진입: amount=${req.amount}")
         val res = donationService.prepare(userDetails.userId, req)
+        println("2. /prepare 엔드포인트 완료: res=$res")
         return ResponseEntity.ok(res)
     }
 
     @Operation(summary = "결제 완료")
     @PostMapping("/complete")
-    fun completeDonation(
+    suspend fun completeDonation(
         @AuthenticationPrincipal userDetails: CustomUserDetails,
         @Valid @RequestBody req: CompleteReq
     ): ResponseEntity<CompleteRes> {
+        println("1. /complete 엔드포인트 진입: paymentId=${req.paymentId}")
         val res = donationService.donate(userDetails.userId, req)
+        println("2. /complete 엔드포인트 완료: res=$res")
         return ResponseEntity.ok(res)
     }
 }

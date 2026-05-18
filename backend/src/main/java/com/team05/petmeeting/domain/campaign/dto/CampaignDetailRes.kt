@@ -17,11 +17,11 @@ data class CampaignDetailRes(
         companion object {
             fun from(campaign: Campaign): CampaignDetailItem {
                 return CampaignDetailItem(
-                    campaign.getId(),
-                    campaign.getTitle(),
-                    campaign.getTargetAmount(),
-                    campaign.getCurrentAmount(),
-                    campaign.getStatus()
+                    campaign.id,
+                    campaign.title,
+                    campaign.targetAmount,
+                    campaign.currentAmount,
+                    campaign.status
                 )
             }
         }

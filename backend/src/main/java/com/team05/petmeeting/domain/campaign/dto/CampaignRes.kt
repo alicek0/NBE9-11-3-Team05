@@ -20,12 +20,12 @@ data class CampaignRes(
             fun from(campaign: Campaign): CampaignItem {
                 return CampaignItem(
                     campaign.getId(),
-                    campaign.getTitle(),
-                    campaign.getDescription(),
-                    campaign.getTargetAmount(),
-                    campaign.getCurrentAmount(),
-                    campaign.getStatus(),
-                    campaign.getShelter().careRegNo
+                    campaign.title,
+                    campaign.description,
+                    campaign.targetAmount,
+                    campaign.currentAmount,
+                    campaign.status,
+                    campaign.shelter.careRegNo
                 )
             }
         }

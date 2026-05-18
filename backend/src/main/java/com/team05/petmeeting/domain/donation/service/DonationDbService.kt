@@ -1,0 +1,93 @@
+package com.team05.petmeeting.domain.donation.service
+
+import com.team05.petmeeting.domain.campaign.repository.CampaignRepository
+import com.team05.petmeeting.domain.campaign.service.CampaignService
+import com.team05.petmeeting.domain.donation.dto.CompleteRes
+import com.team05.petmeeting.domain.donation.dto.PrepareReq
+import com.team05.petmeeting.domain.donation.dto.PrepareRes
+import com.team05.petmeeting.domain.donation.entity.Donation
+import com.team05.petmeeting.domain.donation.enums.DonationStatus
+import com.team05.petmeeting.domain.donation.errorCode.DonationErrorCode
+import com.team05.petmeeting.domain.donation.repository.DonationRepository
+import com.team05.petmeeting.domain.user.dto.profile.UserDonationRes
+import com.team05.petmeeting.domain.user.service.UserService
+import com.team05.petmeeting.global.exception.BusinessException
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import java.util.UUID
+
+@Service
+@Transactional(readOnly = true) // Default to read-only for safety
+class DonationDbService(
+    private val donationRepository: DonationRepository,
+    private val campaignService: CampaignService,
+    private val userService: UserService,
+    private val campaignRepository: CampaignRepository,
+) {
+
+    @Transactional
+    fun prepareDonation(userId: Long, req: PrepareReq): PrepareRes {
+        val paymentId = "donate-" + UUID.randomUUID().toString().replace("-", "")
+        val user = userService.findById(userId)
+        val campaign = campaignService.findById(req.campaignId)
+
+        val donation = Donation.create(user, campaign, paymentId, req.amount)
+        donationRepository.save(donation)
+
+        return PrepareRes(paymentId, req.amount)
+    }
+
+    @Transactional
+    fun completeDonation(paymentId: String, paidAmount: Int, isPaid: Boolean): CompleteRes {
+        val donation = donationRepository.findByPaymentId(paymentId)
+            ?: throw BusinessException(DonationErrorCode.PAYMENT_NOT_FOUND)
+
+        if (!isPaid) {
+            donation.fail()
+            donationRepository.save(donation)
+            throw BusinessException(DonationErrorCode.PAYMENT_NOT_PAID)
+        }
+
+        if (paidAmount != donation.amount) {
+            donation.fail()
+            donationRepository.save(donation)
+            throw BusinessException(DonationErrorCode.AMOUNT_MISMATCH)
+        }
+
+        donation.complete()
+        campaignRepository.addDonationAmount(donation.campaign.id ,paidAmount)
+//        donation.campaign.addAmount(paidAmount)
+        donationRepository.save(donation)
+
+        return CompleteRes(
+            id = donation.id!!,
+            amount = donation.amount,
+            status = donation.status,
+            campaignId = donation.campaign.id!!
+        )
+    }
+
+    @Transactional
+    fun processWebhookDonation(paymentId: String, paidAmount: Int) {
+        val donation = donationRepository.findByPaymentId(paymentId)
+            ?: throw BusinessException(DonationErrorCode.DONATION_NOT_FOUND)
+
+        if (paidAmount != donation.amount) {
+            donation.fail()
+        } else {
+            donation.complete()
+        }
+        donationRepository.save(donation)
+    }
+
+    fun getMyDonations(userId: Long): UserDonationRes {
+        val donations = donationRepository.findByUser_Id(userId)
+        val totalAmount = donations.stream()
+            .filter { d: Donation -> d.status == DonationStatus.PAID }
+            .mapToInt { obj: Donation -> obj.amount }
+            .sum()
+        return UserDonationRes.of(donations.size, totalAmount, donations)
+    }
+
+
+}

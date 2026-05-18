@@ -6,6 +6,7 @@ import io.portone.sdk.server.webhook.WebhookVerifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Lazy
 
 @Configuration
 class PortOneConfig {
@@ -19,9 +20,13 @@ class PortOneConfig {
     lateinit var webhookSecret: String
 
     @Bean
-    fun portOne() = PaymentClient(apiSecret)
+    fun paymentClient(): PaymentClient {
+        println("API Secret: '$apiSecret'")  // 실제 값 출력
+        return PaymentClient(apiSecret = apiSecret)
+    }
 
 
     @Bean
+    @Lazy
     fun webhookVerifier() = WebhookVerifier(webhookSecret)
 }
