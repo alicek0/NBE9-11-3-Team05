@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/adoptions/admin")
+@RequestMapping("/api/v1/adoptions/admin")
 class AdoptionAdminController(
     private val adoptionAdminService: AdoptionAdminService,
 ) {

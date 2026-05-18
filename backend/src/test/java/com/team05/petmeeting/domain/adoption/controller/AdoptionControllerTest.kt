@@ -74,7 +74,7 @@ class AdoptionControllerTest {
         whenever(adoptionService.getMyAdoptions(USER_ID)).thenReturn(listOf(response))
 
         mockMvc.perform(
-            get("/adoptions/me")
+            get("/api/v1/adoptions/me")
                 .contentType(MediaType.APPLICATION_JSON),
         )
             .andExpect(status().isOk)
@@ -110,7 +110,7 @@ class AdoptionControllerTest {
         whenever(adoptionService.getApplicationDetail(USER_ID, applicationId)).thenReturn(response)
 
         mockMvc.perform(
-            get("/adoptions/{applicationId}", applicationId)
+            get("/api/v1/adoptions/{applicationId}", applicationId)
                 .contentType(MediaType.APPLICATION_JSON),
         )
             .andExpect(status().isOk)
@@ -137,7 +137,7 @@ class AdoptionControllerTest {
             .thenReturn(response)
 
         mockMvc.perform(
-            post("/adoptions/{animalId}", animalId)
+            post("/api/v1/adoptions/{animalId}", animalId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
                     """
@@ -163,7 +163,7 @@ class AdoptionControllerTest {
             .thenThrow(BusinessException(AdoptionErrorCode.ALREADY_APPLIED))
 
         mockMvc.perform(
-            post("/adoptions/{animalId}", 20L)
+            post("/api/v1/adoptions/{animalId}", 20L)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
                     """
@@ -186,7 +186,7 @@ class AdoptionControllerTest {
         doNothing().`when`(adoptionService).cancelApplication(USER_ID, applicationId)
 
         mockMvc.perform(
-            delete("/adoptions/{applicationId}", applicationId)
+            delete("/api/v1/adoptions/{applicationId}", applicationId)
                 .contentType(MediaType.APPLICATION_JSON),
         )
             .andExpect(status().isNoContent)

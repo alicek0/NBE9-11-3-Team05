@@ -72,7 +72,7 @@ class AdoptionAdminControllerTest {
             .thenReturn(listOf(response))
 
         mockMvc.perform(
-            get("/adoptions/admin/shelters/{careRegNo}/applications", CARE_REG_NO)
+            get("/api/v1/adoptions/admin/shelters/{careRegNo}/applications", CARE_REG_NO)
                 .contentType(MediaType.APPLICATION_JSON),
         )
             .andExpect(status().isOk)
@@ -110,7 +110,7 @@ class AdoptionAdminControllerTest {
             .thenReturn(response)
 
         mockMvc.perform(
-            get("/adoptions/admin/shelters/{careRegNo}/applications/{applicationId}", CARE_REG_NO, applicationId)
+            get("/api/v1/adoptions/admin/shelters/{careRegNo}/applications/{applicationId}", CARE_REG_NO, applicationId)
                 .contentType(MediaType.APPLICATION_JSON),
         )
             .andExpect(status().isOk)
@@ -131,7 +131,7 @@ class AdoptionAdminControllerTest {
             .thenThrow(BusinessException(AdoptionErrorCode.UNAUTHORIZED_SHELTER))
 
         mockMvc.perform(
-            get("/adoptions/admin/shelters/{careRegNo}/applications", CARE_REG_NO)
+            get("/api/v1/adoptions/admin/shelters/{careRegNo}/applications", CARE_REG_NO)
                 .contentType(MediaType.APPLICATION_JSON),
         )
             .andExpect(status().isForbidden)
@@ -170,7 +170,7 @@ class AdoptionAdminControllerTest {
         ).thenReturn(response)
 
         mockMvc.perform(
-            patch("/adoptions/admin/shelters/{careRegNo}/applications/{applicationId}/review", CARE_REG_NO, applicationId)
+            patch("/api/v1/adoptions/admin/shelters/{careRegNo}/applications/{applicationId}/review", CARE_REG_NO, applicationId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""{"status":"Approved","rejectionReason":null}"""),
         )
