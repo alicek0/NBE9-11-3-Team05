@@ -17,6 +17,9 @@ import org.springframework.web.bind.annotation.*
 class AnimalController(
     private val animalService: AnimalService
 ) {
+    companion object {
+        const val DEFAULT_PAGE_SIZE = 12
+    }
 
     data class PageResBody<T>(
         val content: List<T>,
@@ -34,7 +37,7 @@ class AnimalController(
         @RequestParam(required = false) region: String?,
         @RequestParam(required = false) kind: String?,
         @RequestParam(required = false) stateGroup: Int?,
-        @PageableDefault(page = 0, size = 12, sort = ["noticeEdt"], direction = Sort.Direction.ASC) pageable: Pageable
+        @PageableDefault(page = 0, size = DEFAULT_PAGE_SIZE, sort = ["noticeEdt"], direction = Sort.Direction.ASC) pageable: Pageable
     ): ResponseEntity<PageResBody<AnimalRes>> {
         val page: Page<AnimalRes> = animalService.getAnimals(region, kind, stateGroup, pageable)
 

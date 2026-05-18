@@ -7,15 +7,12 @@ import com.team05.petmeeting.domain.cheer.dto.CheerStatusDto
 import com.team05.petmeeting.domain.cheer.entity.Cheer
 import com.team05.petmeeting.domain.cheer.errorCode.CheerErrorCode
 import com.team05.petmeeting.domain.cheer.repository.CheerRepository
-import com.team05.petmeeting.domain.user.entity.User
 import com.team05.petmeeting.domain.user.errorCode.UserErrorCode
 import com.team05.petmeeting.domain.user.repository.UserRepository
 import com.team05.petmeeting.global.exception.BusinessException
-import lombok.RequiredArgsConstructor
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
-import java.util.function.Supplier
 
 @Service
 @Transactional
@@ -24,6 +21,9 @@ class CheerService(
     private val userRepository: UserRepository,
     private val animalRepository: AnimalRepository,
 ) {
+    companion object {
+        private const val MAX_DAILY_CHEER_COUNT = 5
+    }
 
     // 오늘 응원 상태 조회
     fun getTodaysStatus(userId: Long): CheerStatusDto {
@@ -34,7 +34,7 @@ class CheerService(
         user.resetDailyHeartCountIfNeeded()
 
         val usedToday = user.dailyHeartCount
-        val remainingToday = 5 - usedToday
+        val remainingToday = MAX_DAILY_CHEER_COUNT - usedToday
 
         // 내일 자정 계산 (DB에 저장하지 않고, 매번 계산해서 사용)
         val tomorrow_midnight = LocalDate.now().plusDays(1) // 2026-04-13
@@ -57,7 +57,7 @@ class CheerService(
         user.resetDailyHeartCountIfNeeded()
 
         // 5회 제한 확인
-        if (user.dailyHeartCount >= 5) {
+        if (user.dailyHeartCount >= MAX_DAILY_CHEER_COUNT) {
             throw BusinessException(CheerErrorCode.DAILY_CHEER_LIMIT_EXCEEDED)
         }
 
@@ -81,4 +81,5 @@ class CheerService(
             5 - updatedUser.dailyHeartCount
         )
     }
+
 }

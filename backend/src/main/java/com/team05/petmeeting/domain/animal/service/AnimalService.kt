@@ -32,4 +32,5 @@ class AnimalService(
         // 3. Entity를 DTO로 변환하여 반환
         return animalPage.map(::AnimalRes)
     }
+
 }

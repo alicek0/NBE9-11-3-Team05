@@ -63,8 +63,11 @@ springdoc:
   # 로그 향상
 logging:
   level:
-    org.hibernate.orm.jdbc.bind: TRACE
-    org.hibernate.orm.jdbc.extract: TRACE
+    root: INFO
+    com.team05.petmeeting: INFO   # 우리 프로젝트 패키지도 INFO로 상향
+    # 하이버네이트의 상세 JDBC 바인딩 로그를 완전히 차단 (TRACE -> INFO)
+    org.hibernate.orm.jdbc.bind: INFO
+    org.hibernate.orm.jdbc.extract: INFO
 
 # 유기 동물 API 설정
 animal:
@@ -103,3 +106,16 @@ portone:
   api-secret: ${PORTONE_SECRET_KEY}
   store-id: ${PORTONE_STORE_ID}
   webhook-secret: ${PORTONE_WEBHOOK_SECRET}
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "prometheus" # /actuator/prometheus 엔드포인트 활성화
+  endpoint:
+    prometheus:
+      enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name:pet-meeting} # 그라파나에서 애플리케이션을 식별할 태그명

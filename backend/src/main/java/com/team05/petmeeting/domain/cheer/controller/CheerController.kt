@@ -37,4 +37,5 @@ class CheerController(
 
         return ResponseEntity.ok(cheerRes)
     }
+
 }

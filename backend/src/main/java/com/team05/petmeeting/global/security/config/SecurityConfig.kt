@@ -61,6 +61,7 @@ class SecurityConfig(
                 authorize("/api/v1/auth/refresh", permitAll)
                 authorize("/swagger-ui/**", permitAll)
                 authorize("/v3/api-docs/**", permitAll)
+                authorize("/actuator/**", permitAll) // 메트릭 엔드포인트 허용
 
                 authorize(HttpMethod.GET, "/api/v1/animals", permitAll)
                 authorize(HttpMethod.GET, "/api/v1/animals/**", permitAll)
