@@ -4,9 +4,9 @@ import com.team05.petmeeting.global.exception.ErrorCode
 import org.springframework.http.HttpStatus
 
 enum class AnimalErrorCode(
-    private val status: HttpStatus,
-    private val code: String,
-    private val message: String,
+    override val status: HttpStatus,
+    override val code: String,
+    override val message: String,
 ) : ErrorCode {
     // HttpStatus 객체 사용 및 코드에 식별자(A-) 부여
     ANIMAL_NOT_FOUND(HttpStatus.NOT_FOUND, "A-001", "존재하지 않는 유기동물입니다."),
@@ -16,8 +16,4 @@ enum class AnimalErrorCode(
     INITIAL_ANIMAL_SYNC_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "A-005", "유기동물 최초 적재 중 오류가 발생했습니다."),
     UPDATE_ANIMAL_SYNC_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "A-006", "유기동물 업데이트 적재 중 오류가 발생했습니다."),
     ;
-
-    override fun getStatus(): HttpStatus = status
-    override fun getCode(): String = code
-    override fun getMessage(): String = message
 }

@@ -29,7 +29,7 @@ data class AnimalRes(
     val care_reg_no: String?
 ) {
     constructor(animal: Animal) : this(
-        animal.id,
+        requireNotNull(animal.id),
         animal.desertionNo,
         animal.processState,
         animal.noticeNo,

@@ -127,8 +127,8 @@ internal class AnimalServiceTest {
             .satisfies({ ex: Throwable? ->
                 val be = ex as BusinessException
                 // 에러 코드와 메시지를 직접 꺼내서 확인
-                Assertions.assertThat(be.errorCode.getCode()).isEqualTo("A-002")
-                Assertions.assertThat(be.errorCode.getMessage()).isEqualTo("잘못된 페이지 번호입니다")
+                Assertions.assertThat(be.errorCode.code).isEqualTo("A-002")
+                Assertions.assertThat(be.errorCode.message).isEqualTo("잘못된 페이지 번호입니다")
             })
     }
 }

@@ -31,7 +31,7 @@ data class FeedListRes(
             commentCount: Long,
             isLiked: Boolean
         ) = FeedListRes(
-            feed.id,
+            requireNotNull(feed.id),
             userId,
             profileImageUrl,
             animalId,
@@ -43,7 +43,7 @@ data class FeedListRes(
             likeCount.toInt(),
             isLiked,
             commentCount.toInt(),
-            feed.createdAt,
+            requireNotNull(feed.createdAt),
             feed.updatedAt
         )
     }

@@ -50,14 +50,14 @@ class DonationDbServiceTest {
 
     private fun mockCampaign(status: CampaignStatus = CampaignStatus.ACTIVE): Campaign {
         val campaign = mock<Campaign>()
-        setId(campaign, 11L)  // 통일
+        lenient().`when`(campaign.id).thenReturn(11L)
         lenient().`when`(campaign.status).thenReturn(status)
         return campaign
     }
 
     private fun mockUser(): User {
         val user = mock<User>()
-        setId(user, 1L)  // 통일
+        lenient().`when`(user.id).thenReturn(1L)
         return user
     }
 

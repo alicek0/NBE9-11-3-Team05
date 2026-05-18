@@ -60,7 +60,7 @@ class AdoptionAdminServiceTest {
             .thenReturn(listOf(managedApplication))
 
         val responses: List<AdoptionApplyRes> =
-            adoptionAdminService.getManagedShelterApplications(manager.id, "S-001")
+            adoptionAdminService.getManagedShelterApplications(idOf(manager), "S-001")
 
         assertThat(responses).hasSize(1)
         assertThat(responses[0].applicationId).isEqualTo(managedApplication.id)
@@ -78,11 +78,11 @@ class AdoptionAdminServiceTest {
         val application = createApplication(1L, applicant, animal)
         `when`(shelterRepository.findById("S-001"))
             .thenReturn(java.util.Optional.of(requireNotNull(animal.shelter)))
-        `when`(adoptionApplicationRepository.findById(application.id))
+        `when`(adoptionApplicationRepository.findById(idOf(application)))
             .thenReturn(java.util.Optional.of(application))
 
         val response: AdoptionDetailRes =
-            adoptionAdminService.getManagedShelterApplicationDetail(manager.id, "S-001", application.id)
+            adoptionAdminService.getManagedShelterApplicationDetail(idOf(manager), "S-001", idOf(application))
 
         assertThat(response.applicationId).isEqualTo(application.id)
         assertThat(response.status).isEqualTo(AdoptionStatus.Processing)
@@ -103,11 +103,11 @@ class AdoptionAdminServiceTest {
         val application = createApplication(1L, applicant, animal)
         `when`(shelterRepository.findById("S-001"))
             .thenReturn(java.util.Optional.of(managedShelter))
-        `when`(adoptionApplicationRepository.findById(application.id))
+        `when`(adoptionApplicationRepository.findById(idOf(application)))
             .thenReturn(java.util.Optional.of(application))
 
         assertThatThrownBy {
-            adoptionAdminService.getManagedShelterApplicationDetail(manager.id, "S-001", application.id)
+            adoptionAdminService.getManagedShelterApplicationDetail(idOf(manager), "S-001", idOf(application))
         }
             .isInstanceOf(BusinessException::class.java)
             .extracting { (it as BusinessException).errorCode }
@@ -124,7 +124,7 @@ class AdoptionAdminServiceTest {
             .thenReturn(java.util.Optional.of(otherShelter))
 
         assertThatThrownBy {
-            adoptionAdminService.getManagedShelterApplicationDetail(manager.id, "S-001", 1L)
+            adoptionAdminService.getManagedShelterApplicationDetail(idOf(manager), "S-001", 1L)
         }
             .isInstanceOf(BusinessException::class.java)
             .extracting { (it as BusinessException).errorCode }
@@ -140,13 +140,13 @@ class AdoptionAdminServiceTest {
         val application = createApplication(1L, applicant, animal)
         `when`(shelterRepository.findById("S-001"))
             .thenReturn(java.util.Optional.of(requireNotNull(animal.shelter)))
-        `when`(adoptionApplicationRepository.findById(application.id))
+        `when`(adoptionApplicationRepository.findById(idOf(application)))
             .thenReturn(java.util.Optional.of(application))
 
         val response = adoptionAdminService.reviewApplication(
-            manager.id,
+            idOf(manager),
             "S-001",
-            application.id,
+            idOf(application),
             AdoptionReviewReq(AdoptionStatus.Approved, null),
         )
 
@@ -165,13 +165,13 @@ class AdoptionAdminServiceTest {
         val application = createApplication(1L, applicant, animal)
         `when`(shelterRepository.findById("S-001"))
             .thenReturn(java.util.Optional.of(requireNotNull(animal.shelter)))
-        `when`(adoptionApplicationRepository.findById(application.id))
+        `when`(adoptionApplicationRepository.findById(idOf(application)))
             .thenReturn(java.util.Optional.of(application))
 
         val response = adoptionAdminService.reviewApplication(
-            manager.id,
+            idOf(manager),
             "S-001",
-            application.id,
+            idOf(application),
             AdoptionReviewReq(AdoptionStatus.Rejected, "조건이 맞지 않습니다."),
         )
 
@@ -192,13 +192,13 @@ class AdoptionAdminServiceTest {
         application.reject("이전 거절 사유")
         `when`(shelterRepository.findById("S-001"))
             .thenReturn(java.util.Optional.of(requireNotNull(animal.shelter)))
-        `when`(adoptionApplicationRepository.findById(application.id))
+        `when`(adoptionApplicationRepository.findById(idOf(application)))
             .thenReturn(java.util.Optional.of(application))
 
         val response = adoptionAdminService.reviewApplication(
-            manager.id,
+            idOf(manager),
             "S-001",
-            application.id,
+            idOf(application),
             AdoptionReviewReq(AdoptionStatus.Processing, null),
         )
 
@@ -219,14 +219,14 @@ class AdoptionAdminServiceTest {
         val application = createApplication(1L, applicant, animal)
         `when`(shelterRepository.findById("S-001"))
             .thenReturn(java.util.Optional.of(requireNotNull(animal.shelter)))
-        `when`(adoptionApplicationRepository.findById(application.id))
+        `when`(adoptionApplicationRepository.findById(idOf(application)))
             .thenReturn(java.util.Optional.of(application))
 
         assertThatThrownBy {
             adoptionAdminService.reviewApplication(
-                manager.id,
+                idOf(manager),
                 "S-001",
-                application.id,
+                idOf(application),
                 AdoptionReviewReq(AdoptionStatus.Rejected, " "),
             )
         }
@@ -290,4 +290,6 @@ class AdoptionAdminServiceTest {
         idField.isAccessible = true
         idField.set(entity, id)
     }
+
+    private fun idOf(entity: BaseEntity): Long = requireNotNull(entity.id)
 }

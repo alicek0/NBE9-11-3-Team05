@@ -116,7 +116,7 @@ class FeedService(
     private fun validateAdoptedAnimal(user: User, animalId: Long) {
         val isApproved = adoptionApplicationRepository
             .existsByUser_IdAndAnimal_IdAndStatus(
-                user.getId(),
+                requireNotNull(user.id),
                 animalId,
                 AdoptionStatus.Approved
             )

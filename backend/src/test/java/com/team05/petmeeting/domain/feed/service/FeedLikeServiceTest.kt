@@ -105,7 +105,7 @@ internal class FeedLikeServiceTest {
         // when & then
         assertThatThrownBy { feedLikeService.toggleLike(feedId, user) }
             .isInstanceOf(BusinessException::class.java)
-            .extracting { (it as BusinessException).getErrorCode() }
+            .extracting { (it as BusinessException).errorCode }
             .isEqualTo(FeedErrorCode.FEED_NOT_FOUND)
     }
 }

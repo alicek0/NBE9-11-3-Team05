@@ -19,7 +19,7 @@ data class UserCheerAnimalRes(
             @JvmStatic
             fun from(animal: Animal, myCheerCount: Long): CheerAnimalItem {
                 return CheerAnimalItem(
-                    animal.id,
+                    requireNotNull(animal.id),
                     animal.upKindNm,
                     animal.kindFullNm,
                     animal.popfile1,

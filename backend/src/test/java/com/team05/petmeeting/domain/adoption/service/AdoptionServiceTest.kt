@@ -50,10 +50,10 @@ class AdoptionServiceTest {
         val user = createUser(1L)
         val animal = createAnimal(10L, "A-001")
         val application = createApplication(100L, user, animal)
-        `when`(adoptionApplicationRepository.findByUser_Id(user.id))
+        `when`(adoptionApplicationRepository.findByUser_Id(idOf(user)))
             .thenReturn(listOf(application))
 
-        val responses: List<AdoptionApplyRes> = adoptionService.getMyAdoptions(user.id)
+        val responses: List<AdoptionApplyRes> = adoptionService.getMyAdoptions(idOf(user))
 
         assertThat(responses).hasSize(1)
         assertThat(responses[0].applicationId).isEqualTo(100L)
@@ -68,10 +68,10 @@ class AdoptionServiceTest {
         val user = createUser(1L)
         val animal = createAnimal(10L, "A-001")
         val application = createApplication(100L, user, animal)
-        `when`(adoptionApplicationRepository.findByIdAndUser_Id(application.id, user.id))
+        `when`(adoptionApplicationRepository.findByIdAndUser_Id(idOf(application), idOf(user)))
             .thenReturn(java.util.Optional.of(application))
 
-        val response: AdoptionDetailRes = adoptionService.getApplicationDetail(user.id, application.id)
+        val response: AdoptionDetailRes = adoptionService.getApplicationDetail(idOf(user), idOf(application))
 
         assertThat(response.applicationId).isEqualTo(100L)
         assertThat(response.status).isEqualTo(AdoptionStatus.Processing)
@@ -99,10 +99,10 @@ class AdoptionServiceTest {
         val user = createUser(1L)
         val animal = createAnimal(10L, "A-001")
         val request = createApplyRequest("가족으로 맞이하고 싶습니다.", "010-9999-8888")
-        `when`(adoptionApplicationRepository.existsByUser_IdAndAnimal_Id(user.id, animal.id))
+        `when`(adoptionApplicationRepository.existsByUser_IdAndAnimal_Id(idOf(user), idOf(animal)))
             .thenReturn(false)
-        `when`(userRepository.findById(user.id)).thenReturn(java.util.Optional.of(user))
-        `when`(animalRepository.findById(animal.id)).thenReturn(java.util.Optional.of(animal))
+        `when`(userRepository.findById(idOf(user))).thenReturn(java.util.Optional.of(user))
+        `when`(animalRepository.findById(idOf(animal))).thenReturn(java.util.Optional.of(animal))
         `when`(adoptionApplicationRepository.save(any(AdoptionApplication::class.java)))
             .thenAnswer { invocation ->
                 val saved = invocation.getArgument<AdoptionApplication>(0)
@@ -110,7 +110,7 @@ class AdoptionServiceTest {
                 saved
             }
 
-        val response: AdoptionApplyRes = adoptionService.applyApplication(user.id, animal.id, request)
+        val response: AdoptionApplyRes = adoptionService.applyApplication(idOf(user), idOf(animal), request)
 
         assertThat(response.applicationId).isEqualTo(100L)
         assertThat(response.status).isEqualTo(AdoptionStatus.Processing)
@@ -182,10 +182,10 @@ class AdoptionServiceTest {
     fun cancelApplication() {
         val user = createUser(1L)
         val application = createApplication(100L, user, createAnimal(10L, "A-001"))
-        `when`(adoptionApplicationRepository.findByIdAndUser_Id(application.id, user.id))
+        `when`(adoptionApplicationRepository.findByIdAndUser_Id(idOf(application), idOf(user)))
             .thenReturn(java.util.Optional.of(application))
 
-        adoptionService.cancelApplication(user.id, application.id)
+        adoptionService.cancelApplication(idOf(user), idOf(application))
 
         verify(adoptionApplicationRepository).delete(application)
     }
@@ -244,4 +244,6 @@ class AdoptionServiceTest {
         idField.isAccessible = true
         idField.set(entity, id)
     }
+
+    private fun idOf(entity: BaseEntity): Long = requireNotNull(entity.id)
 }

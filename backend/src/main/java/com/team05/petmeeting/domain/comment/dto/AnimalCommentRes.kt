@@ -16,13 +16,13 @@ data class AnimalCommentRes(
         @JvmStatic
         fun from(comment: AnimalComment): AnimalCommentRes {
             return AnimalCommentRes(
-                comment.user.id,
+                requireNotNull(comment.user.id),
                 comment.user.nickname,
                 comment.user.profileImageUrl,
-                comment.id,
+                requireNotNull(comment.id),
                 comment.content,
-                comment.animal.id,
-                comment.createdAt
+                requireNotNull(comment.animal.id),
+                requireNotNull(comment.createdAt)
             )
         }
     }

@@ -19,7 +19,7 @@ data class CampaignRes(
         companion object {
             fun from(campaign: Campaign): CampaignItem {
                 return CampaignItem(
-                    campaign.getId(),
+                    requireNotNull(campaign.id),
                     campaign.title,
                     campaign.description,
                     campaign.targetAmount,

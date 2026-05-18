@@ -4,9 +4,9 @@ import com.team05.petmeeting.global.exception.ErrorCode
 import org.springframework.http.HttpStatus
 
 enum class FeedErrorCode(
-    private val status: HttpStatus,
-    private val code: String,
-    private val message: String
+    override val status: HttpStatus,
+    override val code: String,
+    override val message: String
 ) : ErrorCode {
     INVALID_PAGE(HttpStatus.BAD_REQUEST, "F-001", "잘못된 페이지 번호입니다."),
     FEED_NOT_FOUND(HttpStatus.NOT_FOUND, "F-002", "존재하지 않거나 이미 삭제된 피드입니다."),
@@ -15,8 +15,4 @@ enum class FeedErrorCode(
     FORBIDDEN(HttpStatus.FORBIDDEN, "F-005", "권한이 없습니다."),  // 삭제, 수정
     ANIMAL_REQUIRED(HttpStatus.BAD_REQUEST, "F-006", "입양후기는 동물 선택이 필수입니다."),
     NOT_ADOPTED_ANIMAL(HttpStatus.FORBIDDEN, "F-007", "입양 승인된 동물만 후기를 작성할 수 있습니다.");
-
-    override fun getStatus(): HttpStatus = status
-    override fun getCode(): String = code
-    override fun getMessage(): String = message
 }
