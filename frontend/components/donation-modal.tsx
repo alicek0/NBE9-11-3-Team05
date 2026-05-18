@@ -59,7 +59,7 @@ export function DonationModal({ isOpen, onClose, campaignTitle, campaignId, onSu
 
       // 이메일 형식 검증 (정규식)
       const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-      let finalEmail = "test@gmail.com";
+      let finalEmail = "";
 
       if (user?.email && emailRegex.test(user.email)) {
         finalEmail = user.email;
