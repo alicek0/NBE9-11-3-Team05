@@ -8,7 +8,7 @@ import java.time.LocalDateTime
 data class FeedRes(
     val profileImageUrl: String?,
     val nickname: String,
-    val feedId: Long?,
+    val feedId: Long,
     val userId: Long?,
     val animalId: Long?,
     val category: FeedCategory,
