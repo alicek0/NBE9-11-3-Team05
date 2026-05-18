@@ -77,7 +77,7 @@ class AnimalSyncService(
             val elapsedMs = elapsedMs(startedAt)
             log.info(
                 "Initial animal sync completed: from={}, to={}, numOfRows={}, savedCount={}, elapsedMs={}",
-                INITIAL_SYNC_START_DATE,
+                animalSyncProperties.initial.startDate,
                 LocalDate.now(),
                 numOfRows,
                 savedCount,
@@ -125,7 +125,7 @@ class AnimalSyncService(
     // 최초 적재 범위를 월별로 순회하면서 저장 건수를 누적한다.
     fun fetchAndSaveMonthlyAnimalsFrom2008(numOfRows: Int, maxSaveCount: Int): Int {
         val today = LocalDate.now()
-        var currentMonthStart = INITIAL_SYNC_START_DATE.withDayOfMonth(1)
+        var currentMonthStart = animalSyncProperties.initial.startDate.withDayOfMonth(1)
         var totalSavedCount = 0
 
         while (!currentMonthStart.isAfter(today) && totalSavedCount < maxSaveCount) {
@@ -364,7 +364,7 @@ class AnimalSyncService(
             .map { it.lastUpdatedAt }
             .orElse(null)
 
-        return lastUpdatedAt?.toLocalDate() ?: INITIAL_SYNC_START_DATE
+        return lastUpdatedAt?.toLocalDate() ?: animalSyncProperties.initial.startDate
     }
 
     // 외부 API 페이지 번호는 1부터 시작하므로 0 이하 요청을 차단한다.
@@ -428,7 +428,6 @@ class AnimalSyncService(
 
     companion object {
         private val log = LoggerFactory.getLogger(AnimalSyncService::class.java)
-        private val INITIAL_SYNC_START_DATE: LocalDate = LocalDate.of(2025, 1, 1)
         private val API_UPDATE_TIME_FORMATTER = DateTimeFormatterBuilder()
             .appendPattern("yyyy-MM-dd HH:mm:ss")
             .optionalStart()
