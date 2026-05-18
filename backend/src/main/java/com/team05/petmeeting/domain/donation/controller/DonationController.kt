@@ -24,9 +24,7 @@ class DonationController(private val donationService: DonationService) {
         @AuthenticationPrincipal userDetails: CustomUserDetails,
         @Valid @RequestBody req: PrepareReq
     ): ResponseEntity<PrepareRes> {
-        println("1. /prepare 엔드포인트 진입: amount=${req.amount}")
         val res = donationService.prepare(userDetails.userId, req)
-        println("2. /prepare 엔드포인트 완료: res=$res")
         return ResponseEntity.ok(res)
     }
 
