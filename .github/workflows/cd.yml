@@ -45,6 +45,9 @@ jobs:
           script: |
             cd NBE9-11-3-Team05/backend
             echo "${{ secrets.ENV_FILE }}" > .env
-            docker compose pull
-            docker compose up -d
-            docker image prune -f 
+
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml down
+            docker compose -f docker-compose.prod.yml up -d
+            
+            docker image prune -f
