@@ -13,9 +13,6 @@ class PortOneConfig {
     @Value("\${portone.api-secret}")
     lateinit var apiSecret: String
 
-    @Value("\${portone.store-id}")
-    lateinit var storeId: String
-
     @Value("\${portone.webhook-secret}")
     lateinit var webhookSecret: String
 
