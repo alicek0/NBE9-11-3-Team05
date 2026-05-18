@@ -82,10 +82,9 @@ class DonationDbService(
 
     fun getMyDonations(userId: Long): UserDonationRes {
         val donations = donationRepository.findByUser_Id(userId)
-        val totalAmount = donations.stream()
-            .filter { d: Donation -> d.status == DonationStatus.PAID }
-            .mapToInt { obj: Donation -> obj.amount }
-            .sum()
+        val totalAmount = donations
+            .filter { it.status == DonationStatus.PAID }
+            .sumOf { it.amount }
         return UserDonationRes.of(donations.size, totalAmount, donations)
     }
 
