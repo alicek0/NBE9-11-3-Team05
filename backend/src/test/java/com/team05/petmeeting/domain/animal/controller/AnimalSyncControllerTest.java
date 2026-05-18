@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.team05.petmeeting.domain.animal.config.AnimalSyncProperties;
 import com.team05.petmeeting.domain.animal.dto.AnimalSyncRes;
 import com.team05.petmeeting.domain.animal.service.AnimalSyncService;
 import com.team05.petmeeting.global.security.filter.JwtAuthenticationFilter;
@@ -31,6 +32,9 @@ class AnimalSyncControllerTest {
 
     @MockitoBean
     private AnimalSyncService animalSyncService;
+
+    @MockitoBean
+    private AnimalSyncProperties animalSyncProperties;
 
     @MockitoBean
     private JwtUtil jwtUtil;
@@ -60,6 +64,9 @@ class AnimalSyncControllerTest {
     @DisplayName("초기 월별 동기화 요청 성공")
     void syncMonthlyFrom2008() throws Exception {
         AnimalSyncRes response = new AnimalSyncRes("초기 동기화 완료", 10, 300L);
+        AnimalSyncProperties.Initial initial = new AnimalSyncProperties.Initial();
+        initial.setNumOfRows(500);
+        given(animalSyncProperties.getInitial()).willReturn(initial);
         given(animalSyncService.runInitialMonthlySync(500)).willReturn(response);
 
         mockMvc.perform(post("/api/v1/animals/sync/initial")
