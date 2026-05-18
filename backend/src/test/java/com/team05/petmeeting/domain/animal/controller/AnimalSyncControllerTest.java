@@ -62,7 +62,7 @@ class AnimalSyncControllerTest {
 
     @Test
     @DisplayName("초기 월별 동기화 요청 성공")
-    void syncMonthlyFrom2008() throws Exception {
+    void syncInitialMonthly() throws Exception {
         AnimalSyncRes response = new AnimalSyncRes("초기 동기화 완료", 10, 300L);
         AnimalSyncProperties.Initial initial = new AnimalSyncProperties.Initial();
         initial.setNumOfRows(500);
