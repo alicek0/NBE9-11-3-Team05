@@ -16,7 +16,7 @@ data class UserProfileRes(
             return UserProfileRes(
                 user.profileImageUrl,
                 user.nickname,
-                maskEmail(user.email),
+                user.email,
                 user.realname,
                 user.createdAt
             )

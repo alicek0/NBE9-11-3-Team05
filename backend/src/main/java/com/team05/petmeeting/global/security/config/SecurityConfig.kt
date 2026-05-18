@@ -75,6 +75,7 @@ class SecurityConfig(
                 authorize(HttpMethod.POST, "/api/v1/animals/sync/initial", permitAll)
                 authorize(HttpMethod.POST, "/api/v1/animals/sync/update", permitAll)
                 authorize(HttpMethod.POST, "/api/v1/ads/run", permitAll)
+                authorize(HttpMethod.POST, "/api/v1/donations/webhook", permitAll)
 
                 authorize("/api/v1/me/**", authenticated)
                 authorize(anyRequest, authenticated)

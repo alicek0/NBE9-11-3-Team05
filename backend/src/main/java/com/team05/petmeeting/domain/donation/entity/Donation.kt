@@ -27,8 +27,7 @@ class Donation (
 
 ) : BaseEntity() {
 
-    fun complete(paymentId: String) {
-        this.paymentId = paymentId
+    fun complete() {
         this.status = DonationStatus.PAID
     }
 

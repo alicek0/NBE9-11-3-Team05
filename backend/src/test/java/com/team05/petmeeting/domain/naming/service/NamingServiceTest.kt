@@ -14,7 +14,6 @@ import com.team05.petmeeting.domain.shelter.entity.Shelter.Companion.create
 import com.team05.petmeeting.domain.user.entity.User
 import com.team05.petmeeting.domain.user.repository.UserRepository
 import com.team05.petmeeting.global.exception.BusinessException
-import com.team05.petmeeting.global.exception.ErrorCode
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName

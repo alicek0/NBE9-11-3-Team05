@@ -1,4 +1,7 @@
 spring:
+  config:
+    import: optional:file:.env[.properties]
+
   application:
     name: pet-meeting
 
@@ -95,3 +98,4 @@ instagram:
 portone:
   api-secret: ${PORTONE_SECRET_KEY}
   store-id: ${PORTONE_STORE_ID}
+  webhook-secret: ${PORTONE_WEBHOOK_SECRET}

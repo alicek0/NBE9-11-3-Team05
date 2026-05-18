@@ -4,6 +4,7 @@ import com.team05.petmeeting.domain.campaign.entity.Campaign
 import com.team05.petmeeting.domain.campaign.enums.CampaignStatus
 import com.team05.petmeeting.domain.shelter.entity.Shelter
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import java.util.*
@@ -20,4 +21,8 @@ interface CampaignRepository : JpaRepository<Campaign, Long> {
     fun existsByShelter_CareRegNoAndStatus(shelterId: String, campaignStatus: CampaignStatus): Boolean
 
     fun findByShelter_CareRegNoAndStatus(shelterId: String, campaignStatus: CampaignStatus): Optional<Campaign>
+
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE Campaign c SET c.currentAmount = c.currentAmount + :amount WHERE c.id = :campaignId")
+    fun addDonationAmount(@Param("campaignId") campaignId: Long, @Param("amount") amount: Int)
 }

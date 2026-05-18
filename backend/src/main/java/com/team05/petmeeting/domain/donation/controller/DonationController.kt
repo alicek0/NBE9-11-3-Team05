@@ -30,7 +30,7 @@ class DonationController(private val donationService: DonationService) {
 
     @Operation(summary = "결제 완료")
     @PostMapping("/complete")
-    fun completeDonation(
+    suspend fun completeDonation(
         @AuthenticationPrincipal userDetails: CustomUserDetails,
         @Valid @RequestBody req: CompleteReq
     ): ResponseEntity<CompleteRes> {
