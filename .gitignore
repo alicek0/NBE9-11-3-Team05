@@ -77,4 +77,5 @@ coverage/
 ############################
 # Misc
 ############################
-*.swpbackend/.gradle-home/
+*.swp
+backend/.gradle-home/
