@@ -77,6 +77,8 @@ class SecurityConfig(
                 authorize(HttpMethod.POST, "/api/v1/ads/run", permitAll)
                 authorize(HttpMethod.POST, "/api/v1/donations/webhook", permitAll)
 
+                authorize("/error", permitAll) // 처리 못 한 예외 포워딩에 대한 경로 오픈
+
                 authorize("/api/v1/me/**", authenticated)
                 authorize(anyRequest, authenticated)
             }

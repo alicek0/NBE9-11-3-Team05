@@ -3,16 +3,7 @@ package com.team05.petmeeting.domain.user.entity
 import com.team05.petmeeting.domain.shelter.entity.Shelter
 import com.team05.petmeeting.domain.user.role.Role
 import com.team05.petmeeting.global.entity.BaseEntity
-import jakarta.persistence.CascadeType
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.EnumType
-import jakarta.persistence.Enumerated
-import jakarta.persistence.FetchType
-import jakarta.persistence.JoinColumn
-import jakarta.persistence.OneToMany
-import jakarta.persistence.OneToOne
-import jakarta.persistence.Table
+import jakarta.persistence.*
 import java.time.LocalDate
 
 @Entity
@@ -97,7 +88,7 @@ class User protected constructor() : BaseEntity() {
                 this.nickname = nickname
                 this.profileImageUrl = ""
                 this.realname = realname
-                this.role = Role.USER
+                this.role = Role.ROLE_USER
                 this.dailyHeartCount = 0
                 this.lastHeartResetDate = LocalDate.now()
             }

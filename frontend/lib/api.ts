@@ -188,7 +188,7 @@ export async function apiRequest<T>(
     const initialResponse = await executeRequest<T>(url, options)
     const shouldTryRefresh =
       initialResponse.status === 401 &&
-      (initialResponse.errorCode === "S-001" || initialResponse.errorCode === "U-001") &&
+      initialResponse.errorCode === "S-001" &&
       url !== API_ENDPOINTS.login &&
       url !== API_ENDPOINTS.register &&
       url !== API_ENDPOINTS.emailLogin &&
