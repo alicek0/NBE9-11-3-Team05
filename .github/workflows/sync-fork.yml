@@ -18,5 +18,5 @@ jobs:
       - name: Push to personal fork
         run: |
           git remote add fork https://x-access-token:${{ secrets.FORK_SYNC_TOKEN }}@github.com/alicek0/NBE9-11-3-Team05.git
-
+          git ls-remote fork
           git push fork main --force
