@@ -4,9 +4,9 @@ import com.team05.petmeeting.global.exception.ErrorCode
 import org.springframework.http.HttpStatus
 
 enum class UserErrorCode(
-    private val status: HttpStatus,
-    private val code: String,
-    private val message: String
+    override val status: HttpStatus,
+    override val code: String,
+    override val message: String
 ) : ErrorCode {
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "U-001", "로그인이 필요한 서비스입니다."),
     LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "U-002", "로그인에 실패했습니다."),
@@ -21,9 +21,4 @@ enum class UserErrorCode(
     INVALID_OTP(HttpStatus.BAD_REQUEST, "U-011", "잘못된 코드입니다. 코드를 다시 확인해주세요."),
     INVALID_VERIFICATION_TOKEN(HttpStatus.BAD_REQUEST, "U-012", "잘못된 검증 코드입니다."),
     ALREADY_REGISTERED_EMAIL(HttpStatus.BAD_REQUEST, "U-013", "이미 가입된 사용자입니다.");
-
-    // Todo: 향후 ErrorCode 수정 후 변경 고려
-    override fun getStatus(): HttpStatus = status
-    override fun getCode(): String = code
-    override fun getMessage(): String = message
 }

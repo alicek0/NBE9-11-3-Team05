@@ -122,7 +122,7 @@ class CampaignServiceTest {
             BusinessException::class.java,
             Executable { campaignService!!.createCampaign(shelterId!!, otherUserId!!, req) }
         )
-        AssertionsForClassTypes.assertThat<ErrorCode?>(ex.getErrorCode())
+        AssertionsForClassTypes.assertThat<ErrorCode?>(ex.errorCode)
             .isEqualTo(CampaignErrorCode.UNAUTHORIZED_SHELTER)
     }
 
@@ -136,7 +136,7 @@ class CampaignServiceTest {
             BusinessException::class.java,
             Executable { campaignService!!.createCampaign(shelterId!!, userId!!, req) }
         )
-        AssertionsForClassTypes.assertThat<ErrorCode?>(ex.getErrorCode())
+        AssertionsForClassTypes.assertThat<ErrorCode?>(ex.errorCode)
             .isEqualTo(CampaignErrorCode.CAMPAIGN_ALREADY_EXISTS)
     }
 
@@ -161,7 +161,7 @@ class CampaignServiceTest {
             BusinessException::class.java,
             Executable { campaignService!!.closeCampaign(userId!!, created.id) }
         )
-        AssertionsForClassTypes.assertThat<ErrorCode?>(ex.getErrorCode()).isEqualTo(CampaignErrorCode.CAMPAIGN_CLOSED)
+        AssertionsForClassTypes.assertThat<ErrorCode?>(ex.errorCode).isEqualTo(CampaignErrorCode.CAMPAIGN_CLOSED)
     }
 
     // 캠페인 종료 실패 - 권한 없는 유저 (CA-004)
@@ -174,7 +174,7 @@ class CampaignServiceTest {
             BusinessException::class.java,
             Executable { campaignService!!.closeCampaign(otherUserId!!, created.id) }
         )
-        AssertionsForClassTypes.assertThat<ErrorCode?>(ex.getErrorCode())
+        AssertionsForClassTypes.assertThat<ErrorCode?>(ex.errorCode)
             .isEqualTo(CampaignErrorCode.UNAUTHORIZED_SHELTER)
     }
 
@@ -185,7 +185,7 @@ class CampaignServiceTest {
             BusinessException::class.java,
             Executable { campaignService!!.closeCampaign(userId!!, 999L) }
         )
-        AssertionsForClassTypes.assertThat<ErrorCode?>(ex.getErrorCode())
+        AssertionsForClassTypes.assertThat<ErrorCode?>(ex.errorCode)
             .isEqualTo(CampaignErrorCode.CAMPAIGN_NOT_FOUND)
     }
 }

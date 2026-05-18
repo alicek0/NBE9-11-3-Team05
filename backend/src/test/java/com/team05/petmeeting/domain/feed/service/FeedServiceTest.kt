@@ -111,7 +111,7 @@ internal class FeedServiceTest {
 
         assertThatThrownBy { feedService.write(req, user) }
             .isInstanceOf(BusinessException::class.java)
-            .extracting { (it as BusinessException).getErrorCode() }
+            .extracting { (it as BusinessException).errorCode }
             .isEqualTo(FeedErrorCode.ANIMAL_REQUIRED)
     }
 
@@ -125,7 +125,7 @@ internal class FeedServiceTest {
 
         assertThatThrownBy { feedService.write(req, user) }
             .isInstanceOf(BusinessException::class.java)
-            .extracting { (it as BusinessException).getErrorCode() }
+            .extracting { (it as BusinessException).errorCode }
             .isEqualTo(AnimalErrorCode.ANIMAL_NOT_FOUND)
     }
 
@@ -147,7 +147,7 @@ internal class FeedServiceTest {
 
         assertThatThrownBy { feedService.write(req, user) }
             .isInstanceOf(BusinessException::class.java)
-            .extracting { (it as BusinessException).getErrorCode() }
+            .extracting { (it as BusinessException).errorCode }
             .isEqualTo(FeedErrorCode.NOT_ADOPTED_ANIMAL)
     }
 
@@ -200,7 +200,7 @@ internal class FeedServiceTest {
 
         assertThatThrownBy { feedService.modify(feedId, req, user) }
             .isInstanceOf(BusinessException::class.java)
-            .extracting { (it as BusinessException).getErrorCode() }
+            .extracting { (it as BusinessException).errorCode }
             .isEqualTo(FeedErrorCode.FEED_NOT_FOUND)
     }
 
@@ -217,7 +217,7 @@ internal class FeedServiceTest {
 
         assertThatThrownBy { feedService.modify(feedId, req, user) }
             .isInstanceOf(BusinessException::class.java)
-            .extracting { (it as BusinessException).getErrorCode() }
+            .extracting { (it as BusinessException).errorCode }
             .isEqualTo(FeedErrorCode.FORBIDDEN)
     }
 
@@ -243,7 +243,7 @@ internal class FeedServiceTest {
 
         assertThatThrownBy { feedService.delete(feedId, user) }
             .isInstanceOf(BusinessException::class.java)
-            .extracting { (it as BusinessException).getErrorCode() }
+            .extracting { (it as BusinessException).errorCode }
             .isEqualTo(FeedErrorCode.FEED_NOT_FOUND)
     }
 
@@ -259,7 +259,7 @@ internal class FeedServiceTest {
 
         assertThatThrownBy { feedService.delete(feedId, user) }
             .isInstanceOf(BusinessException::class.java)
-            .extracting { (it as BusinessException).getErrorCode() }
+            .extracting { (it as BusinessException).errorCode }
             .isEqualTo(FeedErrorCode.FORBIDDEN)
     }
 
@@ -287,7 +287,7 @@ internal class FeedServiceTest {
 
         assertThatThrownBy { feedService.getFeed(feedId) }
             .isInstanceOf(BusinessException::class.java)
-            .extracting { (it as BusinessException).getErrorCode() }
+            .extracting { (it as BusinessException).errorCode }
             .isEqualTo(FeedErrorCode.FEED_NOT_FOUND)
     }
 
