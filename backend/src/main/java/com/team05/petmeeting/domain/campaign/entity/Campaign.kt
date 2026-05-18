@@ -5,10 +5,6 @@ import com.team05.petmeeting.domain.shelter.entity.Shelter
 import com.team05.petmeeting.global.entity.BaseEntity
 import jakarta.persistence.*
 
-import jakarta.persistence.*
-
-import jakarta.persistence.*
-
 @Entity
 @Table(name = "campaigns")
 class Campaign(
