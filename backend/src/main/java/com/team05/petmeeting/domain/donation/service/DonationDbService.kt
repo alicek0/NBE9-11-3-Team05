@@ -44,8 +44,17 @@ class DonationDbService(
 
     @Transactional
     fun completeDonation(paymentId: String, paidAmount: Int, isPaid: Boolean): CompleteRes {
-        val donation = donationRepository.findByPaymentId(paymentId)
+        val donation = donationRepository.findByPaymentIdForUpdate(paymentId)
             ?: throw BusinessException(DonationErrorCode.PAYMENT_NOT_FOUND)
+
+        if (donation.status == DonationStatus.PAID) {  // 웹훅 중복 처리 방지
+            return CompleteRes(
+                id = donation.id!!,
+                amount = donation.amount,
+                status = donation.status,
+                campaignId = donation.campaign.id!!
+            )
+        }
 
         if (!isPaid) {
             donation.fail()
@@ -76,8 +85,12 @@ class DonationDbService(
 
     @Transactional
     fun processWebhookDonation(paymentId: String, paidAmount: Int) {
-        val donation = donationRepository.findByPaymentId(paymentId)
+        val donation = donationRepository.findByPaymentIdForUpdate(paymentId)
             ?: throw BusinessException(DonationErrorCode.DONATION_NOT_FOUND)
+
+        if (donation.status == DonationStatus.PAID) {
+            return // UI가 해결했으면 웹훅 무시
+        }
 
         if (paidAmount != donation.amount) {
             donation.fail()

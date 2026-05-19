@@ -115,7 +115,7 @@ class DonationDbServiceTest {
     @DisplayName("결제 완료 성공")
     fun completeDonation_success() {
         val donation = mockDonation(10000)
-        whenever(donationRepository.findByPaymentId("donate-123")).thenReturn(donation)
+        whenever(donationRepository.findByPaymentIdForUpdate("donate-123")).thenReturn(donation)
 
         val result = donationDbService.completeDonation("donate-123", 10000, true)
 
@@ -130,7 +130,7 @@ class DonationDbServiceTest {
     @DisplayName("결제 완료 실패 - 결제 안 됨")
     fun completeDonation_fail_notPaid() {
         val donation = mockDonation()
-        whenever(donationRepository.findByPaymentId("donate-123")).thenReturn(donation)
+        whenever(donationRepository.findByPaymentIdForUpdate("donate-123")).thenReturn(donation)
 
         assertThrows<BusinessException> {
             donationDbService.completeDonation("donate-123", 10000, false)
@@ -145,7 +145,7 @@ class DonationDbServiceTest {
     @DisplayName("결제 완료 실패 - 금액 불일치")
     fun completeDonation_fail_amountMismatch() {
         val donation = mockDonation(10000)
-        whenever(donationRepository.findByPaymentId("donate-123")).thenReturn(donation)
+        whenever(donationRepository.findByPaymentIdForUpdate("donate-123")).thenReturn(donation)
 
         assertThrows<BusinessException> {
             donationDbService.completeDonation("donate-123", 5000, true)
@@ -159,7 +159,7 @@ class DonationDbServiceTest {
     @Test
     @DisplayName("결제 완료 실패 - 후원 내역 없음")
     fun completeDonation_fail_donationNotFound() {
-        whenever(donationRepository.findByPaymentId("donate-999")).thenReturn(null)
+        whenever(donationRepository.findByPaymentIdForUpdate("donate-999")).thenReturn(null)
 
         assertThrows<BusinessException> {
             donationDbService.completeDonation("donate-999", 10000, true)
@@ -174,7 +174,7 @@ class DonationDbServiceTest {
     @DisplayName("웹훅 처리 성공")
     fun processWebhookDonation_success() {
         val donation = mockDonation(10000)
-        whenever(donationRepository.findByPaymentId("donate-123")).thenReturn(donation)
+        whenever(donationRepository.findByPaymentIdForUpdate("donate-123")).thenReturn(donation)
 
         donationDbService.processWebhookDonation("donate-123", 10000)
 
@@ -187,7 +187,7 @@ class DonationDbServiceTest {
     @DisplayName("웹훅 처리 - 금액 불일치시 fail 처리")
     fun processWebhookDonation_amountMismatch() {
         val donation = mockDonation(10000)
-        whenever(donationRepository.findByPaymentId("donate-123")).thenReturn(donation)
+        whenever(donationRepository.findByPaymentIdForUpdate("donate-123")).thenReturn(donation)
 
         donationDbService.processWebhookDonation("donate-123", 5000)
 
@@ -198,7 +198,7 @@ class DonationDbServiceTest {
     @Test
     @DisplayName("웹훅 처리 실패 - 후원 내역 없음")
     fun processWebhookDonation_fail_donationNotFound() {
-        whenever(donationRepository.findByPaymentId("donate-999")).thenReturn(null)
+        whenever(donationRepository.findByPaymentIdForUpdate("donate-999")).thenReturn(null)
 
         assertThrows<BusinessException> {
             donationDbService.processWebhookDonation("donate-999", 10000)

@@ -26,9 +26,6 @@ class Campaign(
     @Enumerated(EnumType.STRING)
     var status: CampaignStatus = CampaignStatus.ACTIVE
 
-    @Version
-    var version: Long? = null
-
     protected constructor() : this(
         shelter = UNINITIALIZED_SHELTER,
         title = "",
