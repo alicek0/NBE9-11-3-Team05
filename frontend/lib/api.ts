@@ -53,6 +53,7 @@ export const API_ENDPOINTS = {
     `${API_BASE_URL}/adoptions/${applicationId}`,
   // Animals
   animals: `${API_BASE_URL}/animals`,
+  animalKinds: `${API_BASE_URL}/animals/kinds`,
   animalDetail: (id: number) => `${API_BASE_URL}/animals/${id}`,
   animalRanking: `${API_BASE_URL}/animals/ranking`,
 

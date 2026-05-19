@@ -1,5 +1,6 @@
 package com.team05.petmeeting.domain.animal.repository
 
+import com.querydsl.core.Tuple
 import com.querydsl.core.types.Expression
 import com.querydsl.core.types.Order
 import com.querydsl.core.types.OrderSpecifier
@@ -21,6 +22,7 @@ class AnimalRepositoryImpl(
     override fun findAnimalsWithFilter(
         region: String?,
         kind: String?,
+        kindFullNm: String?,
         stateGroup: Int?,
         pageable: Pageable
     ): Page<Animal> {
@@ -29,9 +31,10 @@ class AnimalRepositoryImpl(
         val content = queryFactory
             .selectFrom(animal)
             .where(
+                stateGroupEq(stateGroup),
+                kindFullNmEq(kindFullNm),
                 regionStartsWith(region),
-                kindEq(kind),
-                stateGroupEq(stateGroup)
+                kindEq(kind)
             )
             .offset(pageable.offset) // 페이지 시작위치
             .limit(pageable.pageSize.toLong()) // 페이지 사이즈
@@ -43,9 +46,10 @@ class AnimalRepositoryImpl(
             .select(animal.count())
             .from(animal)
             .where(
+                stateGroupEq(stateGroup),
+                kindFullNmEq(kindFullNm),
                 regionStartsWith(region),
-                kindEq(kind),
-                stateGroupEq(stateGroup)
+                kindEq(kind)
             )
             .fetchOne() // 쿼리 실행결과 -> 단일 객체
 
@@ -67,10 +71,24 @@ class AnimalRepositoryImpl(
         }.toList().toTypedArray()
     }
 
+    override fun findDistinctKindFullNames(): List<Tuple> {
+        return queryFactory
+            .select(animal.upKindNm, animal.kindFullNm)
+            .from(animal)
+            .where(
+                animal.upKindNm.isNotNull,
+                animal.kindFullNm.isNotNull
+            )
+            .distinct()
+            .fetch()
+    }
 
     // null 처리하는 동적 메서드
     // contains -> LIKE '%경남%' | startsWith -> LIKE '경남%'
     // 공고번호(noticeNo)의 앞부분이 지역명으로 시작하는 API 특성을 활용하여 지역 필터링 | 경남-진주-2024-00124
+    private fun kindFullNmEq(kindFullNm: String?): BooleanExpression? =
+        if (StringUtils.hasText(kindFullNm)) animal.kindFullNm.eq(kindFullNm) else null
+
     private fun regionStartsWith(region: String?): BooleanExpression? =
         if (StringUtils.hasText(region)) animal.noticeNo.startsWith(region) else null
 
@@ -79,4 +97,5 @@ class AnimalRepositoryImpl(
 
     private fun stateGroupEq(stateGroup: Int?): BooleanExpression? =
         stateGroup?.let { animal.stateGroup.eq(it) }
+
 }

@@ -17,12 +17,7 @@ import com.team05.petmeeting.domain.shelter.service.ShelterService
 import com.team05.petmeeting.global.exception.BusinessException
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.time.DateTimeException
-import java.time.Duration
-import java.time.Instant
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
+import java.time.*
 import java.time.format.DateTimeFormatterBuilder
 import java.time.temporal.ChronoField
 
@@ -34,6 +29,7 @@ class AnimalSyncService(
     private val shelterRepository: ShelterRepository,
     private val shelterService: ShelterService,
     private val animalSyncProperties: AnimalSyncProperties,
+    private val animalService: AnimalService,
 ) {
     private data class SyncPageResult(
         val message: String,
@@ -48,6 +44,10 @@ class AnimalSyncService(
 
         try {
             val result = fetchAndInsertAnimals(pageNo, numOfRows, null, null, Int.MAX_VALUE)
+
+            // 단일 페이지 적재 성공 후 캐시 리프레시
+            animalService.initKindCache()
+
             log.info(
                 "Animal sync completed: pageNo={}, numOfRows={}, savedCount={}, elapsedMs={}",
                 pageNo,
@@ -73,6 +73,9 @@ class AnimalSyncService(
             val savedCount = fetchAndSaveMonthlyAnimalsFromStartDate(numOfRows, Int.MAX_VALUE)
             // 모든 월별 적재가 정상 종료된 뒤에만 최초 적재 성공 시각을 갱신한다.
             updateSyncState(AnimalSyncType.INITIAL)
+
+            // 최초 대용량 적재 완료 후 캐시 리프레시
+            animalService.initKindCache()
 
             val elapsedMs = elapsedMs(startedAt)
             log.info(
@@ -103,6 +106,9 @@ class AnimalSyncService(
             val savedCount = fetchAndSaveAnimalsByUpdatedDate(bgupd, enupd, numOfRows)
             // 업데이트 반영이 끝난 경우에만 다음 업데이트 기준 시각을 갱신한다.
             updateSyncState(AnimalSyncType.UPDATE)
+
+            // 정기 업데이트 반영 완료 후 캐시 리프레시
+            animalService.initKindCache()
 
             val elapsedMs = elapsedMs(startedAt)
             log.info(

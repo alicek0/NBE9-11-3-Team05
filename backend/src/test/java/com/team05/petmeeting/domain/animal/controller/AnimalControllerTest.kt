@@ -46,7 +46,7 @@ internal class AnimalControllerTest {
         .noticeNo("공고-1")
         .noticeEdt(LocalDate.now())
         .upKindNm("개")
-        .kindFullNm("[개] 믹스견")
+        .kindFullNm("믹스견")
         .colorCd("흰색")
         .age("2023(년생)")
         .weight("5kg")
@@ -77,6 +77,7 @@ internal class AnimalControllerTest {
             animalService.getAnimals(
                 "서울",
                 "개",
+                "믹스견",
                 0,
                 pageable
                 )
@@ -87,13 +88,14 @@ internal class AnimalControllerTest {
             MockMvcRequestBuilders.get("/api/v1/animals")
                 .param("region", "서울")
                 .param("kind", "개")
+                .param("kindFullNm", "믹스견")
                 .param("stateGroup", "0")
                 .param("page", "0")
                 .param("size", "12")
         )
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.jsonPath("$.content[0].desertionNo").value("12345"))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.content[0].kindFullNm").value("[개] 믹스견"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.content[0].kindFullNm").value("믹스견"))
             .andExpect(MockMvcResultMatchers.jsonPath("$.totalElements").value(1))
             .andDo(MockMvcResultHandlers.print())
     }
@@ -112,7 +114,7 @@ internal class AnimalControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/animals/{animalId}", animalId))
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.jsonPath("$.desertionNo").value("12345"))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.kindFullNm").value("[개] 믹스견"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.kindFullNm").value("믹스견"))
             .andExpect(MockMvcResultMatchers.jsonPath("$.totalCheerCount").value(10))
             .andDo(MockMvcResultHandlers.print())
     }

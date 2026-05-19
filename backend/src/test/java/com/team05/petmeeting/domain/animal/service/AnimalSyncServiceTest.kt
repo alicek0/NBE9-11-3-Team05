@@ -2,11 +2,7 @@ package com.team05.petmeeting.domain.animal.service
 
 import com.team05.petmeeting.domain.animal.config.AnimalSyncProperties
 import com.team05.petmeeting.domain.animal.dto.AnimalSyncRes
-import com.team05.petmeeting.domain.animal.dto.external.AnimalApiResponse
-import com.team05.petmeeting.domain.animal.dto.external.AnimalBody
-import com.team05.petmeeting.domain.animal.dto.external.AnimalItem
-import com.team05.petmeeting.domain.animal.dto.external.AnimalItems
-import com.team05.petmeeting.domain.animal.dto.external.AnimalResponse
+import com.team05.petmeeting.domain.animal.dto.external.*
 import com.team05.petmeeting.domain.animal.entity.Animal
 import com.team05.petmeeting.domain.animal.entity.AnimalSyncType
 import com.team05.petmeeting.domain.animal.entity.SyncState
@@ -24,22 +20,16 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.any
-import org.mockito.ArgumentMatchers.anyInt
-import org.mockito.ArgumentMatchers.anyList
-import org.mockito.ArgumentMatchers.eq
+import org.mockito.ArgumentMatchers.*
 import org.mockito.InjectMocks
 import org.mockito.Mock
-import org.mockito.Mockito.never
-import org.mockito.Mockito.times
-import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when`
-import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.Mockito.*
 import org.mockito.Spy
+import org.mockito.junit.jupiter.MockitoExtension
 import org.springframework.test.util.ReflectionTestUtils
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.Optional
+import java.util.*
 
 @ExtendWith(MockitoExtension::class)
 class AnimalSyncServiceTest {
@@ -61,6 +51,9 @@ class AnimalSyncServiceTest {
 
     @Mock
     private lateinit var shelterService: ShelterService
+
+    @Mock
+    private lateinit var animalService: AnimalService
 
     @Spy
     private var animalSyncProperties: AnimalSyncProperties = AnimalSyncProperties()

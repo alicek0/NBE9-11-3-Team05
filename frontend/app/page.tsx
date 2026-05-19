@@ -81,6 +81,26 @@ const REGION_OPTIONS = [
 const SPECIES_OPTIONS = ["전체", "개", "고양이", "기타"]
 const STATUS_OPTIONS = ["보호중", "종료"]
 type SortOption = "noticeEndDate" | "cheerCount"
+type KindMap = Record<string, string[]>
+
+const parseKindMap = (payload: unknown): KindMap => {
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) return {}
+
+  const response = payload as Record<string, unknown>
+  if (response.data && typeof response.data === "object" && !Array.isArray(response.data)) {
+    return parseKindMap(response.data)
+  }
+
+  const result: KindMap = {}
+  for (const [key, value] of Object.entries(response)) {
+    if (Array.isArray(value)) {
+      result[key] = value.filter(
+        (item): item is string => typeof item === "string" && item.trim().length > 0
+      )
+    }
+  }
+  return result
+}
 
 const parseAnimalList = (payload: unknown): AnimalListItem[] => {
   if (!payload) return []
@@ -150,7 +170,9 @@ export default function SocialFeedPage() {
   const [totalAnimalCount, setTotalAnimalCount] = useState(0)
   const [selectedRegion, setSelectedRegion] = useState("전체")
   const [selectedSpecies, setSelectedSpecies] = useState("전체")
+  const [selectedKind, setSelectedKind] = useState("전체")
   const [selectedStatus, setSelectedStatus] = useState("보호중")
+  const [kindMap, setKindMap] = useState<KindMap>({})
   const [sortOption, setSortOption] = useState<SortOption>("noticeEndDate")
   const [top3Animals, setTop3Animals] = useState<Top3Animal[]>([])
 
@@ -244,6 +266,10 @@ export default function SocialFeedPage() {
       queryParams.set("kind", selectedSpecies)
     }
 
+    if (selectedKind !== "전체") {
+      queryParams.set("kindFullNm", selectedKind)
+    }
+
     if (sortOption === "cheerCount") {
       queryParams.set("sort", "totalCheerCount,DESC")
     }
@@ -291,11 +317,26 @@ export default function SocialFeedPage() {
 
   useEffect(() => {
     fetchAnimals(currentPage)
-  }, [currentPage, selectedRegion, selectedSpecies, selectedStatus, sortOption])
+  }, [currentPage, selectedRegion, selectedSpecies, selectedKind, selectedStatus, sortOption])
 
   useEffect(() => {
     setCurrentPage(1)
-  }, [selectedRegion, selectedSpecies, selectedStatus, sortOption])
+  }, [selectedRegion, selectedSpecies, selectedKind, selectedStatus, sortOption])
+
+  useEffect(() => {
+    let cancelled = false
+
+    const fetchKindMap = async () => {
+      const { data, error } = await apiRequest<unknown>(API_ENDPOINTS.animalKinds)
+      if (cancelled || error) return
+      setKindMap(parseKindMap(data))
+    }
+
+    fetchKindMap()
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   useEffect(() => {
     fetchTop3Animals()
@@ -305,6 +346,21 @@ export default function SocialFeedPage() {
     setCurrentPage(page)
     window.scrollTo({ top: 600, behavior: "smooth" })
   }
+
+  const isSpeciesSelected = selectedSpecies !== "전체"
+  const isKindSelectDisabled = !isSpeciesSelected
+  const availableKindOptions = isSpeciesSelected ? (kindMap[selectedSpecies] ?? []) : []
+
+  const handleSpeciesChange = (species: string) => {
+    setSelectedSpecies(species)
+    setSelectedKind("전체")
+  }
+
+  const isClosedStatus = selectedStatus === "종료"
+  const sectionTitle = isClosedStatus ? "보호 종료 동물" : "전체 보호동물"
+  const sectionSubtitle = isClosedStatus
+    ? `따뜻한 관심으로 기억해야 할 총 ${totalAnimalCount}마리의 친구들이에요`
+    : `총 ${totalAnimalCount}마리의 친구들이 가족을 기다리고 있어요`
 
   return (
     <div className="min-h-screen bg-background">
@@ -320,16 +376,16 @@ export default function SocialFeedPage() {
         <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
           <div>
             <h2 className="text-lg md:text-xl font-bold text-foreground">
-              전체 보호동물
+              {sectionTitle}
             </h2>
             <p className="text-xs md:text-sm text-muted-foreground mt-1">
-              총 {totalAnimalCount}마리의 친구들이 가족을 기다리고 있어요
+              {sectionSubtitle}
             </p>
           </div>
           <div className="w-full sm:w-auto sm:ml-auto flex flex-col sm:flex-row gap-2 sm:gap-3 sm:justify-end">
             <div className="flex items-center gap-2 rounded-xl border border-border bg-card px-3 py-2">
               <Filter className="w-4 h-4 text-muted-foreground shrink-0" />
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-2 w-full sm:w-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-2 w-full sm:w-auto">
                 <div className="flex items-center gap-1.5">
                   <span className="text-xs font-medium text-muted-foreground shrink-0">지역</span>
                   <Select value={selectedRegion} onValueChange={setSelectedRegion}>
@@ -348,7 +404,7 @@ export default function SocialFeedPage() {
 
                 <div className="flex items-center gap-1.5">
                   <span className="text-xs font-medium text-muted-foreground shrink-0">종</span>
-                  <Select value={selectedSpecies} onValueChange={setSelectedSpecies}>
+                  <Select value={selectedSpecies} onValueChange={handleSpeciesChange}>
                     <SelectTrigger className="h-9 rounded-lg border-border bg-background px-2">
                       <SelectValue placeholder="축종" />
                     </SelectTrigger>
@@ -360,6 +416,29 @@ export default function SocialFeedPage() {
                       ))}
                     </SelectContent>
                   </Select>
+                </div>
+
+                <div className="flex min-w-0 items-center gap-1.5">
+                  <span className="text-xs font-medium text-muted-foreground shrink-0">품종</span>
+                  <div className="min-w-0 max-w-[190px] w-[190px]">
+                  <Select
+                      value={selectedKind}
+                      onValueChange={setSelectedKind}
+                      disabled={isKindSelectDisabled}
+                    >
+                    <SelectTrigger className="h-9 w-full min-w-0 max-w-[190px] overflow-hidden rounded-lg border-border bg-background px-2 [&_[data-slot=select-value]]:block [&_[data-slot=select-value]]:truncate">
+                      <SelectValue placeholder="품종" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-60 overflow-y-auto">
+                      <SelectItem value="전체">전체</SelectItem>
+                      {availableKindOptions.map((kind) => (
+                        <SelectItem key={kind} value={kind}>
+                          {kind}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-1.5">

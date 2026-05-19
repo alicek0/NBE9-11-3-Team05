@@ -73,7 +73,7 @@ internal class AnimalRepositoryTest {
         val pageable: Pageable = PageRequest.of(0, 10)
 
         // when
-        val result: Page<Animal> = animalRepository.findAnimalsWithFilter(region, null, null, pageable)
+        val result: Page<Animal> = animalRepository.findAnimalsWithFilter(region, null, null, null, pageable)
 
         // then
         Assertions.assertThat(result.getContent()).hasSize(2)
@@ -89,7 +89,7 @@ internal class AnimalRepositoryTest {
         val pageable: Pageable = PageRequest.of(0, 10)
 
         // when
-        val result: Page<Animal> = animalRepository.findAnimalsWithFilter(null, kind, null, pageable)
+        val result: Page<Animal> = animalRepository.findAnimalsWithFilter(null, kind, null, null, pageable)
 
         // then
         Assertions.assertThat(result.getContent()).hasSize(1)
@@ -104,7 +104,7 @@ internal class AnimalRepositoryTest {
         val pageable: Pageable = PageRequest.of(0, 10)
 
         // when
-        val result: Page<Animal> = animalRepository.findAnimalsWithFilter(null, null, stateGroup, pageable)
+        val result: Page<Animal> = animalRepository.findAnimalsWithFilter(null, null, null, stateGroup, pageable)
 
         // then
         Assertions.assertThat(result.getContent()).hasSize(1)
@@ -119,7 +119,7 @@ internal class AnimalRepositoryTest {
         val pageable: Pageable = PageRequest.of(0, 2, Sort.by(Sort.Direction.DESC, "totalCheerCount"))
 
         // when
-        val result: Page<Animal> = animalRepository.findAnimalsWithFilter(null, null, null, pageable)
+        val result: Page<Animal> = animalRepository.findAnimalsWithFilter(null, null, null, null, pageable)
 
         // then
         Assertions.assertThat(result.getContent()).hasSize(2)

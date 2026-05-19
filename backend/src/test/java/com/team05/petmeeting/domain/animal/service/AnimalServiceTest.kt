@@ -89,6 +89,7 @@ internal class AnimalServiceTest {
             animalRepository.findAnimalsWithFilter(
                 "서울",
                 "개",
+                "닥스훈트",
                 0,
                 pageable
             )
@@ -96,7 +97,7 @@ internal class AnimalServiceTest {
             .willReturn(animalPage)
 
         // when
-        val result: Page<AnimalRes> = animalService.getAnimals("서울", "개", 0, pageable)
+        val result: Page<AnimalRes> = animalService.getAnimals("서울", "개", "닥스훈트", 0, pageable)
 
         // then
         Assertions.assertThat(result.getContent()).hasSize(1)
@@ -117,6 +118,7 @@ internal class AnimalServiceTest {
         // 실행 및 검증
         Assertions.assertThatThrownBy(ThrowableAssert.ThrowingCallable {
             animalService.getAnimals(
+                null,
                 null,
                 null,
                 null,

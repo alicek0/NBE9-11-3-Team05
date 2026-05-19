@@ -36,10 +36,11 @@ class AnimalController(
     fun animalList(
         @RequestParam(required = false) region: String?,
         @RequestParam(required = false) kind: String?,
+        @RequestParam(required = false) kindFullNm: String?,
         @RequestParam(required = false) stateGroup: Int?,
         @PageableDefault(page = 0, size = DEFAULT_PAGE_SIZE, sort = ["noticeEdt"], direction = Sort.Direction.ASC) pageable: Pageable
     ): ResponseEntity<PageResBody<AnimalRes>> {
-        val page: Page<AnimalRes> = animalService.getAnimals(region, kind, stateGroup, pageable)
+        val page: Page<AnimalRes> = animalService.getAnimals(region, kind, kindFullNm, stateGroup, pageable)
 
         val response = PageResBody(
             content = page.content,  // 현재 페이지에 해당하는 List<AnimalRes>
@@ -61,5 +62,12 @@ class AnimalController(
         val animal = animalService.findByAnimalId(animalId)
         val response = AnimalRes(animal)
         return ResponseEntity.ok(response)
+    }
+
+    @GetMapping("/kinds")
+    @Operation(summary = "드롭다운 채우기용 품종 목록 조회", description = "DB를 조회하지 않고 서버 메모리(캐시)에서 즉시 반환합니다.")
+    fun getAnimalKinds(): ResponseEntity<Map<String, List<String>>> {
+        val kindMap = animalService.getKindFullNames()
+        return ResponseEntity.ok(kindMap)
     }
 }
