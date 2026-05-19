@@ -126,7 +126,7 @@
 
   ## 시스템 구성도
 
-<img width="1618" height="972" alt="image" src="https://github.com/user-attachments/assets/82b79f74-c840-4780-8262-a6439c0d1c49" />
+<img width="1618" height="972" alt="image" src="https://github.com/user-attachments/assets/4c03e775-e73b-41d2-8157-7a325d91ad43" />
 
 
 
