@@ -16,11 +16,11 @@
 
   | 이름 | 담당 |
   | --- | --- |
-  |  |  |
-  |  |  |
-  |  |  |
-  |  |  |
-  |  |  |
+  | 윤지웅 | 팀장 / 회원 / 인증 파트 담당 |
+  | 강민경 | 프론트엔드 리드 / 노션 관리 / 댓글 / 보호소 캠페인 / 회원 프로필 / 결제 / 공통 업무 파트 담당 |
+  | 최준 | 서기 / 유기동물 조회 / 응원 하트 시스템 파트 담당 |
+  | 고주훈 | Git 관리자 / 소셜 피드 / 파트 Top N 동물 광고담당 |
+  | 서동건 | WBS 관리자 / 입양 신청 / 입양 관리 파트 담당/ DB 구축 |
 
   ## 기술 스택
 
@@ -57,7 +57,7 @@
 
 ### Test
 
-<img src="https://img.shields.io/badge/JUnit 5-25A162?style=for-the-badge&logo=junit5&logoColor=white"> <img src="https://img.shields.io/badge/Mockito-78A641?style=for-the-badge&logoColor=white">
+<img src="https://img.shields.io/badge/JUnit 5-25A162?style=for-the-badge&logo=junit5&logoColor=white"> <img src="https://img.shields.io/badge/Mockito-78A641?style=for-the-badge&logoColor=white"> <img src="https://img.shields.io/badge/k6-7D64FF?style=for-the-badge&logo=k6&logoColor=white">
 
  ## 주요 기능
 
@@ -123,6 +123,12 @@
   └── infra
       └── s3
   ```
+
+  ## 시스템 구성도
+
+### 임시
+<img width="1774" height="887" alt="B77E3459-CD1F-47D1-9CC6-99BD657460EC" src="https://github.com/user-attachments/assets/c235fa6a-be5b-4f01-92b6-4bcffc2a97da" />
+
 
   ## 주요 API
 
@@ -193,5 +199,8 @@
 
 
   ## ERD
+  ### 임시
+
+  <img width="1155" height="865" alt="5조_ERD" src="https://github.com/user-attachments/assets/b8896c48-c1d8-48b3-a304-8b1c56f27c2a" />
 
 
