@@ -4,6 +4,7 @@ import com.team05.petmeeting.domain.ads.dto.AdsPostRequestRes
 import com.team05.petmeeting.domain.ads.dto.AdsPostReviewReq
 import com.team05.petmeeting.domain.ads.service.AdsAdminService
 import com.team05.petmeeting.global.security.userdetails.CustomUserDetails
+import jakarta.validation.Valid
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
@@ -37,7 +38,7 @@ class AdsAdminController(
         @AuthenticationPrincipal userDetails: CustomUserDetails,
         @PathVariable careRegNo: String,
         @PathVariable requestId: Long,
-        @RequestBody request: AdsPostReviewReq,
+        @Valid @RequestBody request: AdsPostReviewReq,
     ): AdsPostRequestRes =
         adsAdminService.reviewRequest(userDetails.userId, careRegNo, requestId, request)
 }

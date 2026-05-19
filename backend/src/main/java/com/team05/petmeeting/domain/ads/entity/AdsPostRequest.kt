@@ -76,11 +76,11 @@ class AdsPostRequest protected constructor() : BaseEntity() {
         publishedAt = LocalDateTime.now()
     }
 
-    fun reject(rejectionReason: String) {
+    fun reject(rejectionReason: String?) {
         status = AdsPostStatus.Rejected
         reviewedAt = LocalDateTime.now()
         publishedAt = null
-        this.rejectionReason = rejectionReason
+        this.rejectionReason = rejectionReason?.takeIf { it.isNotBlank() }
     }
 
     fun markProcessing() {
@@ -88,6 +88,11 @@ class AdsPostRequest protected constructor() : BaseEntity() {
         reviewedAt = null
         publishedAt = null
         rejectionReason = null
+    }
+
+    fun replaceCardNews(imageUrl: String, caption: String) {
+        this.imageUrl = imageUrl
+        this.caption = caption
     }
 
     companion object {

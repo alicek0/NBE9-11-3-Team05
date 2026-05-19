@@ -3,6 +3,7 @@ package com.team05.petmeeting.domain.ads.service
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.team05.petmeeting.domain.ads.client.InstagramClient
 import com.team05.petmeeting.domain.ads.dto.AdsPostReviewReq
+import com.team05.petmeeting.domain.ads.dto.CardNewsResult
 import com.team05.petmeeting.domain.ads.entity.AdsPostRequest
 import com.team05.petmeeting.domain.ads.entity.AdsPostStatus
 import com.team05.petmeeting.domain.ads.errorCode.AdsErrorCode
@@ -38,6 +39,9 @@ internal class AdsAdminServiceTest {
     @Mock
     private lateinit var instagramClient: InstagramClient
 
+    @Mock
+    private lateinit var cardNewsService: CardNewsService
+
     private lateinit var adsAdminService: AdsAdminService
 
     @BeforeEach
@@ -46,6 +50,7 @@ internal class AdsAdminServiceTest {
             adsPostRequestRepository,
             shelterRepository,
             instagramClient,
+            cardNewsService,
             ObjectMapper(),
         )
     }
@@ -84,8 +89,8 @@ internal class AdsAdminServiceTest {
     }
 
     @Test
-    @DisplayName("보호소 관리자가 광고 게시 요청을 거절하면 업로드하지 않는다")
-    fun reviewRequestRejectDoesNotPublishInstagram() {
+    @DisplayName("보호소 관리자가 광고 게시 요청을 거절하면 사유 없이 업로드하지 않는다")
+    fun reviewRequestRejectWithoutReasonDoesNotPublishInstagram() {
         val manager = createUser(1L)
         val shelter = createShelter(manager)
         val request = createRequest(10L, shelter)
@@ -99,11 +104,41 @@ internal class AdsAdminServiceTest {
             userId = 1L,
             careRegNo = "343447202600001",
             requestId = 10L,
-            reviewReq = AdsPostReviewReq(AdsPostStatus.Rejected, "문구 수정 필요"),
+            reviewReq = AdsPostReviewReq(AdsPostStatus.Rejected, null),
         )
 
         assertThat(response.status).isEqualTo(AdsPostStatus.Rejected)
-        assertThat(response.rejectionReason).isEqualTo("문구 수정 필요")
+        assertThat(response.rejectionReason).isNull()
+        Mockito.verifyNoInteractions(instagramClient)
+    }
+
+    @Test
+    @DisplayName("거절된 광고 게시 요청을 재생성하고 다시 검토중으로 변경한다")
+    fun reviewRequestMarkProcessing() {
+        val manager = createUser(1L)
+        val shelter = createShelter(manager)
+        val request = createRequest(10L, shelter)
+        request.reject("이전 거절 사유")
+
+        Mockito.`when`(shelterRepository.findById("343447202600001"))
+            .thenReturn(Optional.of(shelter))
+        Mockito.`when`(adsPostRequestRepository.findById(10L))
+            .thenReturn(Optional.of(request))
+        Mockito.`when`(cardNewsService.generateCardNews(request.animal))
+            .thenReturn(CardNewsResult("https://image-url.com/regenerated-card.png", "regenerated caption"))
+
+        val response = adsAdminService.reviewRequest(
+            userId = 1L,
+            careRegNo = "343447202600001",
+            requestId = 10L,
+            reviewReq = AdsPostReviewReq(AdsPostStatus.Processing, null),
+        )
+
+        assertThat(response.status).isEqualTo(AdsPostStatus.Processing)
+        assertThat(response.rejectionReason).isNull()
+        assertThat(response.imageUrl).isEqualTo("https://image-url.com/regenerated-card.png")
+        assertThat(response.caption).isEqualTo("regenerated caption")
+        assertThat(request.reviewedAt).isNull()
         Mockito.verifyNoInteractions(instagramClient)
     }
 

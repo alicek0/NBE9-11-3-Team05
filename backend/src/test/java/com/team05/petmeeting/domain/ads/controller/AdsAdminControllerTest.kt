@@ -135,7 +135,7 @@ internal class AdsAdminControllerTest {
     }
 
     @Test
-    @DisplayName("보호소 관리자 광고 게시 요청 거절 성공")
+    @DisplayName("보호소 관리자 광고 게시 요청 사유 없이 거절 성공")
     fun reviewRequestReject() {
         whenever(
             adsAdminService.reviewRequest(
@@ -144,19 +144,50 @@ internal class AdsAdminControllerTest {
                 eq(REQUEST_ID),
                 any(),
             ),
-        ).thenReturn(createResponse(REQUEST_ID, AdsPostStatus.Rejected, "문구 수정 필요"))
+        ).thenReturn(createResponse(REQUEST_ID, AdsPostStatus.Rejected))
 
         mockMvc.perform(
             patch("/api/v1/ads/admin/shelters/{careRegNo}/requests/{requestId}/review", CARE_REG_NO, REQUEST_ID)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("""{"status":"Rejected","rejectionReason":"문구 수정 필요"}"""),
+                .content("""{"status":"Rejected"}"""),
         )
             .andExpect(handler().handlerType(AdsAdminController::class.java))
             .andExpect(handler().methodName("reviewRequest"))
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.requestId").value(REQUEST_ID))
             .andExpect(jsonPath("$.status").value("Rejected"))
-            .andExpect(jsonPath("$.rejectionReason").value("문구 수정 필요"))
+            .andExpect(jsonPath("$.rejectionReason").doesNotExist())
+
+        verify(adsAdminService).reviewRequest(
+            eq(USER_ID),
+            eq(CARE_REG_NO),
+            eq(REQUEST_ID),
+            any(),
+        )
+    }
+
+    @Test
+    @DisplayName("보호소 관리자 광고 게시 요청 재승인 요청 성공")
+    fun reviewRequestMarkProcessing() {
+        whenever(
+            adsAdminService.reviewRequest(
+                eq(USER_ID),
+                eq(CARE_REG_NO),
+                eq(REQUEST_ID),
+                any(),
+            ),
+        ).thenReturn(createResponse(REQUEST_ID, AdsPostStatus.Processing))
+
+        mockMvc.perform(
+            patch("/api/v1/ads/admin/shelters/{careRegNo}/requests/{requestId}/review", CARE_REG_NO, REQUEST_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"status":"Processing"}"""),
+        )
+            .andExpect(handler().handlerType(AdsAdminController::class.java))
+            .andExpect(handler().methodName("reviewRequest"))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.requestId").value(REQUEST_ID))
+            .andExpect(jsonPath("$.status").value("Processing"))
 
         verify(adsAdminService).reviewRequest(
             eq(USER_ID),
