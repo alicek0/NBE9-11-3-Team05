@@ -141,34 +141,7 @@ function CommunityPostCard({
   const [showUpdateModal, setShowUpdateModal] = useState(false)
   const [liked, setLiked] = useState(post.isLiked ?? false)
   const [likeCount, setLikeCount] = useState(post.likeCount)
-  const [showComments, setShowComments] = useState(false)
-  const [newComment, setNewComment] = useState("")
-  const [comments, setComments] = useState<any[]>([])
-  const [isSubmittingComment, setIsSubmittingComment] = useState(false)
-  const [commentCount, setCommentCount] = useState(post.commentCount ?? 0)
-  const [hasFetchedComments, setHasFetchedComments] = useState(false)
-  const [editingCommentId, setEditingCommentId] = useState<number | null>(null)
-  const [editContent, setEditContent] = useState("")
   const [animalInfoLabel, setAnimalInfoLabel] = useState("")
-
-  const fetchComments = async () => {
-    const { data } = await apiRequest<{ comments: any[]; totalCount?: number }>(API_ENDPOINTS.feedComments(post.feedId))
-    if (data?.comments) {
-      const sorted = data.comments.sort((a: any, b: any) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
-      setComments(sorted)
-      setCommentCount(data.totalCount ?? sorted.length)
-    } else {
-      setComments([])
-      setCommentCount(0)
-    }
-    setHasFetchedComments(true)
-  }
-
-  useEffect(() => {
-    if (showComments && !hasFetchedComments) {
-      fetchComments()
-    }
-  }, [showComments, hasFetchedComments])
 
   useEffect(() => {
     if (!post.animalId) {
@@ -209,55 +182,6 @@ function CommunityPostCard({
 
     setLikeCount(data.likeCount)
     setLiked(data.isLiked)
-  }
-
-  const handleCommentSubmit = async () => {
-    if (!user) {
-      alert("로그인이 필요합니다")
-      return
-    }
-    if (!newComment.trim() || isSubmittingComment) return
-
-    setIsSubmittingComment(true)
-    const { error } = await apiRequest(API_ENDPOINTS.feedComments(post.feedId), {
-      method: "POST",
-      body: JSON.stringify({ content: newComment })
-    })
-    setIsSubmittingComment(false)
-
-    if (error) {
-      alert("댓글 작성에 실패했습니다.")
-      return
-    }
-
-    setNewComment("")
-    fetchComments()
-  }
-
-  const handleCommentDelete = async (commentId: number) => {
-    if (!confirm("댓글을 정말 삭제하시겠습니까?")) return
-    const { error } = await apiRequest(API_ENDPOINTS.feedCommentDetail(post.feedId, commentId), {
-      method: "DELETE"
-    })
-    if (error) {
-      alert("댓글 삭제에 실패했습니다.")
-    } else {
-      fetchComments()
-    }
-  }
-
-  const handleCommentEditSubmit = async (commentId: number) => {
-    if (!editContent.trim()) return
-    const { error } = await apiRequest(API_ENDPOINTS.feedCommentDetail(post.feedId, commentId), {
-      method: "PATCH",
-      body: JSON.stringify({ content: editContent })
-    })
-    if (error) {
-      alert("댓글 수정에 실패했습니다.")
-    } else {
-      setEditingCommentId(null)
-      fetchComments()
-    }
   }
 
   const handleDelete = async () => {
@@ -314,7 +238,7 @@ function CommunityPostCard({
             {post.category}
           </span>
         </div>
-        {showComments && post.animalId && animalInfoLabel && (
+        {post.animalId && animalInfoLabel && (
           <p className="text-xs text-muted-foreground">{animalInfoLabel}</p>
         )}
         <h3 className="font-bold text-lg text-foreground">{post.title}</h3>
@@ -335,7 +259,7 @@ function CommunityPostCard({
 
       <CardFooter className="flex-col items-stretch gap-3 pt-2 relative">
         {/* Action Buttons */}
-        <div className="flex items-center gap-4 pb-2 border-b border-border">
+        <div className="flex items-center gap-4 pb-2">
           <button
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleLike() }}
             className="flex items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors relative z-20"
@@ -344,129 +268,13 @@ function CommunityPostCard({
             <span className="text-sm font-medium">{likeCount}</span>
           </button>
           <button
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowComments(!showComments) }}
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); router.push(`/community/${post.feedId}`) }}
             className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors relative z-20"
           >
             <MessageCircle className="w-5 h-5" />
-            <span className="text-sm font-medium">{commentCount}</span>
+            <span className="text-sm font-medium">{post.commentCount}</span>
           </button>
         </div>
-
-        {/* Comments Section */}
-        {showComments && (
-          <div className="space-y-3 relative z-20">
-            {comments.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-4">
-                첫 번째 댓글을 남겨보세요!
-              </p>
-            ) : (
-              <div className="space-y-2 max-h-48 overflow-y-auto">
-                {comments.map((comment) => (
-                  <div key={comment.commentId || comment.id} className="flex gap-3 group">
-                    <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center shrink-0 overflow-hidden">
-                      {comment.profileImageUrl ? (
-                        <Image
-                          src={comment.profileImageUrl}
-                          alt="프로필"
-                          width={32}
-                          height={32}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <UserIcon className="w-4 h-4 text-muted-foreground" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-2 overflow-hidden">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <span className="font-semibold text-foreground text-sm truncate">
-                            {comment.nickname || comment.author || "익명"}
-                          </span>
-                          {comment.createdAt && (
-                            <span className="text-xs text-muted-foreground shrink-0">
-                              {new Date(comment.createdAt).toLocaleDateString("ko-KR")}
-                            </span>
-                          )}
-                        </div>
-                        {user?.id === (comment.userId || comment.authorId) && (
-                          <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button
-                              onClick={() => {
-                                setEditingCommentId(comment.commentId)
-                                setEditContent(comment.content || comment.text || "")
-                              }}
-                              className="text-muted-foreground hover:text-primary transition-colors"
-                            >
-                              <Edit2 className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              onClick={() => handleCommentDelete(comment.commentId)}
-                              className="text-muted-foreground hover:text-destructive transition-colors"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        )}
-                      </div>
-
-                      {editingCommentId === comment.commentId ? (
-                        <div className="flex gap-2 mt-2">
-                          <Input
-                            value={editContent}
-                            onChange={(e) => setEditContent(e.target.value)}
-                            onKeyDown={(e) => e.key === "Enter" && handleCommentEditSubmit(comment.commentId)}
-                            autoFocus
-                            className="h-8 text-sm"
-                          />
-                          <Button size="sm" onClick={() => handleCommentEditSubmit(comment.commentId)}>수정</Button>
-                          <Button size="sm" variant="ghost" onClick={() => setEditingCommentId(null)}>취소</Button>
-                        </div>
-                      ) : (
-                        <p className="text-sm text-muted-foreground mt-1 whitespace-pre-wrap">{comment.content || comment.text}</p>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {commentCount > comments.length && (
-              <div className="text-center py-1">
-                <Link
-                  href={`/community/${post.feedId}`}
-                  className="inline-block text-xs font-semibold text-primary hover:underline relative z-20"
-                >
-                  댓글 {commentCount}개
-                </Link>
-              </div>
-            )}
-
-            {/* Comment Input */}
-            <div className="flex gap-2 relative z-20">
-              <Input
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.repeat) {
-                    e.preventDefault()
-                    handleCommentSubmit()
-                  }
-                }}
-                placeholder={user ? "댓글을 입력하세요..." : "로그인 후 댓글을 남길 수 있습니다"}
-                className="flex-1 rounded-xl bg-secondary/50 border-0 h-10"
-                disabled={!user || isSubmittingComment}
-              />
-              <Button
-                onClick={handleCommentSubmit}
-                disabled={!user || !newComment.trim() || isSubmittingComment}
-                size="icon"
-                className="rounded-xl bg-primary text-primary-foreground hover:bg-primary/90"
-              >
-                <Send className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
-        )}
       </CardFooter>
 
       {showUpdateModal && (
@@ -896,7 +704,42 @@ export default function CommunityPage() {
   const [selectedCategory, setSelectedCategory] = useState<PostCategory>("전체")
   const postsPerPage = 10
 
+  const [isRestored, setIsRestored] = useState(false)
+
+  // 1. Restore state from sessionStorage on mount
   useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem("community_feed_state")
+      if (saved) {
+        const state = JSON.parse(saved)
+        if (typeof state.currentPage === "number") setCurrentPage(state.currentPage)
+        if (state.selectedCategory) setSelectedCategory(state.selectedCategory)
+      }
+    } catch (e) {
+      console.error("Failed to restore community state:", e)
+    } finally {
+      setIsRestored(true)
+    }
+  }, [])
+
+  // 2. Save state to sessionStorage on any changes
+  useEffect(() => {
+    if (!isRestored) return
+
+    try {
+      const state = {
+        currentPage,
+        selectedCategory
+      }
+      sessionStorage.setItem("community_feed_state", JSON.stringify(state))
+    } catch (e) {
+      console.error("Failed to save community state:", e)
+    }
+  }, [currentPage, selectedCategory, isRestored])
+
+  useEffect(() => {
+    if (!isRestored) return
+
     const mapCategory = (category?: string): PostCategory => {
       if (category === "ADOPTION_REVIEW" || category === "입양후기") return "입양후기"
       if (category === "VOLUNTEER" || category === "봉사활동") return "봉사활동"
@@ -946,7 +789,7 @@ export default function CommunityPage() {
     }
 
     fetchPosts()
-  }, [currentPage, selectedCategory])
+  }, [currentPage, selectedCategory, isRestored])
 
   const handleCategoryChange = (category: PostCategory) => {
     setSelectedCategory(category)

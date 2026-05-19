@@ -311,17 +311,55 @@ export default function SocialFeedPage() {
     setTotalAnimalCount(parsedAnimals.length)
   }
 
+  const [isRestored, setIsRestored] = useState(false)
+
+  // 1. Restore state from sessionStorage on mount
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem("animal_feed_state")
+      if (saved) {
+        const state = JSON.parse(saved)
+        if (typeof state.currentPage === "number") setCurrentPage(state.currentPage)
+        if (state.selectedRegion) setSelectedRegion(state.selectedRegion)
+        if (state.selectedSpecies) setSelectedSpecies(state.selectedSpecies)
+        if (state.selectedKind) setSelectedKind(state.selectedKind)
+        if (state.selectedStatus) setSelectedStatus(state.selectedStatus)
+        if (state.sortOption) setSortOption(state.sortOption)
+      }
+    } catch (e) {
+      console.error("Failed to restore animal feed state:", e)
+    } finally {
+      setIsRestored(true)
+    }
+  }, [])
+
+  // 2. Save state to sessionStorage on any changes
+  useEffect(() => {
+    if (!isRestored) return
+
+    try {
+      const state = {
+        currentPage,
+        selectedRegion,
+        selectedSpecies,
+        selectedKind,
+        selectedStatus,
+        sortOption
+      }
+      sessionStorage.setItem("animal_feed_state", JSON.stringify(state))
+    } catch (e) {
+      console.error("Failed to save animal feed state:", e)
+    }
+  }, [currentPage, selectedRegion, selectedSpecies, selectedKind, selectedStatus, sortOption, isRestored])
+
   useEffect(() => {
     fetchDailyHeartsRemaining()
   }, [user])
 
   useEffect(() => {
+    if (!isRestored) return
     fetchAnimals(currentPage)
-  }, [currentPage, selectedRegion, selectedSpecies, selectedKind, selectedStatus, sortOption])
-
-  useEffect(() => {
-    setCurrentPage(1)
-  }, [selectedRegion, selectedSpecies, selectedKind, selectedStatus, sortOption])
+  }, [currentPage, selectedRegion, selectedSpecies, selectedKind, selectedStatus, sortOption, isRestored])
 
   useEffect(() => {
     let cancelled = false
@@ -354,6 +392,7 @@ export default function SocialFeedPage() {
   const handleSpeciesChange = (species: string) => {
     setSelectedSpecies(species)
     setSelectedKind("전체")
+    setCurrentPage(1)
   }
 
   const isClosedStatus = selectedStatus === "종료"
@@ -388,7 +427,10 @@ export default function SocialFeedPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-2 w-full sm:w-auto">
                 <div className="flex items-center gap-1.5">
                   <span className="text-xs font-medium text-muted-foreground shrink-0">지역</span>
-                  <Select value={selectedRegion} onValueChange={setSelectedRegion}>
+                  <Select value={selectedRegion} onValueChange={(value) => {
+                    setSelectedRegion(value)
+                    setCurrentPage(1)
+                  }}>
                     <SelectTrigger className="h-9 rounded-lg border-border bg-background px-2">
                       <SelectValue placeholder="지역" />
                     </SelectTrigger>
@@ -421,29 +463,35 @@ export default function SocialFeedPage() {
                 <div className="flex min-w-0 items-center gap-1.5">
                   <span className="text-xs font-medium text-muted-foreground shrink-0">품종</span>
                   <div className="min-w-0 max-w-[190px] w-[190px]">
-                  <Select
+                    <Select
                       value={selectedKind}
-                      onValueChange={setSelectedKind}
+                      onValueChange={(value) => {
+                        setSelectedKind(value)
+                        setCurrentPage(1)
+                      }}
                       disabled={isKindSelectDisabled}
                     >
-                    <SelectTrigger className="h-9 w-full min-w-0 max-w-[190px] overflow-hidden rounded-lg border-border bg-background px-2 [&_[data-slot=select-value]]:block [&_[data-slot=select-value]]:truncate">
-                      <SelectValue placeholder="품종" />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-60 overflow-y-auto">
-                      <SelectItem value="전체">전체</SelectItem>
-                      {availableKindOptions.map((kind) => (
-                        <SelectItem key={kind} value={kind}>
-                          {kind}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                      <SelectTrigger className="h-9 w-full min-w-0 max-w-[190px] overflow-hidden rounded-lg border-border bg-background px-2 [&_[data-slot=select-value]]:block [&_[data-slot=select-value]]:truncate">
+                        <SelectValue placeholder="품종" />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-60 overflow-y-auto">
+                        <SelectItem value="전체">전체</SelectItem>
+                        {availableKindOptions.map((kind) => (
+                          <SelectItem key={kind} value={kind}>
+                            {kind}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-1.5">
                   <span className="text-xs font-medium text-muted-foreground shrink-0">보호상태</span>
-                  <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                  <Select value={selectedStatus} onValueChange={(value) => {
+                    setSelectedStatus(value)
+                    setCurrentPage(1)
+                  }}>
                     <SelectTrigger className="h-9 rounded-lg border-border bg-background px-2">
                       <SelectValue placeholder="상태" />
                     </SelectTrigger>
@@ -464,7 +512,10 @@ export default function SocialFeedPage() {
               <div className="w-full min-w-0">
                 <Select
                   value={sortOption}
-                  onValueChange={(value) => setSortOption(value as SortOption)}
+                  onValueChange={(value) => {
+                    setSortOption(value as SortOption)
+                    setCurrentPage(1)
+                  }}
                 >
                   <SelectTrigger className="h-9 rounded-lg border-border bg-background px-2">
                     <SelectValue />

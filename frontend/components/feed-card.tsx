@@ -123,7 +123,7 @@ export function FeedCard({
   return (
     <Card className="overflow-hidden border-0 shadow-md bg-card">
       {/* Header Badge */}
-      <CardHeader className="pb-2 pt-4 px-4">
+      {/* <CardHeader className="pb-2 pt-4 px-4">
         {isProtecting ? (
           <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium w-fit">
             가족을 찾아요
@@ -133,7 +133,7 @@ export function FeedCard({
             입양 완료
           </span>
         )}
-      </CardHeader>
+      </CardHeader> */}
 
       {/* Image - Clickable */}
       <Link href={`/animals/${animalId}`}>
