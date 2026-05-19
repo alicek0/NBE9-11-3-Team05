@@ -129,6 +129,10 @@ export default function AnimalDetailPage({ params }: { params: Promise<{ id: str
   const [isSubmittingName, setIsSubmittingName] = useState(false)
   const [votingCandidateId, setVotingCandidateId] = useState<number | null>(null)
   const [showAllCandidates, setShowAllCandidates] = useState(false)
+  const [commentPage, setCommentPage] = useState(0)
+  const [commentTotalPages, setCommentTotalPages] = useState(1)
+  const [commentTotalCount, setCommentTotalCount] = useState(0)
+  const COMMENTS_PER_PAGE = 10
 
   const extractRemainingToday = (
     payload: { [key: string]: any } | string | number | null
@@ -201,7 +205,7 @@ export default function AnimalDetailPage({ params }: { params: Promise<{ id: str
         setNameCandidates(null)
       }
 
-      await fetchComments()
+      await fetchComments(0)
       await fetchRemainingToday()
       setIsLoading(false)
     }
@@ -344,13 +348,18 @@ export default function AnimalDetailPage({ params }: { params: Promise<{ id: str
     await fetchNameCandidates(animal.animalId)
   }
 
-  const fetchComments = async () => {
-    const { data } = await apiRequest<{ comments: any[] }>(API_ENDPOINTS.comments(Number(resolvedParams.id)))
+  const fetchComments = async (page = 0) => {
+    const { data } = await apiRequest<{ comments: any[]; totalPages: number; totalCount: number }>(
+      `${API_ENDPOINTS.comments(Number(resolvedParams.id))}?page=${page}&size=${COMMENTS_PER_PAGE}`
+    )
     if (data?.comments) {
-      // Sort older comments first or newer first based on preference. Default to newest at bottom.
-      setComments(data.comments.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()))
+      setComments(data.comments)
+      setCommentTotalPages(data.totalPages ?? 1)
+      setCommentTotalCount(data.totalCount ?? 0)
     } else {
       setComments([])
+      setCommentTotalPages(1)
+      setCommentTotalCount(0)
     }
   }
 
@@ -374,7 +383,7 @@ export default function AnimalDetailPage({ params }: { params: Promise<{ id: str
     }
 
     setNewComment("")
-    fetchComments()
+    fetchComments(commentPage)
   }
 
   const handleCommentDelete = async (commentId: number) => {
@@ -385,7 +394,10 @@ export default function AnimalDetailPage({ params }: { params: Promise<{ id: str
     if (error) {
       alert("댓글 삭제에 실패했습니다.")
     } else {
-      fetchComments()
+      // If deleting last comment on a page > 0, go back one page
+      const newPage = comments.length === 1 && commentPage > 0 ? commentPage - 1 : commentPage
+      setCommentPage(newPage)
+      fetchComments(newPage)
     }
   }
 
@@ -399,7 +411,7 @@ export default function AnimalDetailPage({ params }: { params: Promise<{ id: str
       alert("댓글 수정에 실패했습니다.")
     } else {
       setEditingCommentId(null)
-      fetchComments()
+      fetchComments(commentPage)
     }
   }
 
@@ -837,6 +849,37 @@ export default function AnimalDetailPage({ params }: { params: Promise<{ id: str
                 ))
               )}
             </div>
+
+            {/* Comment Pagination */}
+            {commentTotalPages > 1 && (
+              <div className="flex items-center justify-center gap-2 mt-4 mb-4">
+                <button
+                  onClick={() => {
+                    const prev = Math.max(0, commentPage - 1)
+                    setCommentPage(prev)
+                    fetchComments(prev)
+                  }}
+                  disabled={commentPage === 0}
+                  className="px-3 py-1.5 rounded-lg text-sm font-medium bg-secondary/50 text-muted-foreground hover:bg-secondary disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                  이전
+                </button>
+                <span className="text-sm text-muted-foreground">
+                  {commentPage + 1} / {commentTotalPages}
+                </span>
+                <button
+                  onClick={() => {
+                    const next = Math.min(commentTotalPages - 1, commentPage + 1)
+                    setCommentPage(next)
+                    fetchComments(next)
+                  }}
+                  disabled={commentPage >= commentTotalPages - 1}
+                  className="px-3 py-1.5 rounded-lg text-sm font-medium bg-secondary/50 text-muted-foreground hover:bg-secondary disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                  다음
+                </button>
+              </div>
+            )}
 
             {/* Comment Input */}
             <div className="flex gap-2">

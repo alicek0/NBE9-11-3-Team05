@@ -31,7 +31,7 @@ data class UserAnimalCommentRes(
 
     companion object {
         @JvmStatic
-        fun of(totalCommentCount: Long, commentList: MutableList<AnimalComment>): UserAnimalCommentRes {
+        fun of(totalCommentCount: Long, commentList: List<AnimalComment>): UserAnimalCommentRes {
             val items = commentList.stream()
                 .map { comment: AnimalComment -> AnimalCommentItem.from(comment) }
                 .toList()

@@ -17,6 +17,8 @@ import com.team05.petmeeting.domain.user.errorCode.UserErrorCode
 import com.team05.petmeeting.domain.user.repository.UserRepository
 import com.team05.petmeeting.global.exception.BusinessException
 import jakarta.validation.Valid
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.function.Supplier
@@ -85,8 +87,18 @@ class CommentService(
             .map { animalComment -> from(animalComment) }
     }
 
+    fun getAnimalComments(animalId: Long, pageable: Pageable): Page<AnimalCommentRes> {
+        return animalCommentRepository.findByAnimal_Id(animalId, pageable)
+            .map { animalComment -> from(animalComment) }
+    }
+
     fun getFeedComments(feedId: Long): List<FeedCommentRes> {
         return feedCommentRepository.findByFeed_Id(feedId)
+            .map { feedComment -> FeedCommentRes.from(feedComment) }
+    }
+
+    fun getFeedComments(feedId: Long, pageable: Pageable): Page<FeedCommentRes> {
+        return feedCommentRepository.findByFeed_Id(feedId, pageable)
             .map { feedComment -> FeedCommentRes.from(feedComment) }
     }
 

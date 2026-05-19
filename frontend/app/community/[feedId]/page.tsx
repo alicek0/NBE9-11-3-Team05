@@ -42,6 +42,10 @@ export default function FeedDetailPage({ params }: { params: Promise<{ feedId: s
   const [editContent, setEditContent] = useState("")
   const [openMenuId, setOpenMenuId] = useState<number | null>(null)
   const [animalInfoLabel, setAnimalInfoLabel] = useState("")
+  const [commentPage, setCommentPage] = useState(0)
+  const [commentTotalPages, setCommentTotalPages] = useState(1)
+  const [commentTotalCount, setCommentTotalCount] = useState(0)
+  const COMMENTS_PER_PAGE = 10
 
   // ── 피드 로드 ──────────────────────────────────────────────
   useEffect(() => {
@@ -57,12 +61,8 @@ export default function FeedDetailPage({ params }: { params: Promise<{ feedId: s
       }
       setFeed(data)
       setLikeCount(data.likeCount)
-      setComments(
-        [...data.comments].sort(
-          (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-        )
-      )
       setIsLoading(false)
+      await refreshComments(0)
     }
     fetchFeed()
   }, [feedId])
@@ -103,16 +103,14 @@ export default function FeedDetailPage({ params }: { params: Promise<{ feedId: s
   }
 
   // ── 댓글 새로고침 ──────────────────────────────────────────
-  const refreshComments = async () => {
-    const { data } = await apiRequest<{ comments: FeedComment[] }>(
-      API_ENDPOINTS.feedComments(Number(feedId))
+  const refreshComments = async (page = 0) => {
+    const { data } = await apiRequest<{ comments: FeedComment[]; totalPages: number; totalCount: number }>(
+      `${API_ENDPOINTS.feedComments(Number(feedId))}?page=${page}&size=${COMMENTS_PER_PAGE}`
     )
     if (data?.comments) {
-      setComments(
-        [...data.comments].sort(
-          (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-        )
-      )
+      setComments(data.comments)
+      setCommentTotalPages(data.totalPages ?? 1)
+      setCommentTotalCount(data.totalCount ?? 0)
     }
   }
 
@@ -128,7 +126,7 @@ export default function FeedDetailPage({ params }: { params: Promise<{ feedId: s
     setIsSubmittingComment(false)
     if (error) { alert("댓글 작성에 실패했습니다."); return }
     setNewComment("")
-    await refreshComments()
+    await refreshComments(commentPage)
   }
 
   // ── 댓글 수정 ──────────────────────────────────────────────
@@ -140,7 +138,7 @@ export default function FeedDetailPage({ params }: { params: Promise<{ feedId: s
     )
     if (error) { alert("댓글 수정에 실패했습니다."); return }
     setEditingCommentId(null)
-    await refreshComments()
+    await refreshComments(commentPage)
   }
 
   // ── 댓글 삭제 ──────────────────────────────────────────────
@@ -151,7 +149,9 @@ export default function FeedDetailPage({ params }: { params: Promise<{ feedId: s
       { method: "DELETE" }
     )
     if (error) { alert("댓글 삭제에 실패했습니다."); return }
-    await refreshComments()
+    const newPage = comments.length === 1 && commentPage > 0 ? commentPage - 1 : commentPage
+    setCommentPage(newPage)
+    await refreshComments(newPage)
   }
 
   // ── 로딩 / 에러 ───────────────────────────────────────────
@@ -192,11 +192,11 @@ export default function FeedDetailPage({ params }: { params: Promise<{ feedId: s
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center overflow-hidden">
                   {feed.profileImageUrl ? (
-                    <Image 
-                      src={feed.profileImageUrl} 
-                      alt={feed.nickname || "User"} 
-                      width={40} 
-                      height={40} 
+                    <Image
+                      src={feed.profileImageUrl}
+                      alt={feed.nickname || "User"}
+                      width={40}
+                      height={40}
                       className="w-full h-full object-cover"
                     />
                   ) : (
@@ -257,7 +257,7 @@ export default function FeedDetailPage({ params }: { params: Promise<{ feedId: s
             </button>
             <div className="flex items-center gap-1.5 text-muted-foreground">
               <MessageCircle className="w-5 h-5" />
-              <span className="text-sm font-medium">{comments.length}</span>
+              <span className="text-sm font-medium">{commentTotalCount}</span>
             </div>
           </div>
 
@@ -277,11 +277,11 @@ export default function FeedDetailPage({ params }: { params: Promise<{ feedId: s
                       <div className="flex items-start justify-between gap-4">
                         <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center shrink-0 overflow-hidden mt-1">
                           {comment.profileImageUrl ? (
-                            <Image 
-                              src={comment.profileImageUrl} 
-                              alt={comment.nickname || "User"} 
-                              width={32} 
-                              height={32} 
+                            <Image
+                              src={comment.profileImageUrl}
+                              alt={comment.nickname || "User"}
+                              width={32}
+                              height={32}
                               className="w-full h-full object-cover"
                             />
                           ) : (
@@ -363,6 +363,37 @@ export default function FeedDetailPage({ params }: { params: Promise<{ feedId: s
                   )
                 })}
               </ul>
+            )}
+
+            {/* 댓글 페이지네이션 */}
+            {commentTotalPages > 1 && (
+              <div className="flex items-center justify-center gap-3 px-6 py-3 border-t border-border">
+                <button
+                  onClick={() => {
+                    const prev = Math.max(0, commentPage - 1)
+                    setCommentPage(prev)
+                    refreshComments(prev)
+                  }}
+                  disabled={commentPage === 0}
+                  className="px-3 py-1.5 rounded-lg text-sm font-medium bg-secondary/50 text-muted-foreground hover:bg-secondary disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                  이전
+                </button>
+                <span className="text-sm text-muted-foreground">
+                  {commentPage + 1} / {commentTotalPages}
+                </span>
+                <button
+                  onClick={() => {
+                    const next = Math.min(commentTotalPages - 1, commentPage + 1)
+                    setCommentPage(next)
+                    refreshComments(next)
+                  }}
+                  disabled={commentPage >= commentTotalPages - 1}
+                  className="px-3 py-1.5 rounded-lg text-sm font-medium bg-secondary/50 text-muted-foreground hover:bg-secondary disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                  다음
+                </button>
+              </div>
             )}
 
             {/* 댓글 입력 */}

@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.Operation
 import jakarta.validation.Valid
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -72,11 +73,14 @@ class FeedController(
     @Operation(summary = "피드 댓글 목록 조회")
     @GetMapping("/{feedId}/comments")
     fun getFeedComments(
-        @PathVariable feedId: Long
+        @PathVariable feedId: Long,
+        @RequestParam(defaultValue = "0") page: Int,
+        @RequestParam(defaultValue = "10") size: Int
     ): ResponseEntity<FeedCommentListRes> {
         log.info("=============== 피드 댓글 조회 =================")
-        val list = commentService.getFeedComments(feedId)
-        val res = FeedCommentListRes.from(list)
+        val pageable = PageRequest.of(page, size, org.springframework.data.domain.Sort.by("createdAt").ascending())
+        val commentPage = commentService.getFeedComments(feedId, pageable)
+        val res = FeedCommentListRes.from(commentPage)
         return ResponseEntity.ok(res)
     }
 

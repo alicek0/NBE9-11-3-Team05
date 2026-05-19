@@ -10,10 +10,14 @@ import com.team05.petmeeting.global.exception.BusinessException
 import com.team05.petmeeting.global.security.test.WithCustomUser
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
+import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.Pageable
 import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.WithAnonymousUser
 import org.springframework.test.context.ActiveProfiles
@@ -22,7 +26,6 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 @SpringBootTest
@@ -154,13 +157,14 @@ internal class FeedControllerCommentTest {
     @Test
     @Throws(Exception::class)
     fun getFeedComments_success() {
-        val res = FeedCommentListRes(mutableListOf<FeedCommentRes>(), 0)
-        Mockito.`when`<List<FeedCommentRes>>(commentService.getFeedComments(1L))
-            .thenReturn(listOf<FeedCommentRes>())
+        val emptyPage = PageImpl<FeedCommentRes>(emptyList())
+        Mockito.`when`(commentService.getFeedComments(anyLong(), any()))
+            .thenReturn(emptyPage)
 
         mvc.perform(MockMvcRequestBuilders.get("/api/v1/feeds/{feedId}/comments", 1L))
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.jsonPath("$.totalCount").value(0))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.totalPages").value(1))
     }
 
     // 피드 댓글 목록 조회 - 비로그인도 가능
@@ -169,8 +173,9 @@ internal class FeedControllerCommentTest {
     @DisplayName("피드 댓글 목록 조회 - 비로그인도 가능")
     @Throws(Exception::class)
     fun getFeedComments_anonymous_success() {
-        Mockito.`when`<List<FeedCommentRes>>(commentService.getFeedComments(1L))
-            .thenReturn(mutableListOf<FeedCommentRes>())
+        val emptyPage = PageImpl<FeedCommentRes>(emptyList())
+        Mockito.`when`(commentService.getFeedComments(anyLong(), any()))
+            .thenReturn(emptyPage)
 
         mvc.perform(MockMvcRequestBuilders.get("/api/v1/feeds/{feedId}/comments", 1L))
             .andExpect(MockMvcResultMatchers.status().isOk())
