@@ -33,6 +33,7 @@ class UserProfileServiceTest {
     private lateinit var feedCommentRepository: FeedCommentRepository
 
     private var userId: Long = 0L
+    private lateinit var user: User
 
     @BeforeEach
     fun setUp() {
@@ -54,7 +55,7 @@ class UserProfileServiceTest {
 
         `when`(passwordEncoder.encode(NEW_PASSWORD)).thenReturn(ENCODED_NEW_PASSWORD)
 
-        val user = User.create("test@test.com", "테스터", "홍길동").apply {
+        user = User.create("test@test.com", "테스터", "홍길동").apply {
             addAuth(UserAuth.create(Provider.LOCAL, "test@test.com", ENCODED_PASSWORD))
         }
         ReflectionTestUtils.setField(user, "id", USER_ID)
@@ -117,6 +118,27 @@ class UserProfileServiceTest {
     }
 
     @Test
+    fun getUserProfile_success_localUser() {
+        val res = userProfileService.getUserProfile(USER_ID)
+
+        assertThat(res.hasLocalAuth).isTrue()
+    }
+
+    @Test
+    fun getUserProfile_success_socialUser() {
+        val socialUser = User.create("social@test.com", "소셜유저", "홍길동").apply {
+            addAuth(UserAuth.create(Provider.GOOGLE, "google-id-123", null))
+        }
+        ReflectionTestUtils.setField(socialUser, "id", SOCIAL_USER_ID)
+        ReflectionTestUtils.setField(socialUser, "createdAt", LocalDateTime.now())
+        `when`(userRepository.findById(SOCIAL_USER_ID)).thenReturn(Optional.of(socialUser))
+
+        val res = userProfileService.getUserProfile(SOCIAL_USER_ID)
+
+        assertThat(res.hasLocalAuth).isFalse()
+    }
+
+    @Test
     fun getUserProfile_fail_userNotFound() {
         `when`(userRepository.findById(NOT_FOUND_USER_ID)).thenReturn(Optional.empty())
 
@@ -125,6 +147,23 @@ class UserProfileServiceTest {
         }
 
         assertThat(ex.errorCode).isEqualTo(UserErrorCode.USER_NOT_FOUND)
+    }
+
+    @Test
+    fun getMyProfileDetails_success() {
+        `when`(feedRepository.countByUser(user)).thenReturn(2L)
+        `when`(cheerRepository.countByUser(user)).thenReturn(7L)
+        `when`(cheerRepository.countDistinctAnimalByUser(user)).thenReturn(3L)
+        `when`(feedCommentRepository.countFeedCommentByUser(user)).thenReturn(4L)
+        `when`(animalCommentRepository.countAnimalCommentByUser(user)).thenReturn(5L)
+
+        val res = userProfileService.getMyProfileDetails(USER_ID)
+
+        assertThat(res.feedCount).isEqualTo(2L)
+        assertThat(res.cheerCount).isEqualTo(7L)
+        assertThat(res.cheerAnimalCount).isEqualTo(3L)
+        assertThat(res.feedCommentCount).isEqualTo(4L)
+        assertThat(res.animalCommentCount).isEqualTo(5L)
     }
 
     companion object {

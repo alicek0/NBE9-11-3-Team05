@@ -17,10 +17,10 @@ import { MyFeedComment, MyAnimalComment, User, MyAdoptionApplication, AdoptionSt
 
 interface CheeredAnimal {
   animalId: number
-  kind: string
+  species: string
   breed?: string
   imageUrl?: string
-  heartCount: number
+  myCheerCount: number
   temperature: number
 }
 
@@ -33,9 +33,9 @@ interface MyFeed {
 
 // Mock data for demo
 const mockCheeredAnimals: CheeredAnimal[] = [
-  { animalId: 1, kind: "개", breed: "믹스견", imageUrl: "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=200&h=200&fit=crop", heartCount: 5, temperature: 85.0 },
-  { animalId: 2, kind: "고양이", breed: "코리안숏헤어", imageUrl: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=200&h=200&fit=crop", heartCount: 3, temperature: 72.0 },
-  { animalId: 3, kind: "개", breed: "말티즈", imageUrl: "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=200&h=200&fit=crop", heartCount: 2, temperature: 45.0 },
+  { animalId: 1, species: "개", breed: "믹스견", imageUrl: "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=200&h=200&fit=crop", myCheerCount: 5, temperature: 85.0 },
+  { animalId: 2, species: "고양이", breed: "코리안숏헤어", imageUrl: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=200&h=200&fit=crop", myCheerCount: 3, temperature: 72.0 },
+  { animalId: 3, species: "개", breed: "말티즈", imageUrl: "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=200&h=200&fit=crop", myCheerCount: 2, temperature: 45.0 },
 ]
 
 const mockMyFeeds: MyFeed[] = [
@@ -72,10 +72,11 @@ export default function ProfilePage() {
   const [profileStats, setProfileStats] = useState<{
     feedCount: number,
     cheerCount: number,
+    cheerAnimalCount: number,
     feedCommentCount: number,
     animalCommentCount: number,
     createdAt?: string
-  }>({ feedCount: 0, cheerCount: 0, feedCommentCount: 0, animalCommentCount: 0 })
+  }>({ feedCount: 0, cheerCount: 0, cheerAnimalCount: 0, feedCommentCount: 0, animalCommentCount: 0 })
   const [isLoading, setIsLoading] = useState(true)
   const [showNicknameModal, setShowNicknameModal] = useState(false)
   const [showPasswordModal, setShowPasswordModal] = useState(false)
@@ -148,6 +149,7 @@ export default function ProfilePage() {
         email: string
         name: string
         createdAt: string
+        hasLocalAuth: boolean
       }>(API_ENDPOINTS.myProfile)
 
       if (profileResponse.data) {
@@ -155,13 +157,15 @@ export default function ProfilePage() {
           !user.createdAt ||
           user.nickname !== profileResponse.data.nickname ||
           user.email !== profileResponse.data.email ||
-          user.name !== profileResponse.data.name
+          user.name !== profileResponse.data.name ||
+          user.hasLocalAuth !== profileResponse.data.hasLocalAuth
         ) {
           updateUser({
             nickname: profileResponse.data.nickname,
             email: profileResponse.data.email,
             name: profileResponse.data.name,
-            createdAt: profileResponse.data.createdAt
+            createdAt: profileResponse.data.createdAt,
+            hasLocalAuth: profileResponse.data.hasLocalAuth,
           })
         }
       }
@@ -170,6 +174,7 @@ export default function ProfilePage() {
       const statsResponse = await apiRequest<{
         feedCount: number,
         cheerCount: number,
+        cheerAnimalCount: number,
         feedCommentCount: number,
         animalCommentCount: number,
         createdAt?: string
@@ -281,7 +286,7 @@ export default function ProfilePage() {
                     <p className="text-[10px] md:text-xs text-muted-foreground mt-1">보낸 응원</p>
                   </div>
                   <div className="text-left">
-                    <p className="text-xl md:text-2xl font-bold text-primary">{cheeredAnimals.length}</p>
+                    <p className="text-xl md:text-2xl font-bold text-primary">{profileStats.cheerAnimalCount}</p>
                     <p className="text-[10px] md:text-xs text-muted-foreground mt-1">응원한 동물</p>
                   </div>
                   <div className="text-left">
@@ -392,9 +397,11 @@ export default function ProfilePage() {
                     아이디 변경
                   </Button>
                   */}
-                  <Button variant="outline" className="rounded-xl" onClick={() => setShowPasswordModal(true)}>
-                    비밀번호 변경
-                  </Button>
+                  {user.hasLocalAuth === true && (
+                    <Button variant="outline" className="rounded-xl" onClick={() => setShowPasswordModal(true)}>
+                      비밀번호 변경
+                    </Button>
+                  )}
                   <Button variant="outline" className="rounded-xl" onClick={() => setShowNicknameModal(true)}>
                     이름(닉네임) 변경
                   </Button>
@@ -448,13 +455,13 @@ export default function ProfilePage() {
                             {animal.imageUrl ? (
                               <Image
                                 src={animal.imageUrl}
-                                alt={`${animal.kind} ${animal.breed || ""}`}
+                                alt={`${animal.species} ${animal.breed || ""}`}
                                 fill
                                 className="object-cover"
                               />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                                {animal.kind === "개" ? "🐕" : "🐈"}
+                                {animal.species === "개" ? "🐕" : "🐈"}
                               </div>
                             )}
                           </div>
@@ -462,12 +469,12 @@ export default function ProfilePage() {
                           {/* Animal Info */}
                           <div className="flex-1 min-w-0">
                             <p className="font-medium text-foreground">
-                              {animal.kind} {animal.breed && `(${animal.breed})`}
+                              {animal.species} {animal.breed && `(${animal.breed})`}
                             </p>
                             <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
                               <span className="flex items-center gap-1">
                                 <Heart className="w-3.5 h-3.5 fill-primary text-primary" />
-                                {animal.heartCount}개 보냄
+                                {animal.myCheerCount}개 보냄
                               </span>
                               <span className="flex items-center gap-1">
                                 <ThermometerSun className="w-3.5 h-3.5" />
@@ -789,7 +796,7 @@ export default function ProfilePage() {
         />
       )}
 
-      {showPasswordModal && (
+      {showPasswordModal && user.hasLocalAuth === true && (
         <UpdatePasswordModal
           onClose={() => setShowPasswordModal(false)}
         />
@@ -980,6 +987,7 @@ function UpdatePasswordModal({ onClose }: { onClose: () => void }) {
         "U-004": "사용자 정보를 찾을 수 없습니다.",
         "U-005": "현재 비밀번호가 일치하지 않습니다.",
         "U-006": "기존 비밀번호와 다른 비밀번호를 입력해주세요.",
+        "U-014": "소셜 로그인으로 가입한 계정은 비밀번호를 변경할 수 없습니다.",
         "U-001": "로그인이 만료되었습니다. 다시 로그인해주세요."
       };
 

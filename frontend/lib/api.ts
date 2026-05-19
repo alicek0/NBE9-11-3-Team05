@@ -264,6 +264,7 @@ export interface User {
   nickname?: string
   profileImageUrl?: string
   createdAt?: string
+  hasLocalAuth?: boolean
 }
 
 export interface JwtPayload {

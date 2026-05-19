@@ -1,6 +1,7 @@
 package com.team05.petmeeting.domain.user.dto.profile
 
 import com.team05.petmeeting.domain.user.entity.User
+import com.team05.petmeeting.domain.user.provider.Provider
 import java.time.LocalDateTime
 
 data class UserProfileRes(
@@ -8,7 +9,8 @@ data class UserProfileRes(
     val nickname: String,
     val email: String,
     val name: String,
-    val createdAt: LocalDateTime
+    val createdAt: LocalDateTime,
+    val hasLocalAuth: Boolean,
 ) {
     companion object {
         @JvmStatic
@@ -18,7 +20,8 @@ data class UserProfileRes(
                 user.nickname,
                 user.email,
                 user.realname,
-                requireNotNull(user.createdAt)
+                requireNotNull(user.createdAt),
+                user.userAuths.any { it.provider == Provider.LOCAL },
             )
         }
 

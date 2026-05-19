@@ -65,6 +65,7 @@ class UserProfileService(
         getUserById(userId).let { user ->
             MyProfileDetailRes.of(
                 feedRepository.countByUser(user),
+                cheerRepository.countByUser(user),
                 cheerRepository.countDistinctAnimalByUser(user),
                 feedCommentRepository.countFeedCommentByUser(user),
                 animalCommentRepository.countAnimalCommentByUser(user),

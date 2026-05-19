@@ -98,7 +98,7 @@ class UserProfileControllerTest {
 
     @Test
     fun getProfile_success() {
-        val res = MyProfileDetailRes(3L, 5L, 2L, 1L)
+        val res = MyProfileDetailRes(3L, 5L, 2L, 2L, 1L)
 
         doReturn(res).`when`(userProfileService).getMyProfileDetails(100L)
 
@@ -106,6 +106,7 @@ class UserProfileControllerTest {
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.feedCount").value(3))
             .andExpect(jsonPath("$.cheerCount").value(5))
+            .andExpect(jsonPath("$.cheerAnimalCount").value(2))
     }
 
     @Test
@@ -115,6 +116,24 @@ class UserProfileControllerTest {
 
         mockMvc.perform(get("/api/v1/me/profile"))
             .andExpect(status().isNotFound)
+    }
+
+    @Test
+    fun getUserProfile_success_hasLocalAuth() {
+        val res = UserProfileRes(
+            profileImageUrl = "",
+            nickname = "tester",
+            email = "test@test.com",
+            name = "홍길동",
+            createdAt = LocalDateTime.now(),
+            hasLocalAuth = true,
+        )
+
+        doReturn(res).`when`(userProfileService).getUserProfile(100L)
+
+        mockMvc.perform(get("/api/v1/me/profile"))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.hasLocalAuth").value(true))
     }
 
     @Test
@@ -175,13 +194,14 @@ class UserProfileControllerTest {
 
     @Test
     fun getMyProfile_success() {
-        val res = MyProfileDetailRes.of(5L, 3L, 5L, 5L)
+        val res = MyProfileDetailRes.of(5L, 7L, 3L, 5L, 5L)
 
         doReturn(res).`when`(userProfileService).getMyProfileDetails(100L)
 
         mockMvc.perform(get("/api/v1/me"))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.cheerCount").value(3))
+            .andExpect(jsonPath("$.cheerCount").value(7))
+            .andExpect(jsonPath("$.cheerAnimalCount").value(3))
             .andExpect(jsonPath("$.feedCount").value(5))
             .andExpect(jsonPath("$.feedCommentCount").value(5))
             .andExpect(jsonPath("$.animalCommentCount").value(5))
