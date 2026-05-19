@@ -56,6 +56,8 @@ class SecurityConfig(
             }
 
             authorizeHttpRequests {
+                authorize(HttpMethod.OPTIONS, "/**", permitAll) // CORS Preflight
+
                 authorize("/api/v1/auth/email/**", permitAll)
                 authorize("/api/v1/auth/logout", permitAll)
                 authorize("/api/v1/auth/refresh", permitAll)
