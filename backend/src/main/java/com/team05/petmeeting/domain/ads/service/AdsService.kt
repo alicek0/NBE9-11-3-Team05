@@ -1,21 +1,24 @@
 package com.team05.petmeeting.domain.ads.service
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.team05.petmeeting.domain.ads.client.InstagramClient
-import com.team05.petmeeting.domain.ads.dto.CardNewsResult
+import com.team05.petmeeting.domain.ads.dto.AdsPostRequestRes
+import com.team05.petmeeting.domain.ads.entity.AdsPostRequest
+import com.team05.petmeeting.domain.ads.errorCode.AdsErrorCode
+import com.team05.petmeeting.domain.ads.repository.AdsPostRequestRepository
 import com.team05.petmeeting.domain.animal.entity.Animal
 import com.team05.petmeeting.domain.animal.repository.AnimalRepository
+import com.team05.petmeeting.global.exception.BusinessException
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class AdsService(
     private val animalRepository: AnimalRepository,
     private val cardNewsService: CardNewsService,
-    private val instagramClient: InstagramClient,
-    private val objectMapper: ObjectMapper
+    private val adsPostRequestRepository: AdsPostRequestRepository,
 ) {
     // Top N 동물 조회 (보호중인 동물만)
+    @Transactional(readOnly = true)
     fun getTopAnimals(n: Int): List<Animal> {
         return animalRepository.findAllByStateGroupOrderByTotalCheerCountDesc(
             0,  // 0 = 보호중
@@ -23,87 +26,31 @@ class AdsService(
         )
     }
 
-    // 인스타그램 업로드 없이 카드뉴스 이미지만 생성
-    fun generateCardNewsPreview(n: Int): List<CardNewsResult> {
+    // 인스타그램 업로드 없이 카드뉴스를 생성하고 승인 대기 요청으로 저장
+    @Transactional
+    fun createCardNewsPostRequests(n: Int): List<AdsPostRequestRes> {
         return getTopAnimals(n).map { animal ->
-            cardNewsService.generateCardNews(animal)
-        }
-    }
-
-    // 전체 파이프라인 실행
-    @Throws(InterruptedException::class)
-    fun runWeeklyAds(n: Int) {
-        val topAnimals = getTopAnimals(n)
-
-        for (animal in topAnimals) {
-            // 1. 카드뉴스 생성
             val cardNews = cardNewsService.generateCardNews(animal)
+            val shelter = animal.shelter
+                ?: throw BusinessException(AdsErrorCode.ANIMAL_SHELTER_NOT_FOUND)
 
-            // 2. 컨테이너 생성
-            val containerResponse = instagramClient.createMediaContainer(
-                cardNews.imageUrl,
-                cardNews.caption
-            ) ?: throw IllegalStateException("인스타그램 미디어 컨테이너 응답이 비어있습니다.")
-            val containerId = extractId(containerResponse)
-
-            // 3. 인스타그램 이미지 처리 완료 대기
-            waitUntilContainerReady(containerId)
-
-            // 4. 게시
-            instagramClient.publishMedia(containerId)
-        }
+            adsPostRequestRepository.save(
+                AdsPostRequest.create(
+                    animal = animal,
+                    shelter = shelter,
+                    imageUrl = requireNotNull(cardNews.imageUrl),
+                    caption = requireNotNull(cardNews.caption),
+                ),
+            )
+        }.map { AdsPostRequestRes.from(it) }
     }
 
-    private fun extractId(response: String): String {
-        return try {
-            objectMapper.readTree(response)
-                .path("id")
-                .asText(null)
-                ?: throw IllegalStateException("인스타그램 응답에서 id를 찾을 수 없습니다.")
-        } catch (e: Exception) {
-            throw IllegalStateException("인스타그램 미디어 컨테이너 ID 추출 실패", e)
-        }
-    }
-
-    private fun waitUntilContainerReady(containerId: String) {
-        repeat(MAX_STATUS_CHECK_COUNT) {
-            val statusResponse = instagramClient.getContainerStatus(containerId)
-            val statusCode = extractStatusCode(statusResponse)
-
-            if (statusCode == "FINISHED") {
-                return
-            }
-
-            if (statusCode == "ERROR") {
-                throw IllegalStateException("인스타그램 미디어 컨테이너 처리 실패")
-            }
-
-            Thread.sleep(STATUS_CHECK_INTERVAL_MILLIS)
-        }
-
-        throw IllegalStateException("인스타그램 미디어 컨테이너 처리 시간 초과")
-    }
-
-    private fun extractStatusCode(response: String): String {
-        return try {
-            objectMapper.readTree(response)
-                .path("status_code")
-                .asText(null)
-                ?: throw IllegalStateException("인스타그램 응답에서 status_code를 찾을 수 없습니다.")
-        } catch (e: Exception) {
-            throw IllegalStateException("인스타그램 미디어 컨테이너 상태 추출 실패", e)
-        }
-    }
-
-    // @Scheduled(cron = "0 0 9 * * MON") // 매주 월요일 오전 9시 스프링이 직접 자동 실행하는 어노테이션, 일단 주석처리
-    @Throws(InterruptedException::class)
+    // @Scheduled(cron = "0 0 9 * * MON") // 매주 월요일 오전 9시 승인 대기 요청 생성
     fun scheduledWeeklyAds() {
-        runWeeklyAds(DEFAULT_WEEKLY_ADS_COUNT)
+        createCardNewsPostRequests(DEFAULT_WEEKLY_ADS_COUNT)
     }
 
     companion object {
         private const val DEFAULT_WEEKLY_ADS_COUNT = 3
-        private const val MAX_STATUS_CHECK_COUNT = 5
-        private const val STATUS_CHECK_INTERVAL_MILLIS = 3000L
     }
 }
