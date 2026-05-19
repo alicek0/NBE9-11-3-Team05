@@ -1,6 +1,6 @@
   
   
-  # PetMeeting 작성중~
+  # PetMeeting
 
   ## 🐾 프로젝트 소개
 
@@ -126,7 +126,7 @@
 
   ## 시스템 구성도
 
-<img width="1692" height="930" alt="image" src="https://github.com/user-attachments/assets/41a0109d-8a52-4da6-a2d0-e32af02734ae" />
+<img width="1618" height="972" alt="image" src="https://github.com/user-attachments/assets/4c03e775-e73b-41d2-8157-7a325d91ad43" />
 
 
 
@@ -249,7 +249,8 @@
 
   ## ERD
 
-  <img width="1155" height="865" alt="5조_ERD" src="https://github.com/user-attachments/assets/b8896c48-c1d8-48b3-a304-8b1c56f27c2a" />
+<img width="6941" height="5330" alt="erd 5조 일러" src="https://github.com/user-attachments/assets/2bce80fe-3554-446a-b6b8-90e0bbe64651" />
+
 
 ## GitHub Flow 전략
 

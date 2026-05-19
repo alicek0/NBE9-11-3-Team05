@@ -44,6 +44,12 @@ export const API_ENDPOINTS = {
     `${API_BASE_URL}/adoptions/admin/shelters/${encodeURIComponent(careRegNo)}/applications/${applicationId}`,
   reviewAdminShelterApplication: (careRegNo: string, applicationId: number) =>
     `${API_BASE_URL}/adoptions/admin/shelters/${encodeURIComponent(careRegNo)}/applications/${applicationId}/review`,
+  adminAdsRequests: (careRegNo: string) =>
+    `${API_BASE_URL}/ads/admin/shelters/${encodeURIComponent(careRegNo)}/requests`,
+  adminAdsRequestDetail: (careRegNo: string, requestId: number) =>
+    `${API_BASE_URL}/ads/admin/shelters/${encodeURIComponent(careRegNo)}/requests/${requestId}`,
+  reviewAdminAdsRequest: (careRegNo: string, requestId: number) =>
+    `${API_BASE_URL}/ads/admin/shelters/${encodeURIComponent(careRegNo)}/requests/${requestId}/review`,
   applyAdoption: (animalId: number) =>
     `${API_BASE_URL}/adoptions/${animalId}`,
   myAdoptions: `${API_BASE_URL}/adoptions/me`,
@@ -717,6 +723,7 @@ export interface NameCandidateRes {
 }
 
 export type AdoptionStatus = "Processing" | "Approved" | "Rejected"
+export type AdsPostStatus = "Processing" | "Approved" | "Rejected" | "Published"
 
 export interface AdminAdoptionApplication {
   applicationId: number
@@ -735,6 +742,26 @@ export interface AdminAdoptionApplication {
     careOwnerNm?: string
     careTel?: string
     careAddr?: string
+  }
+}
+
+export interface AdminAdsPostRequest {
+  requestId: number
+  status: AdsPostStatus
+  imageUrl: string
+  caption: string
+  createdAt?: string | null
+  reviewedAt?: string | null
+  publishedAt?: string | null
+  rejectionReason?: string | null
+  animalInfo: {
+    desertionNo: string
+    kindFullNm: string
+    age?: string | null
+    sexCd?: string | null
+    careRegNo: string
+    careNm?: string | null
+    specialMark?: string | null
   }
 }
 
@@ -841,6 +868,32 @@ export const reviewAdminShelterApplication = async (
 ) => {
   return await apiRequest<AdminAdoptionApplication>(
     API_ENDPOINTS.reviewAdminShelterApplication(careRegNo, applicationId),
+    {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }
+  )
+}
+
+export const getAdminAdsRequests = async (careRegNo: string) => {
+  return await apiRequest<AdminAdsPostRequest[]>(
+    API_ENDPOINTS.adminAdsRequests(careRegNo)
+  )
+}
+
+export const getAdminAdsRequestDetail = async (careRegNo: string, requestId: number) => {
+  return await apiRequest<AdminAdsPostRequest>(
+    API_ENDPOINTS.adminAdsRequestDetail(careRegNo, requestId)
+  )
+}
+
+export const reviewAdminAdsRequest = async (
+  careRegNo: string,
+  requestId: number,
+  payload: { status: AdsPostStatus; rejectionReason?: string | null }
+) => {
+  return await apiRequest<AdminAdsPostRequest>(
+    API_ENDPOINTS.reviewAdminAdsRequest(careRegNo, requestId),
     {
       method: "PATCH",
       body: JSON.stringify(payload),

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
-import { Building2, Check, RefreshCw } from "lucide-react"
+import { Building2, Check, Loader2, RefreshCw } from "lucide-react"
 import { Header } from "@/components/header"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
@@ -24,16 +24,20 @@ import { Textarea } from "@/components/ui/textarea"
 import { useAuth } from "@/lib/auth-context"
 import {
   AdminAdoptionApplication,
+  AdminAdsPostRequest,
   AdminNameCandidate,
   AdoptionStatus,
+  AdsPostStatus,
   Campaign,
   confirmNamingCandidate,
   createCampaign,
+  getAdminAdsRequests,
   getAdminReadyNamingCandidates,
   getAdminShelterApplications,
   getShelterCampaign,
   getShelterDetail,
   isAdminUser,
+  reviewAdminAdsRequest,
   reviewAdminShelterApplication,
   updateCampaignStatus,
 } from "@/lib/api"
@@ -60,6 +64,20 @@ const statusBadgeClass: Record<AdoptionStatus, string> = {
   Rejected: "border-red-200 bg-red-50 text-red-700",
 }
 
+const adsStatusLabels: Record<AdsPostStatus, string> = {
+  Processing: "검토중",
+  Approved: "승인됨",
+  Rejected: "거절",
+  Published: "게시 완료",
+}
+
+const adsStatusBadgeClass: Record<AdsPostStatus, string> = {
+  Processing: "border-amber-200 bg-amber-50 text-amber-700",
+  Approved: "border-blue-200 bg-blue-50 text-blue-700",
+  Rejected: "border-red-200 bg-red-50 text-red-700",
+  Published: "border-emerald-200 bg-emerald-50 text-emerald-700",
+}
+
 export default function AdminPage() {
   const { user, isLoading: authLoading } = useAuth()
   const isAdmin = isAdminUser(user)
@@ -76,6 +94,12 @@ export default function AdminPage() {
   const [isLoadingApplications, setIsLoadingApplications] = useState(false)
   const [reviewingApplicationId, setReviewingApplicationId] = useState<number | null>(null)
   const [rejectionReasons, setRejectionReasons] = useState<Record<number, string>>({})
+
+  const [adsRequests, setAdsRequests] = useState<AdminAdsPostRequest[]>([])
+  const [adsError, setAdsError] = useState<string | null>(null)
+  const [isLoadingAds, setIsLoadingAds] = useState(false)
+  const [reviewingAdsRequestId, setReviewingAdsRequestId] = useState<number | null>(null)
+  const [regeneratingAdsRequestId, setRegeneratingAdsRequestId] = useState<number | null>(null)
 
   // Campaign States
   const [shelterCampaigns, setShelterCampaigns] = useState<Campaign[]>([])
@@ -147,6 +171,11 @@ export default function AdminPage() {
     [applications]
   )
 
+  const pendingAdsRequests = useMemo(
+    () => adsRequests.filter((request) => request.status === "Processing").length,
+    [adsRequests]
+  )
+
   const trimmedCareRegNo = careRegNo.trim()
   const adminIdentifier = (user?.username || user?.email || "").trim().toLowerCase()
   const assignedShelter = adminIdentifier ? ADMIN_SHELTERS_BY_EMAIL[adminIdentifier] : undefined
@@ -185,6 +214,27 @@ export default function AdminPage() {
     }
 
     setApplications(data ?? [])
+  }
+
+  const loadAdsRequests = async () => {
+    if (!trimmedCareRegNo) {
+      setAdsError("보호소 등록번호를 입력해주세요.")
+      return
+    }
+
+    setIsLoadingAds(true)
+    setAdsError(null)
+    await resolveShelterName()
+    const { data, error } = await getAdminAdsRequests(trimmedCareRegNo)
+    setIsLoadingAds(false)
+
+    if (error) {
+      setAdsError(error)
+      setAdsRequests([])
+      return
+    }
+
+    setAdsRequests(data ?? [])
   }
 
   const resolveShelterName = async () => {
@@ -242,10 +292,45 @@ export default function AdminPage() {
     }
   }
 
+  const handleReviewAdsRequest = async (requestId: number, status: AdsPostStatus) => {
+    const confirmMessage =
+      status === "Approved"
+        ? "승인하면 인스타그램에 게시됩니다. 계속하시겠습니까?"
+        : status === "Processing"
+          ? "거절된 광고의 카드뉴스와 문구를 다시 생성하시겠습니까?"
+          : "광고 게시 요청을 거절하시겠습니까?"
+    if (!confirm(confirmMessage)) return
+
+    if (status === "Processing") {
+      setRegeneratingAdsRequestId(requestId)
+    }
+    setReviewingAdsRequestId(requestId)
+    const { data, error } = await reviewAdminAdsRequest(trimmedCareRegNo, requestId, {
+      status,
+      rejectionReason: null,
+    })
+    setReviewingAdsRequestId(null)
+    setRegeneratingAdsRequestId(null)
+
+    if (error) {
+      alert(error)
+      return
+    }
+
+    if (data) {
+      setAdsRequests((current) =>
+        current.map((request) =>
+          request.requestId === requestId ? { ...request, ...data } : request
+        )
+      )
+    }
+  }
+
   useEffect(() => {
     if (!authLoading && isAdmin) {
       setShelterName(null)
       setApplications([])
+      setAdsRequests([])
       setNameCandidates([])
       setCareRegNo(assignedShelter?.careRegNo ?? "")
     }
@@ -255,6 +340,7 @@ export default function AdminPage() {
     if (!authLoading && isAdmin && assignedShelter && trimmedCareRegNo) {
       loadApplications()
       loadShelterCampaigns()
+      loadAdsRequests()
     }
   }, [authLoading, isAdmin, assignedShelter, trimmedCareRegNo])
 
@@ -313,7 +399,7 @@ export default function AdminPage() {
               담당 보호소의 입양 신청과 이름 확정을 처리합니다.
             </p>
           </div>
-          <div className="grid grid-cols-2 gap-3 sm:w-72">
+          <div className="grid grid-cols-3 gap-3 sm:w-[26rem]">
             <Card>
               <CardContent className="p-4">
                 <p className="text-sm text-muted-foreground">보호소 이름 후보</p>
@@ -324,6 +410,12 @@ export default function AdminPage() {
               <CardContent className="p-4">
                 <p className="text-sm text-muted-foreground">검토중 신청</p>
                 <p className="mt-1 text-2xl font-bold">{pendingApplications}</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <p className="text-sm text-muted-foreground">광고 승인</p>
+                <p className="mt-1 text-2xl font-bold">{pendingAdsRequests}</p>
               </CardContent>
             </Card>
           </div>
@@ -355,6 +447,7 @@ export default function AdminPage() {
             <TabsTrigger value="adoptions">입양 신청</TabsTrigger>
             <TabsTrigger value="naming">이름 확정</TabsTrigger>
             <TabsTrigger value="campaigns">캠페인 관리</TabsTrigger>
+            <TabsTrigger value="ads">광고 승인</TabsTrigger>
           </TabsList>
 
           <TabsContent value="naming">
@@ -639,6 +732,150 @@ export default function AdminPage() {
                         </CardContent>
                       </Card>
                     ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="ads">
+            <Card>
+              <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <CardTitle>광고 게시 승인</CardTitle>
+                  <CardDescription>LLM이 생성한 카드뉴스를 확인하고 인스타그램 게시 여부를 결정합니다.</CardDescription>
+                </div>
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <Button variant="outline" onClick={loadAdsRequests} disabled={isLoadingAds}>
+                    <RefreshCw className={cn("mr-2 h-4 w-4", isLoadingAds && "animate-spin")} />
+                    새로고침
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {adsError ? (
+                  <Alert variant="destructive">
+                    <AlertTitle>광고 요청을 불러오지 못했습니다</AlertTitle>
+                    <AlertDescription>{adsError}</AlertDescription>
+                  </Alert>
+                ) : isLoadingAds ? (
+                  <div className="rounded-md border border-dashed py-10 text-center text-sm text-muted-foreground">
+                    광고 게시 요청을 불러오는 중...
+                  </div>
+                ) : adsRequests.length === 0 ? (
+                  <div className="rounded-md border border-dashed py-10 text-center text-sm text-muted-foreground">
+                    조회된 광고 게시 요청이 없습니다.
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {adsRequests.map((request) => {
+                      const isProcessing = request.status === "Processing"
+                      const isRejected = request.status === "Rejected"
+                      const isRegenerating = regeneratingAdsRequestId === request.requestId
+
+                      return (
+                        <Card key={request.requestId}>
+                          <CardContent className="grid gap-5 p-4 xl:grid-cols-[minmax(320px,420px)_1fr]">
+                            <div className="flex min-h-[320px] items-center justify-center overflow-hidden rounded-md border bg-muted p-2 sm:min-h-[420px]">
+                              <img
+                                src={request.imageUrl}
+                                alt={`${request.animalInfo.kindFullNm} 카드뉴스`}
+                                className="max-h-[70vh] w-full max-w-[420px] object-contain"
+                              />
+                            </div>
+                            <div className="space-y-4">
+                              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                                <div>
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <h3 className="font-semibold">
+                                      {request.animalInfo.kindFullNm || request.animalInfo.desertionNo}
+                                    </h3>
+                                    <Badge variant="outline" className={adsStatusBadgeClass[request.status]}>
+                                      {adsStatusLabels[request.status]}
+                                    </Badge>
+                                  </div>
+                                  <p className="mt-1 text-sm text-muted-foreground">
+                                    요청번호 {request.requestId} · {request.animalInfo.careNm || "보호소 정보 없음"}
+                                  </p>
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                  {isProcessing && (
+                                    <>
+                                      <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => handleReviewAdsRequest(request.requestId, "Approved")}
+                                      disabled={reviewingAdsRequestId === request.requestId || regeneratingAdsRequestId !== null}
+                                    >
+                                      승인 게시
+                                    </Button>
+                                      <Button
+                                      size="sm"
+                                      variant="destructive"
+                                      onClick={() => handleReviewAdsRequest(request.requestId, "Rejected")}
+                                      disabled={reviewingAdsRequestId === request.requestId || regeneratingAdsRequestId !== null}
+                                    >
+                                      거절
+                                    </Button>
+                                    </>
+                                  )}
+                                  {isRejected && (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => handleReviewAdsRequest(request.requestId, "Processing")}
+                                      disabled={reviewingAdsRequestId === request.requestId || regeneratingAdsRequestId !== null}
+                                    >
+                                      {isRegenerating ? (
+                                        <>
+                                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                          재생성 중...
+                                        </>
+                                      ) : (
+                                        "카드뉴스 재생성"
+                                      )}
+                                    </Button>
+                                  )}
+                                </div>
+                              </div>
+
+                              {isRegenerating && (
+                                <Alert>
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                  <AlertTitle>카드뉴스를 다시 만들고 있습니다</AlertTitle>
+                                  <AlertDescription>
+                                    Gemini 문구 생성과 이미지 업로드가 함께 진행되어 1-2분 정도 걸릴 수 있습니다. 완료될 때까지 화면을 닫지 마세요.
+                                  </AlertDescription>
+                                </Alert>
+                              )}
+
+                              <div className="grid gap-3 text-sm sm:grid-cols-2">
+                                <div>
+                                  <p className="text-muted-foreground">유기번호</p>
+                                  <p className="font-medium">{request.animalInfo.desertionNo}</p>
+                                </div>
+                                <div>
+                                  <p className="text-muted-foreground">나이 / 성별</p>
+                                  <p className="font-medium">
+                                    {request.animalInfo.age || "나이 미상"} · {request.animalInfo.sexCd || "성별 미상"}
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className="rounded-md bg-muted/50 p-3 text-sm leading-6 whitespace-pre-wrap">
+                                {request.caption}
+                              </div>
+
+                              {request.rejectionReason && (
+                                <Alert variant="destructive">
+                                  <AlertTitle>거절 사유</AlertTitle>
+                                  <AlertDescription>{request.rejectionReason}</AlertDescription>
+                                </Alert>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )
+                    })}
                   </div>
                 )}
               </CardContent>
