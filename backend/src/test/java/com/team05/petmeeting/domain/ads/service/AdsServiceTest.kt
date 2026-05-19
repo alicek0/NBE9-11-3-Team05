@@ -85,6 +85,27 @@ internal class AdsServiceTest {
         Mockito.verify(instagramClient).publishMedia("container-123")
     }
 
+    @Test
+    @DisplayName("카드뉴스 미리보기는 인스타그램 업로드 없이 이미지와 캡션만 생성한다")
+    fun generateCardNewsPreviewDoesNotUploadToInstagram() {
+        val animal = Animal()
+        val cardNewsResult = CardNewsResult("https://image-url.com/card.png", "caption")
+
+        Mockito.`when`(
+            animalRepository.findAllByStateGroupOrderByTotalCheerCountDesc(
+                eq(0),
+                anyPageable()
+            )
+        ).thenReturn(listOf(animal))
+        Mockito.`when`(cardNewsService.generateCardNews(animal))
+            .thenReturn(cardNewsResult)
+
+        val result = adsService.generateCardNewsPreview(1)
+
+        assertThat(result).containsExactly(cardNewsResult)
+        Mockito.verifyNoInteractions(instagramClient)
+    }
+
     private fun anyPageable(): Pageable {
         return any(Pageable::class.java) ?: Pageable.unpaged()
     }

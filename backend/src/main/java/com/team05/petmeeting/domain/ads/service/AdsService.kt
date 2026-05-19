@@ -2,6 +2,7 @@ package com.team05.petmeeting.domain.ads.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.team05.petmeeting.domain.ads.client.InstagramClient
+import com.team05.petmeeting.domain.ads.dto.CardNewsResult
 import com.team05.petmeeting.domain.animal.entity.Animal
 import com.team05.petmeeting.domain.animal.repository.AnimalRepository
 import org.springframework.data.domain.PageRequest
@@ -20,6 +21,13 @@ class AdsService(
             0,  // 0 = 보호중
             PageRequest.of(0, n)
         )
+    }
+
+    // 인스타그램 업로드 없이 카드뉴스 이미지만 생성
+    fun generateCardNewsPreview(n: Int): List<CardNewsResult> {
+        return getTopAnimals(n).map { animal ->
+            cardNewsService.generateCardNews(animal)
+        }
     }
 
     // 전체 파이프라인 실행

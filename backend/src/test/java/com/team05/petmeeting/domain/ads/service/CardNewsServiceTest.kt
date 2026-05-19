@@ -22,6 +22,9 @@ import javax.imageio.ImageIO
 internal class CardNewsServiceTest {
 
     @Mock
+    private lateinit var geminiService: GeminiService
+
+    @Mock
     private lateinit var s3Service: S3Service
 
     @InjectMocks
@@ -43,6 +46,8 @@ internal class CardNewsServiceTest {
         Mockito.`when`(animal.age).thenReturn("2살")
         Mockito.`when`(animal.sexCd).thenReturn("M")
         Mockito.`when`(animal.careNm).thenReturn("서울보호소")
+        Mockito.`when`(geminiService.generate(Mockito.contains("골든 리트리버")))
+            .thenReturn("사람을 좋아하는 밝은 친구예요.\n장난도 좋아하고 곁에 있는 걸 좋아하는 골든 리트리버예요. 천천히 알아가며 가족이 되어줄 분을 기다리고 있어요.")
         Mockito.`when`(s3Service.upload(anyByteArray(), eqString("123.png"),
             eqString("cardnews"), eqString("image/png")))
             .thenReturn("https://s3-url.com/image.png")
@@ -50,9 +55,15 @@ internal class CardNewsServiceTest {
         val result = cardNewsService.generateCardNews(animal)
 
         assertThat(result.imageUrl).isEqualTo("https://s3-url.com/image.png")
-        assertThat(result.caption).contains("골든 리트리버")
-        assertThat(result.caption).contains("서울보호소")
-        assertThat(result.caption).contains("사람을 좋아함")
+        assertThat(result.caption).contains("사람을 좋아하는 밝은 친구예요.")
+        assertThat(result.caption).contains("품종: 골든 리트리버")
+        assertThat(result.caption).contains("나이: 2살")
+        assertThat(result.caption).contains("성별: 수컷")
+        assertThat(result.caption).contains("보호소: 서울보호소")
+        assertThat(result.caption).contains("특징: 사람을 좋아함")
+        Mockito.verify(geminiService).generate(Mockito.contains("사람을 좋아함"))
+        Mockito.verify(geminiService).generate(Mockito.contains("보호소: 서울보호소"))
+        Mockito.verify(geminiService).generate(Mockito.contains("과장된 문학 표현"))
     }
 
     private fun createLocalImageUrl(): String {

@@ -6,6 +6,7 @@ import com.team05.petmeeting.infra.s3.S3Service
 import org.springframework.stereotype.Service
 import java.awt.Color
 import java.awt.Font
+import java.awt.Graphics2D
 import java.awt.RenderingHints
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
@@ -15,10 +16,11 @@ import javax.imageio.ImageIO
 
 @Service
 class CardNewsService(
+    private val geminiService: GeminiService,
     private val s3Service: S3Service
 ) {
     fun generateCardNews(animal: Animal): CardNewsResult {
-        val caption = createCaption(animal)
+        val caption = createCaption(animal).take(MAX_CAPTION_LENGTH)
 
         val finalImage = createCombinedImage(animal.popfile1, caption, animal)
 
@@ -35,17 +37,41 @@ class CardNewsService(
         val shelter = getShelterName(animal)
         val specialMark = getSpecialMark(animal)
 
-        return """
-            새로운 가족을 기다리고 있어요.
+        val prompt = """
+            유기동물 입양 홍보 글을 한국어로 작성해주세요.
+            품종: $kind
+            나이: $age
+            성별: $gender
+            보호소: $shelter
+            특징: $specialMark
 
-              품종: $kind
-              나이: $age
-              성별: $gender
-              보호소: $shelter
-              특징: $specialMark
+            규칙:
+            - 한국어만 사용
+            - 첫번째 줄: 카드 이미지에 들어갈 짧고 친근한 한 문장
+            - 두번째 줄: 인스타그램 본문에 들어갈 자연스러운 소개 문장
+            - 문구 두 줄만 출력, 다른 말 하지 말것
+            - 설명이나 번호 붙이지 말것
+            - 과장된 문학 표현, 슬픈 표현, 동정심을 자극하는 표현은 피할 것
+            - 친구에게 말하듯 따뜻하고 담백하게 작성할 것
+            - 특징은 부정적으로 단정하지 말고 귀엽거나 일상적인 성격으로 자연스럽게 풀어쓸 것
+            - 입양을 강하게 요구하지 말고  부드럽게 말할 것
+        """.trimIndent()
 
-              이번 주 가장 많은 응원을 받은 친구예요.
-          """.trimIndent()
+        val generatedText = geminiService.generate(prompt)
+            .lineSequence()
+            .map { it.trim() }
+            .filter { it.isNotBlank() }
+            .joinToString("\n")
+
+        return listOf(
+            generatedText,
+            "",
+            "품종: $kind",
+            "나이: $age",
+            "성별: $gender",
+            "보호소: $shelter",
+            "특징: $specialMark",
+        ).joinToString("\n")
     }
 
     private fun getKindName(animal: Animal): String {
@@ -138,7 +164,15 @@ class CardNewsService(
             g.setFont(Font("Dialog", Font.ITALIC, 32))
             g.setColor(Color(255, 100, 0))
             val lines = text.split("\n", limit = 2)
-            g.drawString("\" " + lines[0] + " \"", 40, imageHeight + 330)
+            drawFittedString(
+                g = g,
+                text = "\"${lines[0].trim()}\"",
+                x = 40,
+                y = imageHeight + 330,
+                maxWidth = cardWidth - 80,
+                baseFont = Font("Dialog", Font.ITALIC, 32),
+                minFontSize = 24
+            )
 
             // 5. 하단 구분선
             g.setColor(Color(255, 140, 0))
@@ -154,5 +188,46 @@ class CardNewsService(
         } catch (e: IllegalArgumentException) {
             throw RuntimeException("이미지 합성 중 오류 발생", e)
         }
+    }
+
+    private fun drawFittedString(
+        g: Graphics2D,
+        text: String,
+        x: Int,
+        y: Int,
+        maxWidth: Int,
+        baseFont: Font,
+        minFontSize: Int
+    ) {
+        var fontSize = baseFont.size
+        var fittedFont = baseFont
+        var metrics = g.getFontMetrics(fittedFont)
+
+        while (fontSize > minFontSize && metrics.stringWidth(text) > maxWidth) {
+            fontSize -= 1
+            fittedFont = baseFont.deriveFont(fontSize.toFloat())
+            metrics = g.getFontMetrics(fittedFont)
+        }
+
+        g.font = fittedFont
+        g.drawString(truncateToWidth(text, metrics, maxWidth), x, y)
+    }
+
+    private fun truncateToWidth(text: String, metrics: java.awt.FontMetrics, maxWidth: Int): String {
+        if (metrics.stringWidth(text) <= maxWidth) {
+            return text
+        }
+
+        val ellipsis = "..."
+        var endIndex = text.length
+        while (endIndex > 0 && metrics.stringWidth(text.take(endIndex) + ellipsis) > maxWidth) {
+            endIndex -= 1
+        }
+
+        return text.take(endIndex) + ellipsis
+    }
+
+    companion object {
+        private const val MAX_CAPTION_LENGTH = 700
     }
 }
