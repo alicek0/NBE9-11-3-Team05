@@ -126,81 +126,153 @@
 
   ## 시스템 구성도
 
-### 임시
-<img width="1774" height="887" alt="B77E3459-CD1F-47D1-9CC6-99BD657460EC" src="https://github.com/user-attachments/assets/c235fa6a-be5b-4f01-92b6-4bcffc2a97da" />
+<img width="1692" height="930" alt="image" src="https://github.com/user-attachments/assets/41a0109d-8a52-4da6-a2d0-e32af02734ae" />
 
 
-  ## 주요 API
+
+ ## 주요 API
 
   ### 인증
 
   | Method | URL | 설명 |
   | --- | --- | --- |
-  | POST | /api/v1/auth/email/start | 이메일 가입 흐름 시작 |
-  | POST | /api/v1/auth/email/send-otp | 인증 코드 발송 |
-  | POST | /api/v1/auth/email/verify | 인증 코드 검증 |
-  | POST | /api/v1/auth/email/signup | 이메일 회원가입 |
-  | POST | /api/v1/auth/email/login | 이메일 로그인 |
-  | POST | /api/v1/auth/logout | 로그아웃 |
-  | POST | /api/v1/auth/refresh | Access Token 재발급 |
-  | DELETE | /api/v1/auth/withdraw | 회원 탈퇴 |
+  | POST | `/api/v1/auth/email/start` | 이메일 가입 흐름 시작 |
+  | POST | `/api/v1/auth/email/send-otp` | 인증 코드 발송 |
+  | POST | `/api/v1/auth/email/verify` | 인증 코드 검증 |
+  | POST | `/api/v1/auth/email/signup` | 이메일 회원가입 |
+  | POST | `/api/v1/auth/email/login` | 이메일 로그인 |
+  | POST | `/api/v1/auth/logout` | 로그아웃 |
+  | POST | `/api/v1/auth/refresh` | Access Token 재발급 |
+  | DELETE | `/api/v1/auth/withdraw` | 회원 탈퇴 |
+
+  ### 사용자
+
+  | Method | URL | 설명 |
+  | --- | --- | --- |
+  | GET | `/api/v1/me` | 내 정보 조회 |
+  | GET | `/api/v1/me/profile` | 내 프로필 조회 |
+  | GET | `/api/v1/me/summary` | 마이페이지 요약 조회 |
+  | PATCH | `/api/v1/me/nickname` | 닉네임 수정 |
+  | PATCH | `/api/v1/me/profileImg` | 프로필 이미지 수정 |
+  | PATCH | `/api/v1/me/password` | 비밀번호 수정 |
+  | GET | `/api/v1/me/feeds` | 내가 작성한 피드 조회 |
+  | GET | `/api/v1/me/comments/feeds` | 내가 작성한 피드 댓글 조회 |
+  | GET | `/api/v1/me/comments/animals` | 내가 작성한 동물 댓글 조회 |
+  | GET | `/api/v1/me/cheer-animals` | 내가 응원한 동물 조회 |
+  | GET | `/api/v1/me/donations` | 내 후원 목록 조회 |
 
   ### 유기동물
 
   | Method | URL | 설명 |
   | --- | --- | --- |
-  | GET | /api/v1/animals | 유기동물 목록 조회 |
-  | GET | /api/v1/animals/{animalId} | 유기동물 상세 조회 |
-  | POST | /api/v1/animals/sync | 유기동물 데이터 동기화 |
-  | POST | /api/v1/animals/sync/initial | 초기 데이터 동기화 |
-  | POST | /api/v1/animals/sync/update | 갱신 데이터 동기화 |
+  | GET | `/api/v1/animals` | 유기동물 필터 조회 |
+  | GET | `/api/v1/animals/{animalId}` | 유기동물 상세 조회 |
+  | POST | `/api/v1/animals/sync` | 유기동물 데이터 동기화 |
+  | POST | `/api/v1/animals/sync/initial` | 초기 데이터 동기화 |
+  | POST | `/api/v1/animals/sync/update` | 갱신 데이터 동기화 |
 
-  ### 피드
+  ### 피드 / 댓글
 
   | Method | URL | 설명 |
   | --- | --- | --- |
-  | GET | /api/v1/feeds | 피드 목록 조회 |
-  | GET | /api/v1/feeds/{feedId} | 피드 상세 조회 |
-  | POST | /api/v1/feeds | 피드 작성 |
-  | PUT | /api/v1/feeds/{feedId} | 피드 수정 |
-  | DELETE | /api/v1/feeds/{feedId} | 피드 삭제 |
-  | POST | /api/v1/feeds/images | 피드 이미지 업로드 |
-  | POST | /api/v1/feeds/{feedId}/likes | 피드 좋아요 토글 |
-  | GET | /api/v1/feeds/adoptable-animals | 입양 후기 작성용 동물 목록 조회 |
+  | GET | `/api/v1/feeds` | 피드 목록 조회 |
+  | GET | `/api/v1/feeds/{feedId}` | 피드 상세 조회 |
+  | POST | `/api/v1/feeds` | 피드 작성 |
+  | PUT | `/api/v1/feeds/{feedId}` | 피드 수정 |
+  | DELETE | `/api/v1/feeds/{feedId}` | 피드 삭제 |
+  | POST | `/api/v1/feeds/images` | 피드 이미지 업로드 |
+  | POST | `/api/v1/feeds/{feedId}/likes` | 피드 좋아요 토글 |
+  | GET | `/api/v1/feeds/adoptable-animals` | 입양 후기 작성용 동물 목록 조회 |
+  | GET | `/api/v1/feeds/{feedId}/comments` | 피드 댓글 목록 조회 |
+  | POST | `/api/v1/feeds/{feedId}/comments` | 피드 댓글 작성 |
+  | PATCH | `/api/v1/feeds/{feedId}/comments/{commentId}` | 피드 댓글 수정 |
+  | DELETE | `/api/v1/feeds/{feedId}/comments/{commentId}` | 피드 댓글 삭제 |
+  | GET | `/api/v1/animals/{animalId}/comments` | 동물 댓글 조회 |
+  | POST | `/api/v1/animals/{animalId}/comments` | 동물 댓글 작성 |
+  | PATCH | `/api/v1/animals/{animalId}/comments/{commentId}` | 동물 댓글 수정 |
+  | DELETE | `/api/v1/animals/{animalId}/comments/{commentId}` | 동물 댓글 삭제 |
 
   ### 입양
 
   | Method | URL | 설명 |
   | --- | --- | --- |
-  | GET | /api/v1/adoptions/me | 내 입양 신청 목록 조회 |
-  | GET | /api/v1/adoptions/{applicationId} | 입양 신청 상세 조회 |
-  | POST | /api/v1/adoptions/{animalId} | 입양 신청 |
-  | DELETE | /api/v1/adoptions/{applicationId} | 입양 신청 취소 |
-  | GET | /api/v1/adoptions/admin/shelters/{careRegNo}/applications | 관리자 입양 신청 목록 조회 |
-  | GET | /api/v1/adoptions/admin/shelters/{careRegNo}/applications/{applicationId} | 관리자 입양 신청 상세 조회 |
-  | PATCH | /api/v1/adoptions/admin/shelters/{careRegNo}/applications/{applicationId}/review | 입양 신청 검토 |
+  | GET | `/api/v1/adoptions/me` | 내 입양 신청 목록 조회 |
+  | GET | `/api/v1/adoptions/{applicationId}` | 입양 신청 상세 조회 |
+  | POST | `/api/v1/adoptions/{animalId}` | 입양 신청 |
+  | DELETE | `/api/v1/adoptions/{applicationId}` | 입양 신청 취소 |
+  | GET | `/api/v1/adoptions/admin/shelters/{careRegNo}/applications` | 관리자 입양 신청 목록 조회 |
+  | GET | `/api/v1/adoptions/admin/shelters/{careRegNo}/applications/{applicationId}` | 관리자 입양 신청 상세 조회 |
+  | PATCH | `/api/v1/adoptions/admin/shelters/{careRegNo}/applications/{applicationId}/review` | 입양 신청 검토 |
 
-  ### 후원
+  ### 응원 / 후원
 
   | Method | URL | 설명 |
   | --- | --- | --- |
-  | POST | /api/v1/donations/prepare | 결제 준비 |
-  | POST | /api/v1/donations/complete | 결제 완료 |
-  | POST | /api/v1/donations/webhook | 결제 웹훅 처리 |
-  | GET | /api/v1/me/donations | 내 후원 목록 조회 |
+  | GET | `/api/v1/cheers/today` | 잔여 응원 횟수 조회 |
+  | POST | `/api/v1/animals/{animalId}/cheers` | 응원 부여 |
+  | POST | `/api/v1/donations/prepare` | 결제 준비 |
+  | POST | `/api/v1/donations/complete` | 결제 완료 |
+  | POST | `/api/v1/donations/webhook` | 웹훅 처리 |
+
+  ### 캠페인 / 보호소
+
+  | Method | URL | 설명 |
+  | --- | --- | --- |
+  | GET | `/api/v1/campaigns` | 현재 진행 캠페인 전체 조회 |
+  | POST | `/api/v1/shelters/{shelterId}/campaign` | 보호소 캠페인 생성 |
+  | GET | `/api/v1/shelters/{shelterId}/campaign` | 보호소 현재 진행 캠페인 조회 |
+  | PATCH | `/api/v1/campaigns/{campaignId}/status` | 캠페인 상태 변경 |
+  | GET | `/api/v1/shelters/{shelterId}` | 보호소 조회 |
+  | GET | `/api/v1/shelters/` | 전체 보호소 조회 |
+
+  ### 이름 짓기
+
+  | Method | URL | 설명 |
+  | --- | --- | --- |
+  | GET | `/api/v1/naming/animals/{animalId}/candidates` | 이름 후보 조회 |
+  | POST | `/api/v1/naming/animals/{animalId}/propose` | 이름 작명 제안 |
+  | POST | `/api/v1/naming/candidates/{candidateId}/vote` | 기존 이름 투표 |
+  | PATCH | `/api/v1/naming/candidates/{candidateId}/confirm` | 관리자 이름 확정 |
+  | GET | `/api/v1/naming/admin/qualified-candidates` | 관리자용 확정 대기 목록 |
+  | GET | `/api/v1/naming/admin/badwords` | 금칙어 조회 |
+  | POST | `/api/v1/naming/admin/badwords` | 금칙어 추가 |
+  | DELETE | `/api/v1/naming/admin/badwords/{badwordId}` | 금칙어 삭제 |
 
   ### 광고
 
   | Method | URL | 설명 |
   | --- | --- | --- |
-  | GET | /api/v1/ads/top-animals | 응원 수 기준 Top N 동물 조회 |
-  | POST | /api/v1/ads/run | 광고 파이프라인 수동 실행 |
+  | GET | `/api/v1/ads/top-animals` | 응원 수 기준 Top N 동물 조회 |
+  | POST | `/api/v1/ads/run` | 광고 파이프라인 수동 실행 |
 
 
 
   ## ERD
-  ### 임시
 
   <img width="1155" height="865" alt="5조_ERD" src="https://github.com/user-attachments/assets/b8896c48-c1d8-48b3-a304-8b1c56f27c2a" />
 
+## GitHub Flow 전략
 
+본 프로젝트는 `main` 브랜치를 기준으로 기능 단위 브랜치를 생성하고, Pull Request를 통해 코드 리뷰 후 병합하는 **GitHub Flow** 방식으로 관리했습니다.
+
+### 브랜치 규칙
+
+| 브랜치 | 설명 |
+| --- | --- |
+| `main` | 실제 배포 가능한 안정 버전 브랜치 |
+| `feat/*` | 신규 기능 개발 |
+| `fix/*` | 버그 수정 |
+| `refactor/*` | 코드 리팩토링 |
+| `docs/*` | 문서 수정 |
+| `chore/*` | 설정, 빌드, 패키지 등 기타 작업 |
+
+### 작업 프로세스
+
+1. `main` 브랜치 최신화
+2. 이슈 단위 작업 브랜치 생성
+3. 기능 개발 및 테스트
+4. 작업 중인 `Pull Request`는 `Draft PR`로 생성
+5. Gemini Code Assist 자동 리뷰를 통해 1차 코드 품질 검토
+6. 리뷰 피드백 반영 후 `Ready for review`로 전환
+7. 팀원 리뷰 및 승인 후 `main` 브랜치에 병합
+8. 병합 후 작업 브랜치 삭제
