@@ -5,6 +5,7 @@ import com.team05.petmeeting.domain.user.dto.auth.login.LoginAndRefreshRes
 import com.team05.petmeeting.domain.user.entity.User
 import com.team05.petmeeting.domain.user.entity.UserAuth
 import com.team05.petmeeting.domain.user.errorCode.UserErrorCode
+import com.team05.petmeeting.domain.user.event.SignupOtpMailRequestedEvent
 import com.team05.petmeeting.domain.user.provider.Provider
 import com.team05.petmeeting.domain.user.refreshtoken.entity.RefreshToken
 import com.team05.petmeeting.domain.user.refreshtoken.repository.RefreshTokenRepository
@@ -15,6 +16,7 @@ import jakarta.servlet.http.Cookie
 import jakarta.servlet.http.HttpServletRequest
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.springframework.context.ApplicationEventPublisher
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -32,7 +34,7 @@ class UserAuthServiceTest {
     private lateinit var passwordEncoder: PasswordEncoder
     private lateinit var jwtUtil: JwtUtil
     private lateinit var otpService: OtpService
-    private lateinit var mailService: MailService
+    private lateinit var eventPublisher: ApplicationEventPublisher
 
     @BeforeEach
     fun setUp() {
@@ -41,16 +43,31 @@ class UserAuthServiceTest {
         passwordEncoder = mock(PasswordEncoder::class.java)
         jwtUtil = mock(JwtUtil::class.java)
         otpService = mock(OtpService::class.java)
-        mailService = mock(MailService::class.java)
+        eventPublisher = mock(ApplicationEventPublisher::class.java)
 
         userAuthService = UserAuthService(
             passwordEncoder,
             jwtUtil,
-            mailService,
+            eventPublisher,
             otpService,
             userRepository,
             refreshTokenRepository,
         )
+    }
+
+    @Test
+    @DisplayName("sendSignupOtp - OTP 저장 후 메일 발송 이벤트를 발행")
+    fun sendSignupOtp_success() {
+        val email = "test@gmail.com"
+        val code = "123456"
+
+        `when`(otpService.saveSignupOtp(email)).thenReturn(code)
+
+        userAuthService.sendSignupOtp(email)
+
+        verify(otpService).checkCooldown(email)
+        verify(otpService).saveSignupOtp(email)
+        verify(eventPublisher).publishEvent(SignupOtpMailRequestedEvent(email, code))
     }
 
     @Test

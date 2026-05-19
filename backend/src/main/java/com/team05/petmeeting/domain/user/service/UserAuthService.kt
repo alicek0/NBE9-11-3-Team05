@@ -8,6 +8,7 @@ import com.team05.petmeeting.domain.user.dto.auth.login.LoginAndRefreshRes
 import com.team05.petmeeting.domain.user.entity.User
 import com.team05.petmeeting.domain.user.entity.UserAuth
 import com.team05.petmeeting.domain.user.errorCode.UserErrorCode
+import com.team05.petmeeting.domain.user.event.SignupOtpMailRequestedEvent
 import com.team05.petmeeting.domain.user.provider.Provider
 import com.team05.petmeeting.domain.user.refreshtoken.entity.RefreshToken
 import com.team05.petmeeting.domain.user.refreshtoken.repository.RefreshTokenRepository
@@ -18,6 +19,7 @@ import com.team05.petmeeting.global.security.util.JwtUtil
 import com.team05.petmeeting.global.security.util.RefreshTokenUtil.Companion.REFRESH_TOKEN_COOKIE_NAME
 import jakarta.servlet.http.HttpServletRequest
 import org.slf4j.LoggerFactory
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -29,7 +31,7 @@ import java.util.*
 class UserAuthService(
     private val passwordEncoder: PasswordEncoder,
     private val jwtUtil: JwtUtil,
-    private val mailService: MailService,
+    private val eventPublisher: ApplicationEventPublisher,
     private val otpService: OtpService,
     private val userRepository: UserRepository,
     private val refreshTokenRepository: RefreshTokenRepository,
@@ -53,7 +55,8 @@ class UserAuthService(
 
     fun sendSignupOtp(email: String) {
         otpService.checkCooldown(email)
-        mailService.sendMail(email, otpService.saveSignupOtp(email))
+        val code = otpService.saveSignupOtp(email)
+        eventPublisher.publishEvent(SignupOtpMailRequestedEvent(email, code))
     }
 
     fun verifyOtp(email: String, code: String): String {
