@@ -35,9 +35,7 @@ data class UserDonationRes(
             donationTotalAmount: Int,
             donations: List<Donation>
         ): UserDonationRes {
-            val items = donations.stream()
-                .map { donation: Donation -> UserDonationItem.from(donation) }
-                .toList()
+            val items = donations.map(UserDonationItem::from)
             return UserDonationRes(donationCount, donationTotalAmount, items)
         }
     }

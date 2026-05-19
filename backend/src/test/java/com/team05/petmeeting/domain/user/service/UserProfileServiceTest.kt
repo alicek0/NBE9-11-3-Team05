@@ -6,7 +6,7 @@ import com.team05.petmeeting.domain.comment.repository.FeedCommentRepository
 import com.team05.petmeeting.domain.feed.repository.FeedRepository
 import com.team05.petmeeting.domain.user.entity.User
 import com.team05.petmeeting.domain.user.entity.UserAuth
-import com.team05.petmeeting.domain.user.errorCode.UserErrorCode
+import com.team05.petmeeting.domain.user.errorcode.UserErrorCode
 import com.team05.petmeeting.domain.user.provider.Provider
 import com.team05.petmeeting.domain.user.repository.UserRepository
 import com.team05.petmeeting.global.exception.BusinessException

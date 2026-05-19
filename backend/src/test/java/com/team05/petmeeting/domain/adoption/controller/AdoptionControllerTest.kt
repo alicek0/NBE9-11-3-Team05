@@ -4,7 +4,7 @@ import com.team05.petmeeting.domain.adoption.dto.AdoptionApplyReq
 import com.team05.petmeeting.domain.adoption.dto.AdoptionApplyRes
 import com.team05.petmeeting.domain.adoption.dto.AdoptionDetailRes
 import com.team05.petmeeting.domain.adoption.entity.AdoptionStatus
-import com.team05.petmeeting.domain.adoption.errorCode.AdoptionErrorCode
+import com.team05.petmeeting.domain.adoption.errorcode.AdoptionErrorCode
 import com.team05.petmeeting.domain.adoption.service.AdoptionService
 import com.team05.petmeeting.global.exception.BusinessException
 import com.team05.petmeeting.global.security.filter.JwtAuthenticationFilter

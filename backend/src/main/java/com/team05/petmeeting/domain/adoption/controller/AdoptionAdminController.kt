@@ -5,6 +5,7 @@ import com.team05.petmeeting.domain.adoption.dto.AdoptionDetailRes
 import com.team05.petmeeting.domain.adoption.dto.AdoptionReviewReq
 import com.team05.petmeeting.domain.adoption.service.AdoptionAdminService
 import com.team05.petmeeting.global.security.userdetails.CustomUserDetails
+import jakarta.validation.Valid
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
@@ -41,7 +42,7 @@ class AdoptionAdminController(
         @AuthenticationPrincipal userDetails: CustomUserDetails,
         @PathVariable careRegNo: String,
         @PathVariable applicationId: Long,
-        @RequestBody request: AdoptionReviewReq,
+        @Valid @RequestBody request: AdoptionReviewReq,
     ): AdoptionDetailRes =
         adoptionAdminService.reviewApplication(userDetails.userId, careRegNo, applicationId, request)
 }

@@ -4,7 +4,7 @@ import com.team05.petmeeting.domain.animal.entity.Animal
 
 data class UserCheerAnimalRes(
     val totalAnimalCount: Long,
-    val animals: MutableList<CheerAnimalItem>
+    val animals: List<CheerAnimalItem>
 ) {
 
     data class CheerAnimalItem(
@@ -32,15 +32,14 @@ data class UserCheerAnimalRes(
 
     companion object {
         @JvmStatic
-        fun from(animalCountMap: MutableList<Array<Any>>): UserCheerAnimalRes {
-            val items = animalCountMap.stream()
-                .map { row: Array<Any> ->
+        fun from(animalCountMap: List<Array<Any>>): UserCheerAnimalRes {
+            val items = animalCountMap
+                .map { row ->
                     CheerAnimalItem.from(
                         (row[0] as Animal),
                         (row[1] as Long)
                     )
                 }
-                .toList()
 
             return UserCheerAnimalRes(items.size.toLong(), items)
         }

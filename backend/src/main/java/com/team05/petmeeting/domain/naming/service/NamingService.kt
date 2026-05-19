@@ -1,7 +1,7 @@
 package com.team05.petmeeting.domain.naming.service
 
 import com.team05.petmeeting.domain.animal.entity.Animal
-import com.team05.petmeeting.domain.animal.errorCode.AnimalErrorCode
+import com.team05.petmeeting.domain.animal.errorcode.AnimalErrorCode
 import com.team05.petmeeting.domain.animal.repository.AnimalRepository
 import com.team05.petmeeting.domain.naming.dto.BadWordAddRes
 import com.team05.petmeeting.domain.naming.dto.BadWordListRes
@@ -12,10 +12,10 @@ import com.team05.petmeeting.domain.naming.entity.AnimalNameCandidate
 import com.team05.petmeeting.domain.naming.entity.BadWord
 import com.team05.petmeeting.domain.naming.entity.NameVoteHistory
 import com.team05.petmeeting.domain.naming.entity.QBadWord.badWord
-import com.team05.petmeeting.domain.naming.errorCode.NamingErrorCode
+import com.team05.petmeeting.domain.naming.errorcode.NamingErrorCode
 import com.team05.petmeeting.domain.naming.repository.AnimalNameCandidateRepository
 import com.team05.petmeeting.domain.naming.repository.NameVoteHistoryRepository
-import com.team05.petmeeting.domain.user.errorCode.UserErrorCode
+import com.team05.petmeeting.domain.user.errorcode.UserErrorCode
 import com.team05.petmeeting.domain.user.repository.UserRepository
 import com.team05.petmeeting.global.exception.BusinessException
 import org.springframework.stereotype.Service

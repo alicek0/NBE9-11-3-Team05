@@ -1,6 +1,6 @@
 package com.team05.petmeeting.domain.user.service
 
-import com.team05.petmeeting.domain.user.errorCode.UserErrorCode
+import com.team05.petmeeting.domain.user.errorcode.UserErrorCode
 import com.team05.petmeeting.global.exception.BusinessException
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.data.redis.core.script.DefaultRedisScript

@@ -8,7 +8,7 @@ import com.team05.petmeeting.domain.campaign.dto.CampaignRes
 import com.team05.petmeeting.domain.campaign.dto.CampaignRes.Companion.of
 import com.team05.petmeeting.domain.campaign.entity.Campaign
 import com.team05.petmeeting.domain.campaign.enums.CampaignStatus
-import com.team05.petmeeting.domain.campaign.errorCode.CampaignErrorCode
+import com.team05.petmeeting.domain.campaign.errorcode.CampaignErrorCode
 import com.team05.petmeeting.domain.campaign.repository.CampaignRepository
 import com.team05.petmeeting.domain.shelter.service.ShelterService
 import com.team05.petmeeting.global.exception.BusinessException

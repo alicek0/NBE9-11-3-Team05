@@ -1,7 +1,7 @@
 package com.team05.petmeeting.domain.shelter.controller;
 
 import com.team05.petmeeting.domain.shelter.dto.ShelterRes;
-import com.team05.petmeeting.domain.shelter.errorCode.ShelterErrorCode;
+import com.team05.petmeeting.domain.shelter.errorcode.ShelterErrorCode;
 import com.team05.petmeeting.domain.shelter.service.ShelterService;
 import com.team05.petmeeting.global.exception.BusinessException;
 import com.team05.petmeeting.global.security.test.WithCustomUser;

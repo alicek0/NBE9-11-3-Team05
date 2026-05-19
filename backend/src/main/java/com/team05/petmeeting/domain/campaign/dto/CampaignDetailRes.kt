@@ -30,9 +30,7 @@ data class CampaignDetailRes(
     companion object {
         @JvmStatic
         fun from(campaign: List<Campaign>): CampaignDetailRes {
-            val campaignDetailItems = campaign.stream()
-                .map{ campaign: Campaign -> CampaignDetailItem.from(campaign) }
-                .toList()
+            val campaignDetailItems = campaign.map(CampaignDetailItem::from)
             return CampaignDetailRes(campaignDetailItems.size, campaignDetailItems)
         }
     }

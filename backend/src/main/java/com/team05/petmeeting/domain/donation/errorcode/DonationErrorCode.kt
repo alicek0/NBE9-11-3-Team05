@@ -1,4 +1,4 @@
-package com.team05.petmeeting.domain.donation.errorCode
+package com.team05.petmeeting.domain.donation.errorcode
 
 import com.team05.petmeeting.global.exception.ErrorCode
 import org.springframework.http.HttpStatus

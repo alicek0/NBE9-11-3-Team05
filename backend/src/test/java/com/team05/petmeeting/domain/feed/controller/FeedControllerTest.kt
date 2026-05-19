@@ -7,7 +7,7 @@ import com.team05.petmeeting.domain.feed.dto.FeedListRes
 import com.team05.petmeeting.domain.feed.dto.FeedReq
 import com.team05.petmeeting.domain.feed.dto.FeedRes
 import com.team05.petmeeting.domain.feed.enums.FeedCategory
-import com.team05.petmeeting.domain.feed.errorCode.FeedErrorCode
+import com.team05.petmeeting.domain.feed.errorcode.FeedErrorCode
 import com.team05.petmeeting.domain.feed.service.FeedLikeService
 import com.team05.petmeeting.domain.feed.service.FeedService
 import com.team05.petmeeting.domain.user.entity.User

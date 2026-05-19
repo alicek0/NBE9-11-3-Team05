@@ -2,7 +2,7 @@ package com.team05.petmeeting.domain.campaign.service
 
 import com.team05.petmeeting.domain.animal.service.AnimalExternalService
 import com.team05.petmeeting.domain.campaign.dto.CampaignCreateReq
-import com.team05.petmeeting.domain.campaign.errorCode.CampaignErrorCode
+import com.team05.petmeeting.domain.campaign.errorcode.CampaignErrorCode
 import com.team05.petmeeting.domain.campaign.repository.CampaignRepository
 import com.team05.petmeeting.domain.shelter.dto.ShelterCommand
 import com.team05.petmeeting.domain.shelter.entity.Shelter

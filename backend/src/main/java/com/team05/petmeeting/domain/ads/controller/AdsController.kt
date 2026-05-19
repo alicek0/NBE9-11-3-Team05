@@ -2,7 +2,7 @@ package com.team05.petmeeting.domain.ads.controller
 
 import com.team05.petmeeting.domain.ads.service.AdsService
 import com.team05.petmeeting.domain.animal.entity.Animal
-import com.team05.petmeeting.global.rsData.RsData
+import com.team05.petmeeting.global.rsdata.RsData
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping

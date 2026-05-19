@@ -4,7 +4,7 @@ import com.team05.petmeeting.domain.user.dto.auth.emailsignup.EmailSignupReq
 import com.team05.petmeeting.domain.user.dto.auth.login.LoginAndRefreshRes
 import com.team05.petmeeting.domain.user.entity.User
 import com.team05.petmeeting.domain.user.entity.UserAuth
-import com.team05.petmeeting.domain.user.errorCode.UserErrorCode
+import com.team05.petmeeting.domain.user.errorcode.UserErrorCode
 import com.team05.petmeeting.domain.user.event.SignupOtpMailRequestedEvent
 import com.team05.petmeeting.domain.user.provider.Provider
 import com.team05.petmeeting.domain.user.refreshtoken.entity.RefreshToken

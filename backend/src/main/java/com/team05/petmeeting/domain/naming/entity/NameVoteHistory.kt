@@ -3,9 +3,6 @@ package com.team05.petmeeting.domain.naming.entity
 import com.team05.petmeeting.domain.animal.entity.Animal
 import com.team05.petmeeting.domain.user.entity.User
 import jakarta.persistence.*
-import lombok.AccessLevel
-import lombok.Getter
-import lombok.NoArgsConstructor
 import java.time.LocalDateTime
 
 // 복합 유니크 키: 유저는 한 동물에 한번만 투표가능

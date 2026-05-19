@@ -3,7 +3,7 @@ package com.team05.petmeeting.domain.feed.service
 import com.team05.petmeeting.domain.feed.entity.Feed
 import com.team05.petmeeting.domain.feed.entity.FeedLike
 import com.team05.petmeeting.domain.feed.enums.FeedCategory
-import com.team05.petmeeting.domain.feed.errorCode.FeedErrorCode
+import com.team05.petmeeting.domain.feed.errorcode.FeedErrorCode
 import com.team05.petmeeting.domain.feed.repository.FeedLikeRepository
 import com.team05.petmeeting.domain.feed.repository.FeedRepository
 import com.team05.petmeeting.domain.user.entity.User

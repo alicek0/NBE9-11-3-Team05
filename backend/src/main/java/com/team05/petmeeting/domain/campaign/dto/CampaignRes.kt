@@ -34,9 +34,7 @@ data class CampaignRes(
     companion object {
         @JvmStatic
         fun of(totalCampaigns: Int, campaignList: List<Campaign>): CampaignRes {
-            val items: List<CampaignItem> = campaignList.stream()
-                .map{ campaign: Campaign -> CampaignItem.from(campaign) }
-                .toList()
+            val items = campaignList.map(CampaignItem::from)
             return CampaignRes(totalCampaigns, items)
         }
     }

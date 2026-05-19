@@ -1,7 +1,7 @@
 package com.team05.petmeeting.domain.donation.service
 
 import com.team05.petmeeting.domain.campaign.enums.CampaignStatus
-import com.team05.petmeeting.domain.campaign.errorCode.CampaignErrorCode
+import com.team05.petmeeting.domain.campaign.errorcode.CampaignErrorCode
 import com.team05.petmeeting.domain.campaign.repository.CampaignRepository
 import com.team05.petmeeting.domain.campaign.service.CampaignService
 import com.team05.petmeeting.domain.donation.dto.CompleteRes
@@ -9,7 +9,7 @@ import com.team05.petmeeting.domain.donation.dto.PrepareReq
 import com.team05.petmeeting.domain.donation.dto.PrepareRes
 import com.team05.petmeeting.domain.donation.entity.Donation
 import com.team05.petmeeting.domain.donation.enums.DonationStatus
-import com.team05.petmeeting.domain.donation.errorCode.DonationErrorCode
+import com.team05.petmeeting.domain.donation.errorcode.DonationErrorCode
 import com.team05.petmeeting.domain.donation.repository.DonationRepository
 import com.team05.petmeeting.domain.user.dto.profile.UserDonationRes
 import com.team05.petmeeting.domain.user.service.UserService
@@ -48,12 +48,7 @@ class DonationDbService(
             ?: throw BusinessException(DonationErrorCode.PAYMENT_NOT_FOUND)
 
         if (donation.status == DonationStatus.PAID) {  // 웹훅 중복 처리 방지
-            return CompleteRes(
-                id = donation.id!!,
-                amount = donation.amount,
-                status = donation.status,
-                campaignId = donation.campaign.id!!
-            )
+            return donation.toCompleteRes()
         }
 
         if (!isPaid) {
@@ -75,12 +70,7 @@ class DonationDbService(
 
         donationRepository.save(donation)
 
-        return CompleteRes(
-            id = donation.id!!,
-            amount = donation.amount,
-            status = donation.status,
-            campaignId = donation.campaign.id!!
-        )
+        return donation.toCompleteRes()
     }
 
     @Transactional
@@ -96,7 +86,7 @@ class DonationDbService(
             donation.fail()
         } else {
             donation.complete()
-            val campaignId = donation.campaign.id!!
+            val campaignId = requireNotNull(donation.campaign.id)
             campaignRepository.addDonationAmount(campaignId, paidAmount)
             campaignRepository.updateStatusIfTargetReached(campaignId)
         }
@@ -111,5 +101,12 @@ class DonationDbService(
         return UserDonationRes.of(donations.size, totalAmount, donations)
     }
 
+    private fun Donation.toCompleteRes(): CompleteRes =
+        CompleteRes(
+            id = requireNotNull(id),
+            amount = amount,
+            status = status,
+            campaignId = requireNotNull(campaign.id)
+        )
 
 }

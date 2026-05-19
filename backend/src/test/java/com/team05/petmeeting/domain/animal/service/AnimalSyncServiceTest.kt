@@ -6,7 +6,7 @@ import com.team05.petmeeting.domain.animal.dto.external.*
 import com.team05.petmeeting.domain.animal.entity.Animal
 import com.team05.petmeeting.domain.animal.entity.AnimalSyncType
 import com.team05.petmeeting.domain.animal.entity.SyncState
-import com.team05.petmeeting.domain.animal.errorCode.AnimalErrorCode
+import com.team05.petmeeting.domain.animal.errorcode.AnimalErrorCode
 import com.team05.petmeeting.domain.animal.repository.AnimalRepository
 import com.team05.petmeeting.domain.animal.repository.SyncStateRepository
 import com.team05.petmeeting.domain.shelter.dto.ShelterCommand

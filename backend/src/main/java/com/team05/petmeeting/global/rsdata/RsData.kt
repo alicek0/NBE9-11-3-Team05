@@ -1,4 +1,4 @@
-package com.team05.petmeeting.global.rsData
+package com.team05.petmeeting.global.rsdata
 
 data class RsData<T>(
     val msg: String,

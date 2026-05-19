@@ -5,15 +5,12 @@ import com.team05.petmeeting.domain.shelter.dto.ShelterListRes
 import com.team05.petmeeting.domain.shelter.dto.ShelterRes
 import com.team05.petmeeting.domain.shelter.entity.Shelter
 import com.team05.petmeeting.domain.shelter.entity.Shelter.Companion.create
-import com.team05.petmeeting.domain.shelter.errorCode.ShelterErrorCode
+import com.team05.petmeeting.domain.shelter.errorcode.ShelterErrorCode
 import com.team05.petmeeting.domain.shelter.repository.ShelterRepository
 import com.team05.petmeeting.global.exception.BusinessException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.data.domain.Pageable
-import java.util.function.Function
-import java.util.function.Supplier
-import java.util.stream.Collectors
 
 @Service
 @Transactional
@@ -32,29 +29,27 @@ class ShelterService(private val shelterRepository: ShelterRepository) {
         */
     fun createOrUpdateShelter(cmd: ShelterCommand): Shelter {
         return shelterRepository.findById(cmd.careRegNo)
-            .map(Function { existing: Shelter ->
-                if (existing.updTm!!.isBefore(cmd.updTm)) {
+            .map { existing ->
+                if (existing.updTm.isBefore(cmd.updTm)) {
                     existing.updateFrom(cmd)
                 }
                 existing
-            })
-            .orElseGet(Supplier {
-                shelterRepository.save<Shelter>(
-                    create(cmd)
-                )
-            })
+            }
+            .orElseGet {
+                shelterRepository.save(create(cmd))
+            }
     }
 
     /*
      * n개 cmd -> DB 조회 한번
      */
     fun createOrUpdateShelters(cmds: List<ShelterCommand>) {
-        val ids = cmds.map {it.careRegNo} .toSet()
+        val ids = cmds.map { it.careRegNo }.toSet()
 
         // 모든 careRegNo 한번에 다 조회해서 map에 저장
         val map = shelterRepository.findByCareRegNoIn(ids)
-            .stream()
-            .collect(Collectors.toMap(Shelter::careRegNo, Function { s: Shelter? -> s }))
+            .associateBy { it.careRegNo }
+            .toMutableMap()
 
         for (cmd in cmds) {
             val existing = map[cmd.careRegNo] // map에 저장해둔 Shelter
@@ -65,7 +60,7 @@ class ShelterService(private val shelterRepository: ShelterRepository) {
                 }
             } else {
                 val newShelter = create(cmd)
-                shelterRepository.save<Shelter>(newShelter)
+                shelterRepository.save(newShelter)
                 map[cmd.careRegNo] = newShelter
             }
         }
@@ -73,7 +68,7 @@ class ShelterService(private val shelterRepository: ShelterRepository) {
 
     fun findById(id: String): Shelter {
         return shelterRepository.findById(id)
-            .orElseThrow( { BusinessException(ShelterErrorCode.SHELTER_NOT_FOUND) })
+            .orElseThrow { BusinessException(ShelterErrorCode.SHELTER_NOT_FOUND) }
     }
 
     fun getShelter(shelterId: String): ShelterRes {

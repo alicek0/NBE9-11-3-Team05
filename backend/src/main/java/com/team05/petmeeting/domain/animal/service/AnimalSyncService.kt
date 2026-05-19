@@ -7,7 +7,7 @@ import com.team05.petmeeting.domain.animal.dto.external.AnimalItem
 import com.team05.petmeeting.domain.animal.entity.Animal
 import com.team05.petmeeting.domain.animal.entity.AnimalSyncType
 import com.team05.petmeeting.domain.animal.entity.SyncState
-import com.team05.petmeeting.domain.animal.errorCode.AnimalErrorCode
+import com.team05.petmeeting.domain.animal.errorcode.AnimalErrorCode
 import com.team05.petmeeting.domain.animal.repository.AnimalRepository
 import com.team05.petmeeting.domain.animal.repository.SyncStateRepository
 import com.team05.petmeeting.domain.shelter.dto.ShelterCommand
@@ -320,14 +320,15 @@ class AnimalSyncService(
             .filter { !it.careRegNo.isNullOrBlank() }
             .filter { !it.updTm.isNullOrBlank() }
             .map {
+                val careRegNo = it.careRegNo
                 val updatedAt = parseApiUpdatedAt(it.updTm)
                 if (updatedAt == null) {
-                    log.warn("Skipping shelter sync for careRegNo={} due to invalid updTm={}", it.careRegNo, it.updTm)
+                    log.warn("Skipping shelter sync for careRegNo={} due to invalid updTm={}", careRegNo, it.updTm)
                     return@map null
                 }
 
                 ShelterCommand(
-                    it.careRegNo!!,
+                    requireNotNull(careRegNo),
                     it.careNm,
                     it.careTel,
                     it.careAddr,

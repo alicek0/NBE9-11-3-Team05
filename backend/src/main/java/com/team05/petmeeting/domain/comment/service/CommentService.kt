@@ -8,12 +8,12 @@ import com.team05.petmeeting.domain.comment.dto.FeedCommentRes
 import com.team05.petmeeting.domain.comment.entity.AnimalComment
 import com.team05.petmeeting.domain.comment.entity.FeedComment
 import com.team05.petmeeting.domain.comment.entity.FeedComment.Companion.create
-import com.team05.petmeeting.domain.comment.errorCode.CommentErrorCode
+import com.team05.petmeeting.domain.comment.errorcode.CommentErrorCode
 import com.team05.petmeeting.domain.comment.repository.AnimalCommentRepository
 import com.team05.petmeeting.domain.comment.repository.FeedCommentRepository
 import com.team05.petmeeting.domain.feed.service.FeedService
 import com.team05.petmeeting.domain.user.entity.User
-import com.team05.petmeeting.domain.user.errorCode.UserErrorCode
+import com.team05.petmeeting.domain.user.errorcode.UserErrorCode
 import com.team05.petmeeting.domain.user.repository.UserRepository
 import com.team05.petmeeting.global.exception.BusinessException
 import jakarta.validation.Valid
@@ -21,7 +21,6 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.function.Supplier
 
 @Service
 class CommentService(
@@ -49,35 +48,39 @@ class CommentService(
     }
 
     @Transactional
-    fun updateAnimalComment(userId: Long, commentId: Long, @Valid commentReq: CommentReq): AnimalCommentRes {
+    fun updateAnimalComment(userId: Long, animalId: Long, commentId: Long, @Valid commentReq: CommentReq): AnimalCommentRes {
         val comment = animalCommentRepository.findById(commentId)
             .orElseThrow{ BusinessException(CommentErrorCode.COMMENT_NOT_FOUND) }
+        validateAnimalCommentBelongsToAnimal(animalId, comment)
         validateAnimalCommentAuthor(userId, comment)
         comment.updateContent(commentReq.content)
         return from(animalCommentRepository.save(comment))
     }
 
     @Transactional
-    fun updateFeedComment(userId: Long, commentId: Long, @Valid commentReq: CommentReq): FeedCommentRes {
+    fun updateFeedComment(userId: Long, feedId: Long, commentId: Long, @Valid commentReq: CommentReq): FeedCommentRes {
         val comment = feedCommentRepository.findById(commentId)
             .orElseThrow { BusinessException(CommentErrorCode.COMMENT_NOT_FOUND) }
+        validateFeedCommentBelongsToFeed(feedId, comment)
         validateFeedCommentAuthor(userId, comment)
         comment.updateContent(commentReq.content)
         return FeedCommentRes.from(feedCommentRepository.save(comment))
     }
 
     @Transactional
-    fun deleteAnimalComment(userId: Long, commentId: Long) {
+    fun deleteAnimalComment(userId: Long, animalId: Long, commentId: Long) {
         val comment = animalCommentRepository.findById(commentId)
             .orElseThrow{ BusinessException(CommentErrorCode.COMMENT_NOT_FOUND) }
+        validateAnimalCommentBelongsToAnimal(animalId, comment)
         validateAnimalCommentAuthor(userId, comment)
         animalCommentRepository.delete(comment)
     }
 
     @Transactional
-    fun deleteFeedComment(userId: Long, commentId: Long) {
+    fun deleteFeedComment(userId: Long, feedId: Long, commentId: Long) {
         val comment = feedCommentRepository.findById(commentId)
             .orElseThrow{ BusinessException(CommentErrorCode.COMMENT_NOT_FOUND) }
+        validateFeedCommentBelongsToFeed(feedId, comment)
         validateFeedCommentAuthor(userId, comment)
         feedCommentRepository.delete(comment)
     }
@@ -105,6 +108,18 @@ class CommentService(
     private fun getUserOrThrow(userId: Long): User {
         return userRepository.findById(userId)
             .orElseThrow { BusinessException(UserErrorCode.USER_NOT_FOUND) }
+    }
+
+    private fun validateAnimalCommentBelongsToAnimal(animalId: Long, comment: AnimalComment) {
+        if (comment.animal.id != animalId) {
+            throw BusinessException(CommentErrorCode.COMMENT_NOT_FOUND)
+        }
+    }
+
+    private fun validateFeedCommentBelongsToFeed(feedId: Long, comment: FeedComment) {
+        if (comment.feed.id != feedId) {
+            throw BusinessException(CommentErrorCode.COMMENT_NOT_FOUND)
+        }
     }
 
     private fun validateAnimalCommentAuthor(userId: Long, comment: AnimalComment) {

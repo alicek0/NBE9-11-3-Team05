@@ -34,9 +34,7 @@ data class UserFeedCommentRes(
     companion object {
         @JvmStatic
         fun of(totalCommentCount: Long, commentList: List<FeedComment>): UserFeedCommentRes {
-            val items = commentList.stream()
-                .map { comment: FeedComment -> ProfileCommentItem.from(comment) }
-                .toList()
+            val items = commentList.map(ProfileCommentItem::from)
 
             return UserFeedCommentRes(totalCommentCount, items)
         }

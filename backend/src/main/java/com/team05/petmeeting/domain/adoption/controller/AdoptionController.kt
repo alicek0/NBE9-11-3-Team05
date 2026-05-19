@@ -5,6 +5,7 @@ import com.team05.petmeeting.domain.adoption.dto.AdoptionApplyRes
 import com.team05.petmeeting.domain.adoption.dto.AdoptionDetailRes
 import com.team05.petmeeting.domain.adoption.service.AdoptionService
 import com.team05.petmeeting.global.security.userdetails.CustomUserDetails
+import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -41,7 +42,7 @@ class AdoptionController(
     fun applyApplication(
         @AuthenticationPrincipal userDetails: CustomUserDetails,
         @PathVariable animalId: Long,
-        @RequestBody request: AdoptionApplyReq,
+        @Valid @RequestBody request: AdoptionApplyReq,
     ): AdoptionApplyRes = adoptionService.applyApplication(userDetails.userId, animalId, request)
 
     // 로그인한 사용자가 본인의 입양 신청을 취소한다.

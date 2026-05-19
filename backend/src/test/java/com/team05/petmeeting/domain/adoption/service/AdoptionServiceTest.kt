@@ -5,13 +5,13 @@ import com.team05.petmeeting.domain.adoption.dto.AdoptionApplyRes
 import com.team05.petmeeting.domain.adoption.dto.AdoptionDetailRes
 import com.team05.petmeeting.domain.adoption.entity.AdoptionApplication
 import com.team05.petmeeting.domain.adoption.entity.AdoptionStatus
-import com.team05.petmeeting.domain.adoption.errorCode.AdoptionErrorCode
+import com.team05.petmeeting.domain.adoption.errorcode.AdoptionErrorCode
 import com.team05.petmeeting.domain.adoption.repository.AdoptionApplicationRepository
 import com.team05.petmeeting.domain.animal.entity.Animal
-import com.team05.petmeeting.domain.animal.errorCode.AnimalErrorCode
+import com.team05.petmeeting.domain.animal.errorcode.AnimalErrorCode
 import com.team05.petmeeting.domain.animal.repository.AnimalRepository
 import com.team05.petmeeting.domain.user.entity.User
-import com.team05.petmeeting.domain.user.errorCode.UserErrorCode
+import com.team05.petmeeting.domain.user.errorcode.UserErrorCode
 import com.team05.petmeeting.domain.user.repository.UserRepository
 import com.team05.petmeeting.global.entity.BaseEntity
 import com.team05.petmeeting.global.exception.BusinessException

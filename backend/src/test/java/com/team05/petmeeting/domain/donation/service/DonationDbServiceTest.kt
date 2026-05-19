@@ -1,13 +1,13 @@
 package com.team05.petmeeting.domain.donation.service
 import com.team05.petmeeting.domain.campaign.entity.Campaign
 import com.team05.petmeeting.domain.campaign.enums.CampaignStatus
-import com.team05.petmeeting.domain.campaign.errorCode.CampaignErrorCode
+import com.team05.petmeeting.domain.campaign.errorcode.CampaignErrorCode
 import com.team05.petmeeting.domain.campaign.repository.CampaignRepository
 import com.team05.petmeeting.domain.campaign.service.CampaignService
 import com.team05.petmeeting.domain.donation.dto.PrepareReq
 import com.team05.petmeeting.domain.donation.entity.Donation
 import com.team05.petmeeting.domain.donation.enums.DonationStatus
-import com.team05.petmeeting.domain.donation.errorCode.DonationErrorCode
+import com.team05.petmeeting.domain.donation.errorcode.DonationErrorCode
 import com.team05.petmeeting.domain.donation.repository.DonationRepository
 import com.team05.petmeeting.domain.user.entity.User
 import com.team05.petmeeting.domain.user.service.UserService

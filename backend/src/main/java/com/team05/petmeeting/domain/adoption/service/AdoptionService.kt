@@ -6,11 +6,11 @@ import com.team05.petmeeting.domain.adoption.dto.AdoptionDetailRes
 import com.team05.petmeeting.domain.adoption.dto.toApplyRes
 import com.team05.petmeeting.domain.adoption.dto.toDetailRes
 import com.team05.petmeeting.domain.adoption.entity.AdoptionApplication
-import com.team05.petmeeting.domain.adoption.errorCode.AdoptionErrorCode
+import com.team05.petmeeting.domain.adoption.errorcode.AdoptionErrorCode
 import com.team05.petmeeting.domain.adoption.repository.AdoptionApplicationRepository
-import com.team05.petmeeting.domain.animal.errorCode.AnimalErrorCode
+import com.team05.petmeeting.domain.animal.errorcode.AnimalErrorCode
 import com.team05.petmeeting.domain.animal.repository.AnimalRepository
-import com.team05.petmeeting.domain.user.errorCode.UserErrorCode
+import com.team05.petmeeting.domain.user.errorcode.UserErrorCode
 import com.team05.petmeeting.domain.user.repository.UserRepository
 import com.team05.petmeeting.global.exception.BusinessException
 import org.springframework.stereotype.Service
@@ -49,8 +49,8 @@ class AdoptionService(
         val application = AdoptionApplication.create(
             user,
             animal,
-            request.applyReason!!,
-            request.applyTel!!,
+            request.applyReason,
+            request.applyTel,
         )
 
         val saved = adoptionApplicationRepository.save(application)

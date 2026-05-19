@@ -3,12 +3,12 @@ package com.team05.petmeeting.domain.feed.service
 import com.team05.petmeeting.domain.adoption.entity.AdoptionStatus
 import com.team05.petmeeting.domain.adoption.repository.AdoptionApplicationRepository
 import com.team05.petmeeting.domain.animal.entity.Animal
-import com.team05.petmeeting.domain.animal.errorCode.AnimalErrorCode
+import com.team05.petmeeting.domain.animal.errorcode.AnimalErrorCode
 import com.team05.petmeeting.domain.animal.repository.AnimalRepository
 import com.team05.petmeeting.domain.feed.dto.FeedReq
 import com.team05.petmeeting.domain.feed.entity.Feed
 import com.team05.petmeeting.domain.feed.enums.FeedCategory
-import com.team05.petmeeting.domain.feed.errorCode.FeedErrorCode
+import com.team05.petmeeting.domain.feed.errorcode.FeedErrorCode
 import com.team05.petmeeting.domain.feed.repository.FeedLikeRepository
 import com.team05.petmeeting.domain.feed.repository.FeedRepository
 import com.team05.petmeeting.domain.user.entity.User

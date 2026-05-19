@@ -7,7 +7,7 @@ import com.querydsl.core.types.dsl.NumberPath
 import com.querydsl.jpa.JPAExpressions
 import com.querydsl.jpa.impl.JPAQueryFactory
 import com.team05.petmeeting.domain.animal.entity.QAnimal.animal
-import com.team05.petmeeting.domain.animal.errorCode.AnimalErrorCode
+import com.team05.petmeeting.domain.animal.errorcode.AnimalErrorCode
 import com.team05.petmeeting.domain.naming.dto.NameCandidateRes
 import com.team05.petmeeting.domain.naming.dto.NameCandidateRes.CandidateDto
 import com.team05.petmeeting.domain.naming.entity.QAnimalNameCandidate.animalNameCandidate

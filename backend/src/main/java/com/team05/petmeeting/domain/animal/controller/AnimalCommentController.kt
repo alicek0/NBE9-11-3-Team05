@@ -54,7 +54,7 @@ class AnimalCommentController(private val commentService: CommentService) {
         @PathVariable commentId: Long,
         @Valid @RequestBody commentReq: CommentReq
     ): ResponseEntity<AnimalCommentRes> {
-        val res = commentService.updateAnimalComment(userDetails.userId, commentId, commentReq)
+        val res = commentService.updateAnimalComment(userDetails.userId, animalId, commentId, commentReq)
         return ResponseEntity.ok(res)
     }
 
@@ -65,7 +65,7 @@ class AnimalCommentController(private val commentService: CommentService) {
         @PathVariable animalId: Long,
         @PathVariable commentId: Long
     ): ResponseEntity<Void> {
-        commentService.deleteAnimalComment(userDetails.userId, commentId)
+        commentService.deleteAnimalComment(userDetails.userId, animalId, commentId)
         return ResponseEntity.noContent().build()
     }
 

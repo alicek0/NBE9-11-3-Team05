@@ -7,14 +7,14 @@ import com.team05.petmeeting.domain.user.dto.auth.login.AccessTokenRes
 import com.team05.petmeeting.domain.user.dto.auth.login.LoginAndRefreshRes
 import com.team05.petmeeting.domain.user.entity.User
 import com.team05.petmeeting.domain.user.entity.UserAuth
-import com.team05.petmeeting.domain.user.errorCode.UserErrorCode
+import com.team05.petmeeting.domain.user.errorcode.UserErrorCode
 import com.team05.petmeeting.domain.user.event.SignupOtpMailRequestedEvent
 import com.team05.petmeeting.domain.user.provider.Provider
 import com.team05.petmeeting.domain.user.refreshtoken.entity.RefreshToken
 import com.team05.petmeeting.domain.user.refreshtoken.repository.RefreshTokenRepository
 import com.team05.petmeeting.domain.user.repository.UserRepository
 import com.team05.petmeeting.global.exception.BusinessException
-import com.team05.petmeeting.global.security.errorCode.SecurityErrorCode
+import com.team05.petmeeting.global.security.errorcode.SecurityErrorCode
 import com.team05.petmeeting.global.security.util.JwtUtil
 import com.team05.petmeeting.global.security.util.RefreshTokenUtil.Companion.REFRESH_TOKEN_COOKIE_NAME
 import jakarta.servlet.http.HttpServletRequest

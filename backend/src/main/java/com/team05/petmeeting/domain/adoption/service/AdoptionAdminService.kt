@@ -7,10 +7,10 @@ import com.team05.petmeeting.domain.adoption.dto.toApplyRes
 import com.team05.petmeeting.domain.adoption.dto.toDetailRes
 import com.team05.petmeeting.domain.adoption.entity.AdoptionApplication
 import com.team05.petmeeting.domain.adoption.entity.AdoptionStatus
-import com.team05.petmeeting.domain.adoption.errorCode.AdoptionErrorCode
+import com.team05.petmeeting.domain.adoption.errorcode.AdoptionErrorCode
 import com.team05.petmeeting.domain.adoption.repository.AdoptionApplicationRepository
 import com.team05.petmeeting.domain.shelter.entity.Shelter
-import com.team05.petmeeting.domain.shelter.errorCode.ShelterErrorCode
+import com.team05.petmeeting.domain.shelter.errorcode.ShelterErrorCode
 import com.team05.petmeeting.domain.shelter.repository.ShelterRepository
 import com.team05.petmeeting.global.exception.BusinessException
 import org.springframework.stereotype.Service
@@ -53,9 +53,8 @@ class AdoptionAdminService(
     ): AdoptionDetailRes {
         validateShelterManager(userId, careRegNo)
         val application = getShelterApplication(careRegNo, applicationId)
-        val status = request.status ?: throw BusinessException(AdoptionErrorCode.INVALID_REVIEW_STATUS)
 
-        when (status) {
+        when (request.status) {
             AdoptionStatus.Approved -> application.approve()
             AdoptionStatus.Rejected -> rejectApplication(application, request.rejectionReason)
             AdoptionStatus.Processing -> application.markProcessing()

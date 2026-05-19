@@ -1,11 +1,11 @@
 package com.team05.petmeeting.domain.cheer.controller
 
-import com.team05.petmeeting.domain.animal.errorCode.AnimalErrorCode
+import com.team05.petmeeting.domain.animal.errorcode.AnimalErrorCode
 import com.team05.petmeeting.domain.cheer.dto.CheerRes
 import com.team05.petmeeting.domain.cheer.dto.CheerStatusDto
-import com.team05.petmeeting.domain.cheer.errorCode.CheerErrorCode
+import com.team05.petmeeting.domain.cheer.errorcode.CheerErrorCode
 import com.team05.petmeeting.domain.cheer.service.CheerService
-import com.team05.petmeeting.domain.user.errorCode.UserErrorCode
+import com.team05.petmeeting.domain.user.errorcode.UserErrorCode
 import com.team05.petmeeting.global.exception.BusinessException
 import com.team05.petmeeting.global.security.handler.JwtAuthenticationEntryPoint
 import com.team05.petmeeting.global.security.userdetails.CustomUserDetails

@@ -3,7 +3,7 @@ package com.team05.petmeeting.domain.feed.entity
 import com.team05.petmeeting.domain.animal.entity.Animal
 import com.team05.petmeeting.domain.comment.entity.FeedComment
 import com.team05.petmeeting.domain.feed.enums.FeedCategory
-import com.team05.petmeeting.domain.feed.errorCode.FeedErrorCode
+import com.team05.petmeeting.domain.feed.errorcode.FeedErrorCode
 import com.team05.petmeeting.domain.user.entity.User
 import com.team05.petmeeting.global.entity.BaseEntity
 import com.team05.petmeeting.global.exception.BusinessException

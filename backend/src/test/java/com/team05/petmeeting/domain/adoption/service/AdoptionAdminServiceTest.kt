@@ -5,7 +5,7 @@ import com.team05.petmeeting.domain.adoption.dto.AdoptionDetailRes
 import com.team05.petmeeting.domain.adoption.dto.AdoptionReviewReq
 import com.team05.petmeeting.domain.adoption.entity.AdoptionApplication
 import com.team05.petmeeting.domain.adoption.entity.AdoptionStatus
-import com.team05.petmeeting.domain.adoption.errorCode.AdoptionErrorCode
+import com.team05.petmeeting.domain.adoption.errorcode.AdoptionErrorCode
 import com.team05.petmeeting.domain.adoption.repository.AdoptionApplicationRepository
 import com.team05.petmeeting.domain.animal.entity.Animal
 import com.team05.petmeeting.domain.shelter.dto.ShelterCommand

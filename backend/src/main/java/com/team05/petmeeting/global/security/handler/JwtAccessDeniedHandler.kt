@@ -2,7 +2,7 @@ package com.team05.petmeeting.global.security.handler
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.team05.petmeeting.global.exception.ErrorResponse
-import com.team05.petmeeting.global.security.errorCode.SecurityErrorCode
+import com.team05.petmeeting.global.security.errorcode.SecurityErrorCode
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.security.access.AccessDeniedException

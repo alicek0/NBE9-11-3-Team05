@@ -3,7 +3,7 @@ import com.team05.petmeeting.domain.donation.dto.CompleteReq
 import com.team05.petmeeting.domain.donation.dto.CompleteRes
 import com.team05.petmeeting.domain.donation.dto.PrepareReq
 import com.team05.petmeeting.domain.donation.dto.PrepareRes
-import com.team05.petmeeting.domain.donation.errorCode.DonationErrorCode
+import com.team05.petmeeting.domain.donation.errorcode.DonationErrorCode
 import com.team05.petmeeting.domain.user.dto.profile.UserDonationRes
 import com.team05.petmeeting.global.exception.BusinessException
 import io.portone.sdk.server.errors.ForbiddenException
@@ -23,11 +23,9 @@ import org.springframework.beans.factory.ObjectProvider
 import org.springframework.beans.factory.annotation.Value
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import lombok.extern.slf4j.Slf4j
 import org.slf4j.LoggerFactory
 
 @Service
-@Slf4j
 class DonationService(
     private val paymentClient: PaymentClient,
     private val webhookVerifierProvider: ObjectProvider<WebhookVerifier>,

@@ -1,9 +1,7 @@
 package com.team05.petmeeting.domain.donation.dto
 
 import com.team05.petmeeting.domain.donation.enums.DonationStatus
-import lombok.Builder
 
-@Builder
 data class CompleteRes(
     val id: Long,
     val amount: Int,

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.team05.petmeeting.domain.comment.dto.CommentReq
 import com.team05.petmeeting.domain.comment.dto.FeedCommentListRes
 import com.team05.petmeeting.domain.comment.dto.FeedCommentRes
-import com.team05.petmeeting.domain.comment.errorCode.CommentErrorCode
+import com.team05.petmeeting.domain.comment.errorcode.CommentErrorCode
 import com.team05.petmeeting.domain.comment.service.CommentService
 import com.team05.petmeeting.global.exception.BusinessException
 import com.team05.petmeeting.global.security.test.WithCustomUser
@@ -101,7 +101,7 @@ internal class FeedControllerCommentTest {
     fun updateFeedComment_success() {
         val req = CommentReq("수정된 댓글입니다.")
         val res = FeedCommentRes(100L, "테스터", "", 1L, "수정된 댓글입니다.", 1L, LocalDateTime.now())
-        Mockito.`when`<FeedCommentRes>(commentService.updateFeedComment(100L, 1L, req)).thenReturn(res)
+        Mockito.`when`<FeedCommentRes>(commentService.updateFeedComment(100L, 1L, 1L, req)).thenReturn(res)
 
         mvc.perform(
             MockMvcRequestBuilders.patch("/api/v1/feeds/{feedId}/comments/{commentId}", 1L, 1L)
@@ -118,7 +118,7 @@ internal class FeedControllerCommentTest {
     @Throws(Exception::class)
     fun updateFeedComment_fail_unauthorized() {
         val req = CommentReq("수정된 댓글입니다.")
-        Mockito.`when`<FeedCommentRes>(commentService.updateFeedComment(100L, 1L, req))
+        Mockito.`when`<FeedCommentRes>(commentService.updateFeedComment(100L, 1L, 1L, req))
             .thenThrow(BusinessException(CommentErrorCode.UNAUTHORIZED))
 
         mvc.perform(
@@ -134,7 +134,7 @@ internal class FeedControllerCommentTest {
     @DisplayName("피드 댓글 삭제 성공")
     @Throws(Exception::class)
     fun deleteFeedComment_success() {
-        Mockito.doNothing().`when`<CommentService>(commentService).deleteFeedComment(100L, 1L)
+        Mockito.doNothing().`when`<CommentService>(commentService).deleteFeedComment(100L, 1L, 1L)
 
         mvc.perform(MockMvcRequestBuilders.delete("/api/v1/feeds/{feedId}/comments/{commentId}", 1L, 1L))
             .andExpect(MockMvcResultMatchers.status().isNoContent())
@@ -146,7 +146,7 @@ internal class FeedControllerCommentTest {
     @Throws(Exception::class)
     fun deleteFeedComment_fail_notFound() {
         Mockito.doThrow(BusinessException(CommentErrorCode.COMMENT_NOT_FOUND))
-            .`when`<CommentService>(commentService).deleteFeedComment(100L, 1L)
+            .`when`<CommentService>(commentService).deleteFeedComment(100L, 1L, 1L)
 
         mvc.perform(MockMvcRequestBuilders.delete("/api/v1/feeds/{feedId}/comments/{commentId}", 1L, 1L))
             .andExpect(MockMvcResultMatchers.status().isNotFound())

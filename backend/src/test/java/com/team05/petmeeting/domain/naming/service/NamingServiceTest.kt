@@ -6,7 +6,7 @@ import com.team05.petmeeting.domain.animal.entity.Animal.Companion.from
 import com.team05.petmeeting.domain.animal.repository.AnimalRepository
 import com.team05.petmeeting.domain.naming.entity.AnimalNameCandidate
 import com.team05.petmeeting.domain.naming.entity.NameVoteHistory
-import com.team05.petmeeting.domain.naming.errorCode.NamingErrorCode
+import com.team05.petmeeting.domain.naming.errorcode.NamingErrorCode
 import com.team05.petmeeting.domain.naming.repository.AnimalNameCandidateRepository
 import com.team05.petmeeting.domain.naming.repository.NameVoteHistoryRepository
 import com.team05.petmeeting.domain.shelter.dto.ShelterCommand

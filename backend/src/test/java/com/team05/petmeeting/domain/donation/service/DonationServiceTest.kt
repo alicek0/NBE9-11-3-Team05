@@ -5,7 +5,7 @@ import com.team05.petmeeting.domain.donation.dto.CompleteRes
 import com.team05.petmeeting.domain.donation.dto.PrepareReq
 import com.team05.petmeeting.domain.donation.dto.PrepareRes
 import com.team05.petmeeting.domain.donation.enums.DonationStatus
-import com.team05.petmeeting.domain.donation.errorCode.DonationErrorCode
+import com.team05.petmeeting.domain.donation.errorcode.DonationErrorCode
 import com.team05.petmeeting.domain.user.dto.profile.UserDonationRes
 import com.team05.petmeeting.global.exception.BusinessException
 import io.portone.sdk.server.errors.PaymentNotFoundException

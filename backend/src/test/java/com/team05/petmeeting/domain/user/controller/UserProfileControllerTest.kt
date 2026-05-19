@@ -8,7 +8,7 @@ import com.team05.petmeeting.domain.user.dto.profile.PasswordReq
 import com.team05.petmeeting.domain.user.dto.profile.UserDonationRes
 import com.team05.petmeeting.domain.user.dto.profile.UserProfileRes
 import com.team05.petmeeting.domain.user.entity.User
-import com.team05.petmeeting.domain.user.errorCode.UserErrorCode
+import com.team05.petmeeting.domain.user.errorcode.UserErrorCode
 import com.team05.petmeeting.domain.user.service.UserProfileService
 import com.team05.petmeeting.global.exception.BusinessException
 import com.team05.petmeeting.global.security.filter.JwtAuthenticationFilter

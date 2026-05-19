@@ -6,7 +6,7 @@ import com.team05.petmeeting.domain.campaign.repository.CampaignRepository
 import com.team05.petmeeting.domain.donation.dto.PrepareReq
 import com.team05.petmeeting.domain.donation.entity.Donation
 import com.team05.petmeeting.domain.donation.enums.DonationStatus
-import com.team05.petmeeting.domain.donation.errorCode.DonationErrorCode
+import com.team05.petmeeting.domain.donation.errorcode.DonationErrorCode
 import com.team05.petmeeting.domain.donation.repository.DonationRepository
 import com.team05.petmeeting.domain.shelter.dto.ShelterCommand
 import com.team05.petmeeting.domain.shelter.entity.Shelter

@@ -5,7 +5,7 @@ import com.team05.petmeeting.domain.animal.entity.Animal
 import com.team05.petmeeting.domain.animal.entity.Animal.Companion.from
 import com.team05.petmeeting.domain.animal.repository.AnimalRepository
 import com.team05.petmeeting.domain.cheer.entity.Cheer
-import com.team05.petmeeting.domain.cheer.errorCode.CheerErrorCode
+import com.team05.petmeeting.domain.cheer.errorcode.CheerErrorCode
 import com.team05.petmeeting.domain.cheer.repository.CheerRepository
 import com.team05.petmeeting.domain.user.entity.User
 import com.team05.petmeeting.domain.user.repository.UserRepository

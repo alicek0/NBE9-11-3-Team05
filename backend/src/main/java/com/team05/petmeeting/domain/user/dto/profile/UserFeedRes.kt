@@ -5,7 +5,7 @@ import java.time.format.DateTimeFormatter
 
 data class UserFeedRes(
     val totalFeedCount: Long,
-    val feeds: MutableList<ProfileFeedItem>
+    val feeds: List<ProfileFeedItem>
 ) {
 
     data class ProfileFeedItem(
@@ -29,10 +29,8 @@ data class UserFeedRes(
 
     companion object {
         @JvmStatic
-        fun of(totalFeedCount: Long, feedList: MutableList<Feed>): UserFeedRes {
-            val items = feedList.stream()
-                .map { feed: Feed -> ProfileFeedItem.from(feed) }
-                .toList()
+        fun of(totalFeedCount: Long, feedList: List<Feed>): UserFeedRes {
+            val items = feedList.map(ProfileFeedItem::from)
             return UserFeedRes(totalFeedCount, items)
         }
     }

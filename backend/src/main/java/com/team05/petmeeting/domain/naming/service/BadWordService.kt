@@ -1,7 +1,7 @@
 package com.team05.petmeeting.domain.naming.service
 
 import com.team05.petmeeting.domain.naming.entity.BadWord
-import com.team05.petmeeting.domain.naming.errorCode.NamingErrorCode
+import com.team05.petmeeting.domain.naming.errorcode.NamingErrorCode
 import com.team05.petmeeting.domain.naming.repository.BadWordRepository
 import com.team05.petmeeting.global.exception.BusinessException
 import org.springframework.data.redis.core.StringRedisTemplate

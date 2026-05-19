@@ -6,7 +6,7 @@ import com.team05.petmeeting.domain.comment.repository.FeedCommentRepository
 import com.team05.petmeeting.domain.feed.repository.FeedRepository
 import com.team05.petmeeting.domain.user.dto.profile.*
 import com.team05.petmeeting.domain.user.entity.User
-import com.team05.petmeeting.domain.user.errorCode.UserErrorCode
+import com.team05.petmeeting.domain.user.errorcode.UserErrorCode
 import com.team05.petmeeting.domain.user.provider.Provider
 import com.team05.petmeeting.domain.user.repository.UserRepository
 import com.team05.petmeeting.global.exception.BusinessException
@@ -79,7 +79,6 @@ class UserProfileService(
     fun getMyCheerAnimals(userId: Long): UserCheerAnimalRes =
         cheerRepository.findCheerCountsByUser(getUserById(userId))
             .map { row -> arrayOf(requireNotNull(row[0]), requireNotNull(row[1])) }
-            .toMutableList()
             .let(UserCheerAnimalRes::from)
 
     fun getUserProfile(userId: Long): UserProfileRes =

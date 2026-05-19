@@ -9,7 +9,7 @@ import com.team05.petmeeting.domain.feed.enums.FeedCategory
 import com.team05.petmeeting.domain.feed.service.FeedLikeService
 import com.team05.petmeeting.domain.feed.service.FeedService
 import com.team05.petmeeting.domain.user.entity.User
-import com.team05.petmeeting.domain.user.errorCode.UserErrorCode
+import com.team05.petmeeting.domain.user.errorcode.UserErrorCode
 import com.team05.petmeeting.domain.user.repository.UserRepository
 import com.team05.petmeeting.global.exception.BusinessException
 import com.team05.petmeeting.global.security.userdetails.CustomUserDetails
@@ -55,7 +55,7 @@ class FeedController(
         @PathVariable commentId: Long,
         @Valid @RequestBody commentReq: CommentReq
     ): ResponseEntity<FeedCommentRes> {
-        val res = commentService.updateFeedComment(userDetails.userId, commentId, commentReq)
+        val res = commentService.updateFeedComment(userDetails.userId, feedId, commentId, commentReq)
         return ResponseEntity.ok(res)
     }
 
@@ -66,7 +66,7 @@ class FeedController(
         @PathVariable feedId: Long,
         @PathVariable commentId: Long
     ): ResponseEntity<Void> {
-        commentService.deleteFeedComment(userDetails.userId, commentId)
+        commentService.deleteFeedComment(userDetails.userId, feedId, commentId)
         return ResponseEntity.noContent().build()
     }
 

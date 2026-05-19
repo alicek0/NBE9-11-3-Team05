@@ -5,7 +5,7 @@ import com.team05.petmeeting.domain.campaign.dto.CampaignCreateRes
 import com.team05.petmeeting.domain.campaign.dto.CampaignDetailRes
 import com.team05.petmeeting.domain.campaign.dto.CampaignRes
 import com.team05.petmeeting.domain.campaign.enums.CampaignStatus
-import com.team05.petmeeting.domain.campaign.errorCode.CampaignErrorCode
+import com.team05.petmeeting.domain.campaign.errorcode.CampaignErrorCode
 import com.team05.petmeeting.domain.campaign.service.CampaignService
 import com.team05.petmeeting.global.exception.BusinessException
 import com.team05.petmeeting.global.security.test.WithCustomUser

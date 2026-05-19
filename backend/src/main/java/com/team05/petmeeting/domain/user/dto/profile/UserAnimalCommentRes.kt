@@ -6,7 +6,7 @@ import java.time.LocalDateTime
 
 data class UserAnimalCommentRes(
     val totalCommentCount: Long,
-    val comments: MutableList<AnimalCommentItem?>
+    val comments: List<AnimalCommentItem>
 ) {
     data class AnimalCommentItem(
         val feedId: Long,
@@ -32,9 +32,7 @@ data class UserAnimalCommentRes(
     companion object {
         @JvmStatic
         fun of(totalCommentCount: Long, commentList: List<AnimalComment>): UserAnimalCommentRes {
-            val items = commentList.stream()
-                .map { comment: AnimalComment -> AnimalCommentItem.from(comment) }
-                .toList()
+            val items = commentList.map(AnimalCommentItem::from)
 
             return UserAnimalCommentRes(totalCommentCount, items)
         }

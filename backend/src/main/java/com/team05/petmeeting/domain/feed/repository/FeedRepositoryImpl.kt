@@ -10,7 +10,7 @@ import com.team05.petmeeting.domain.feed.dto.FeedListRes
 import com.team05.petmeeting.domain.feed.entity.QFeed
 import com.team05.petmeeting.domain.feed.entity.QFeedLike
 import com.team05.petmeeting.domain.feed.enums.FeedCategory
-import com.team05.petmeeting.domain.feed.errorCode.FeedErrorCode
+import com.team05.petmeeting.domain.feed.errorcode.FeedErrorCode
 import com.team05.petmeeting.global.exception.BusinessException
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
