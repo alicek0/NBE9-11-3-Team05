@@ -5,6 +5,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 @ConfigurationProperties(prefix = "gemini.api")
 class GeminiApiProperties {
     var key: String? = null
-    var url: String =
-        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
+    var url: String = ""
 }

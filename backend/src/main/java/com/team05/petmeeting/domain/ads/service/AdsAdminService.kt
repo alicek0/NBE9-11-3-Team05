@@ -8,12 +8,14 @@ import com.team05.petmeeting.domain.ads.entity.AdsPostRequest
 import com.team05.petmeeting.domain.ads.entity.AdsPostStatus
 import com.team05.petmeeting.domain.ads.errorCode.AdsErrorCode
 import com.team05.petmeeting.domain.ads.repository.AdsPostRequestRepository
+import com.team05.petmeeting.domain.animal.entity.Animal
 import com.team05.petmeeting.domain.shelter.entity.Shelter
 import com.team05.petmeeting.domain.shelter.errorcode.ShelterErrorCode
 import com.team05.petmeeting.domain.shelter.repository.ShelterRepository
 import com.team05.petmeeting.global.exception.BusinessException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.support.TransactionTemplate
 
 @Service
 class AdsAdminService(
@@ -22,6 +24,7 @@ class AdsAdminService(
     private val instagramClient: InstagramClient,
     private val cardNewsService: CardNewsService,
     private val objectMapper: ObjectMapper,
+    private val transactionTemplate: TransactionTemplate,
 ) {
     @Transactional(readOnly = true)
     fun getManagedShelterRequests(userId: Long, careRegNo: String): List<AdsPostRequestRes> {
@@ -43,61 +46,86 @@ class AdsAdminService(
         return AdsPostRequestRes.from(request)
     }
 
-    @Transactional
     fun reviewRequest(
         userId: Long,
         careRegNo: String,
         requestId: Long,
         reviewReq: AdsPostReviewReq,
     ): AdsPostRequestRes {
-        validateShelterManager(userId, careRegNo)
-        val request = getShelterRequest(careRegNo, requestId)
-
-        when (reviewReq.status) {
-            AdsPostStatus.Approved -> approveAndPublish(request)
-            AdsPostStatus.Rejected -> rejectRequest(request, reviewReq.rejectionReason)
-            AdsPostStatus.Processing -> requestReviewAgain(request)
+        return when (reviewReq.status) {
+            AdsPostStatus.Approved -> approveAndPublish(userId, careRegNo, requestId)
+            AdsPostStatus.Rejected -> rejectRequest(userId, careRegNo, requestId, reviewReq.rejectionReason)
+            AdsPostStatus.Processing -> requestReviewAgain(userId, careRegNo, requestId)
             AdsPostStatus.Published -> throw BusinessException(AdsErrorCode.INVALID_REVIEW_STATUS)
         }
-
-        return AdsPostRequestRes.from(request)
     }
 
-    private fun approveAndPublish(request: AdsPostRequest) {
-        if (request.status != AdsPostStatus.Processing) {
-            throw BusinessException(AdsErrorCode.ALREADY_REVIEWED)
-        }
+    private fun approveAndPublish(userId: Long, careRegNo: String, requestId: Long): AdsPostRequestRes {
+        val publishTarget = transactionTemplate.execute {
+            validateShelterManager(userId, careRegNo)
+            val request = getShelterRequest(careRegNo, requestId)
+            if (request.status != AdsPostStatus.Processing) {
+                throw BusinessException(AdsErrorCode.ALREADY_REVIEWED)
+            }
 
-        request.approve()
-        publishToInstagram(request)
-        request.markPublished()
+            request.approve()
+            InstagramPublishTarget(request.imageUrl, request.caption)
+        } ?: throw BusinessException(AdsErrorCode.POST_REQUEST_NOT_FOUND)
+
+        publishToInstagram(publishTarget)
+
+        return transactionTemplate.execute {
+            val request = getShelterRequest(careRegNo, requestId)
+            request.markPublished()
+            AdsPostRequestRes.from(request)
+        } ?: throw BusinessException(AdsErrorCode.POST_REQUEST_NOT_FOUND)
     }
 
-    private fun rejectRequest(request: AdsPostRequest, rejectionReason: String?) {
-        if (request.status != AdsPostStatus.Processing) {
-            throw BusinessException(AdsErrorCode.ALREADY_REVIEWED)
-        }
+    private fun rejectRequest(
+        userId: Long,
+        careRegNo: String,
+        requestId: Long,
+        rejectionReason: String?,
+    ): AdsPostRequestRes =
+        transactionTemplate.execute {
+            validateShelterManager(userId, careRegNo)
+            val request = getShelterRequest(careRegNo, requestId)
+            if (request.status != AdsPostStatus.Processing) {
+                throw BusinessException(AdsErrorCode.ALREADY_REVIEWED)
+            }
 
-        request.reject(rejectionReason)
+            request.reject(rejectionReason)
+            AdsPostRequestRes.from(request)
+        } ?: throw BusinessException(AdsErrorCode.POST_REQUEST_NOT_FOUND)
+
+    private fun requestReviewAgain(userId: Long, careRegNo: String, requestId: Long): AdsPostRequestRes {
+        val target = transactionTemplate.execute {
+            validateShelterManager(userId, careRegNo)
+            val request = getShelterRequest(careRegNo, requestId)
+            if (request.status != AdsPostStatus.Rejected) {
+                throw BusinessException(AdsErrorCode.ALREADY_REVIEWED)
+            }
+
+            request.animal.toCardNewsTarget()
+        } ?: throw BusinessException(AdsErrorCode.POST_REQUEST_NOT_FOUND)
+
+        val cardNews = cardNewsService.generateCardNews(target.animal)
+
+        return transactionTemplate.execute {
+            val request = getShelterRequest(careRegNo, requestId)
+            request.replaceCardNews(
+                imageUrl = requireNotNull(cardNews.imageUrl),
+                caption = requireNotNull(cardNews.caption),
+            )
+            request.markProcessing()
+            AdsPostRequestRes.from(request)
+        } ?: throw BusinessException(AdsErrorCode.POST_REQUEST_NOT_FOUND)
     }
 
-    private fun requestReviewAgain(request: AdsPostRequest) {
-        if (request.status != AdsPostStatus.Rejected) {
-            throw BusinessException(AdsErrorCode.ALREADY_REVIEWED)
-        }
-
-        val cardNews = cardNewsService.generateCardNews(request.animal)
-        request.replaceCardNews(
-            imageUrl = requireNotNull(cardNews.imageUrl),
-            caption = requireNotNull(cardNews.caption),
-        )
-        request.markProcessing()
-    }
-
-    private fun publishToInstagram(request: AdsPostRequest) {
+    private fun publishToInstagram(target: InstagramPublishTarget) {
         val containerResponse = instagramClient.createMediaContainer(
-            request.imageUrl,
-            request.caption,
+            target.imageUrl,
+            target.caption,
         ) ?: throw IllegalStateException("인스타그램 미디어 컨테이너 응답이 비어있습니다.")
         val containerId = extractId(containerResponse)
 
@@ -174,5 +202,25 @@ class AdsAdminService(
     companion object {
         private const val MAX_STATUS_CHECK_COUNT = 5
         private const val STATUS_CHECK_INTERVAL_MILLIS = 3000L
+    }
+
+    private data class InstagramPublishTarget(
+        val imageUrl: String,
+        val caption: String,
+    )
+
+    private data class CardNewsTarget(
+        val animal: Animal,
+    )
+
+    private fun Animal.toCardNewsTarget(): CardNewsTarget {
+        desertionNo
+        kindFullNm
+        age
+        sexCd
+        careNm
+        specialMark
+        popfile1
+        return CardNewsTarget(this)
     }
 }

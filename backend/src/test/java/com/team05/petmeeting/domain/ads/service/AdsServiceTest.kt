@@ -20,6 +20,11 @@ import org.mockito.Mockito
 import org.mockito.junit.jupiter.MockitoExtension
 import org.springframework.data.domain.Pageable
 import org.springframework.test.util.ReflectionTestUtils
+import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.transaction.TransactionDefinition
+import org.springframework.transaction.TransactionStatus
+import org.springframework.transaction.support.SimpleTransactionStatus
+import org.springframework.transaction.support.TransactionTemplate
 import java.time.LocalDateTime
 
 @ExtendWith(MockitoExtension::class)
@@ -41,6 +46,7 @@ internal class AdsServiceTest {
             animalRepository,
             cardNewsService,
             adsPostRequestRepository,
+            transactionTemplate(),
         )
     }
 
@@ -113,6 +119,18 @@ internal class AdsServiceTest {
         return any(AdsPostRequest::class.java)
             ?: AdsPostRequest.create(Animal(), createShelter(), "image", "caption")
     }
+
+    private fun transactionTemplate(): TransactionTemplate =
+        TransactionTemplate(
+            object : PlatformTransactionManager {
+                override fun getTransaction(definition: TransactionDefinition?): TransactionStatus =
+                    SimpleTransactionStatus()
+
+                override fun commit(status: TransactionStatus) = Unit
+
+                override fun rollback(status: TransactionStatus) = Unit
+            },
+        )
 
     private fun createShelter(): Shelter {
         return Shelter.create(

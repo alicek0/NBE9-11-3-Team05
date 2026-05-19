@@ -9,18 +9,21 @@ import org.springframework.web.client.RestClient
 @Service
 class GeminiServiceImpl(
     private val geminiApiProperties: GeminiApiProperties,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
+    private val geminiRestClient: RestClient,
 ) : GeminiService {
     override fun generate(prompt: String): String {
         val key = geminiApiProperties.key
             ?.takeIf { it.isNotBlank() }
             ?: throw IllegalStateException("Gemini API key가 설정되지 않았습니다.")
+        val url = geminiApiProperties.url
+            .takeIf { it.isNotBlank() }
+            ?: throw IllegalStateException("Gemini API URL이 설정되지 않았습니다.")
 
         val request = GeminiRequest.from(prompt)
         val response = try {
-            RestClient.create()
-                .post()
-                .uri("${geminiApiProperties.url}?key=$key")
+            geminiRestClient.post()
+                .uri("$url?key=$key")
                 .header("Content-Type", "application/json")
                 .body(objectMapper.writeValueAsString(request))
                 .retrieve()

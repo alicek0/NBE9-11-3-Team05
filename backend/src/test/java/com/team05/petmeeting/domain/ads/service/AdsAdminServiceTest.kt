@@ -24,6 +24,11 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.junit.jupiter.MockitoExtension
 import org.springframework.test.util.ReflectionTestUtils
+import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.transaction.TransactionDefinition
+import org.springframework.transaction.TransactionStatus
+import org.springframework.transaction.support.SimpleTransactionStatus
+import org.springframework.transaction.support.TransactionTemplate
 import java.time.LocalDateTime
 import java.util.Optional
 
@@ -52,6 +57,7 @@ internal class AdsAdminServiceTest {
             instagramClient,
             cardNewsService,
             ObjectMapper(),
+            transactionTemplate(),
         )
     }
 
@@ -210,4 +216,16 @@ internal class AdsAdminServiceTest {
         ReflectionTestUtils.setField(user, "id", id)
         return user
     }
+
+    private fun transactionTemplate(): TransactionTemplate =
+        TransactionTemplate(
+            object : PlatformTransactionManager {
+                override fun getTransaction(definition: TransactionDefinition?): TransactionStatus =
+                    SimpleTransactionStatus()
+
+                override fun commit(status: TransactionStatus) = Unit
+
+                override fun rollback(status: TransactionStatus) = Unit
+            },
+        )
 }
