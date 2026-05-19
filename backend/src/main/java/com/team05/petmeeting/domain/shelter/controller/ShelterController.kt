@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.data.domain.Pageable
+import org.springframework.web.bind.annotation.RequestParam
 
 @RestController
 @RequestMapping("/api/v1/shelters")
@@ -27,6 +28,18 @@ class ShelterController(private val shelterService: ShelterService) {
     @GetMapping("/")
     fun getShelterList(pageable: Pageable): ResponseEntity<ShelterListRes> {
         val res = shelterService.getAllShelters(pageable)
+        return ResponseEntity.ok(res)
+    }
+
+    @Operation(summary = "보호소 검색")
+    @GetMapping("/search")
+    fun searchShelters(
+        @RequestParam keyword: String,
+        pageable: Pageable
+    ) : ResponseEntity<ShelterListRes>{
+        val keyword : String = keyword.trim()
+        if (keyword.isEmpty()) return ResponseEntity.ok(shelterService.getAllShelters(pageable))
+        val res = shelterService.searchShelter(keyword, pageable)
         return ResponseEntity.ok(res)
     }
 }

@@ -88,4 +88,15 @@ class ShelterService(private val shelterRepository: ShelterRepository) {
             totalPages = page.totalPages
         )
     }
+
+    fun searchShelter(keyword: String, pageable: Pageable): ShelterListRes {
+        val page = shelterRepository.searchShelters(keyword, pageable)
+        return ShelterListRes(
+            shelters = page.content.map { ShelterRes.from(it) },
+            totalCount = page.totalElements,
+            page = page.number,
+            size = page.size,
+            totalPages = page.totalPages
+        )
+    }
 }

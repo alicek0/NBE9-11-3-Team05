@@ -624,11 +624,15 @@ export interface ShelterListRes {
   totalPages: number;
 }
 
-export const getShelters = async (page = 0, size = 20) => {
+export const getShelters = async (page = 0, size = 20, keyword?: string) => {
   const queryParams = new URLSearchParams({
     page: String(page),
     size: String(size),
   });
+  if (keyword && keyword.trim()) {
+    queryParams.append("keyword", keyword.trim());
+    return await apiRequest<ShelterListRes>(`${API_BASE_URL}/shelters/search?${queryParams.toString()}`);
+  }
   return await apiRequest<ShelterListRes>(`${API_ENDPOINTS.shelters}?${queryParams.toString()}`);
 };
 

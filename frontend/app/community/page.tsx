@@ -152,11 +152,11 @@ function CommunityPostCard({
   const [animalInfoLabel, setAnimalInfoLabel] = useState("")
 
   const fetchComments = async () => {
-    const { data } = await apiRequest<{ comments: any[] }>(API_ENDPOINTS.feedComments(post.feedId))
+    const { data } = await apiRequest<{ comments: any[]; totalCount?: number }>(API_ENDPOINTS.feedComments(post.feedId))
     if (data?.comments) {
       const sorted = data.comments.sort((a: any, b: any) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
       setComments(sorted)
-      setCommentCount(sorted.length)
+      setCommentCount(data.totalCount ?? sorted.length)
     } else {
       setComments([])
       setCommentCount(0)
@@ -430,6 +430,17 @@ function CommunityPostCard({
               </div>
             )}
 
+            {commentCount > comments.length && (
+              <div className="text-center py-1">
+                <Link
+                  href={`/community/${post.feedId}`}
+                  className="inline-block text-xs font-semibold text-primary hover:underline relative z-20"
+                >
+                  댓글 {commentCount}개
+                </Link>
+              </div>
+            )}
+
             {/* Comment Input */}
             <div className="flex gap-2 relative z-20">
               <Input
@@ -635,8 +646,8 @@ function CreatePostModal({ onClose, onSubmit }: { onClose: () => void; onSubmit:
                 </option>
                 {animals.map((a) => (
                   <option key={a.animalId} value={a.animalId}>
-                  {a.noticeNo}
-                </option>
+                    {a.noticeNo}
+                  </option>
                 ))}
               </select>
             </div>
@@ -817,8 +828,8 @@ function UpdatePostModal({ post, onClose, onSubmit }: { post: CommunityPost; onC
                 </option>
                 {animals.map((a) => (
                   <option key={a.animalId} value={a.animalId}>
-                  {a.noticeNo}
-                </option>
+                    {a.noticeNo}
+                  </option>
                 ))}
               </select>
             </div>

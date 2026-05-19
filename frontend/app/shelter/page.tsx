@@ -5,7 +5,8 @@ import Link from "next/link"
 import { Header } from "@/components/header"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Landmark, MapPin, Phone, Search, ChevronRight } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Landmark, MapPin, Phone, Search, ChevronRight, X } from "lucide-react"
 import { getShelters, type Shelter, type ShelterListRes } from "@/lib/api"
 import { Pagination } from "@/components/pagination"
 
@@ -16,11 +17,13 @@ export default function ShelterListPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [totalCount, setTotalCount] = useState(0)
+  const [searchKeyword, setSearchKeyword] = useState("")
+  const [activeKeyword, setActiveKeyword] = useState("")
 
   useEffect(() => {
     const fetchShelters = async () => {
       setIsLoading(true)
-      const { data, error } = await getShelters(currentPage - 1, 12)
+      const { data, error } = await getShelters(currentPage - 1, 12, activeKeyword)
       
       if (error) {
         setError(error)
@@ -33,11 +36,22 @@ export default function ShelterListPage() {
     }
 
     fetchShelters()
-  }, [currentPage])
+  }, [currentPage, activeKeyword])
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
     window.scrollTo({ top: 0, behavior: "smooth" })
+  }
+
+  const handleSearch = () => {
+    setCurrentPage(1)
+    setActiveKeyword(searchKeyword)
+  }
+
+  const handleClearSearch = () => {
+    setSearchKeyword("")
+    setCurrentPage(1)
+    setActiveKeyword("")
   }
 
   return (
@@ -54,6 +68,28 @@ export default function ShelterListPage() {
             <Search className="w-4 h-4" />
             <span>총 {totalCount}개의 보호소가 있습니다</span>
           </div>
+        </div>
+
+        {/* Search Bar */}
+        <div className="flex gap-2 max-w-md mb-8 relative">
+          <Input
+            value={searchKeyword}
+            onChange={(e) => setSearchKeyword(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+            placeholder="보호소 이름, 지역, 주소 검색..."
+            className="rounded-xl bg-card border-border h-11 pr-10"
+          />
+          {searchKeyword && (
+            <button
+              onClick={handleClearSearch}
+              className="absolute right-16 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1 z-10"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+          <Button onClick={handleSearch} className="h-11 rounded-xl shrink-0">
+            검색
+          </Button>
         </div>
 
         {isLoading ? (
