@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 
@@ -30,7 +31,7 @@ class NamingController(
         return ResponseEntity.ok(response)
     }
 
-
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/admin/qualified-candidates") // animalId 제거!
     @Operation(summary = "관리자용 확정 대기 전체 목록", description = "우리 보호소 동물 중 10표 이상 얻은 후보가 있는 모든 동물 조회")
     fun getAdminQualifiedCandidates(
@@ -62,7 +63,7 @@ class NamingController(
         return ResponseEntity.ok().build()
     }
 
-
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/candidates/{candidateId}/confirm")
     @Operation(summary = "관리자가 이름 확정", description = "해당 동물의 보호소 관리자가 최종 확정 실시")
     fun confirmNameByAdmin(
@@ -73,6 +74,7 @@ class NamingController(
         return ResponseEntity.ok().build()
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/admin/badwords")
     @Operation(summary = "금칙어 조회")
     fun getBadWords(): ResponseEntity<BadWordListRes> {
@@ -80,6 +82,7 @@ class NamingController(
         return ResponseEntity.ok(response)
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/admin/badwords")
     @Operation(summary = "금칙어 추가")
     fun addBadWord(
@@ -91,6 +94,7 @@ class NamingController(
         return ResponseEntity.ok(response)
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/admin/badwords/{badwordId}")
     @Operation(summary = "금칙어 삭제")
     fun deleteBadWord(
