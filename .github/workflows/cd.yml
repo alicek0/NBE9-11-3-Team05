@@ -38,6 +38,15 @@ jobs:
           docker build -t alicekangisy/petmeeting-backend ./backend
           docker push alicekangisy/petmeeting-backend
 
+      - name: Copy config files to EC2  # ec2로 파일 업로드
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_KEY }}
+          source: "docker-compose.prod.yml,nginx.conf"
+          target: "~/app"
+
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1
         with:
@@ -48,9 +57,5 @@ jobs:
             mkdir -p ~/app
             cd ~/app
             echo "${{ secrets.ENV_FILE }}" > .env
-
-            docker compose -f docker-compose.prod.yml pull
-            docker compose -f docker-compose.prod.yml down
-            docker compose -f docker-compose.prod.yml up -d
-            
+            docker compose -f docker-compose.prod.yml up --pull always -d
             docker image prune -f
