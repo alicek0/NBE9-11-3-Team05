@@ -118,24 +118,16 @@ class AnimalRepositoryImpl(
                 regionKeywordsLike(region),
                 beginnerSafetyCheck(experience),
                 sizeFilter,
-                animal.processState.contains("보호중")
+                animal.stateGroup.eq(0) // 기존에 존재하는 idx_animal_state_notice 인덱스를 타기 위해 processState 대신 stateGroup=0 사용
             )
             .offset(pageable.offset)
             .limit(pageable.pageSize.toLong())
             .orderBy(animal.noticeEdt.asc())
             .fetch()
 
-        val total = queryFactory
-            .select(animal.count())
-            .from(animal)
-            .where(
-                kindFilter,
-                regionKeywordsLike(region),
-                beginnerSafetyCheck(experience),
-                sizeFilter,
-                animal.processState.contains("보호중")
-            )
-            .fetchOne() ?: 0L
+        // 160만 건 테이블을 풀스캔하는 최악의 병목(Count 쿼리)을 완전히 제거합니다!
+        // 추천 시스템은 프론트엔드에서 LIMIT 6으로 1페이지만 요청하므로 전체 개수가 필요 없습니다.
+        val total = content.size.toLong()
 
         return PageImpl(content, pageable, total)
     }
