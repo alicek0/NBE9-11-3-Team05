@@ -422,7 +422,7 @@ export default function SocialFeedPage() {
     // Build the query parameters for the new backend recommendations endpoint
     const queryParams = new URLSearchParams({
       species: profile.species,
-      size: profile.size,
+      animalSize: profile.size, // renamed from size to avoid collision with pagination size
       region: profile.region,
       housing: profile.housing,
       activity: profile.activity,

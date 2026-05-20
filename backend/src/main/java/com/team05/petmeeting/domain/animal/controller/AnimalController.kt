@@ -75,7 +75,7 @@ class AnimalController(
     @Operation(summary = "설문 추천 동물 목록 조회")
     fun getRecommendations(
         @RequestParam species: String,
-        @RequestParam size: String,
+        @RequestParam(name = "animalSize") size: String,
         @RequestParam region: String,
         @RequestParam housing: String,
         @RequestParam activity: String,
