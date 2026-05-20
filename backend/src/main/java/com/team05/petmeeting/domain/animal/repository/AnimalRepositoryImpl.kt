@@ -153,16 +153,16 @@ class AnimalRepositoryImpl(
     private fun regionKeywordsLike(region: String?): BooleanExpression? {
         if (!StringUtils.hasText(region) || region == "전국 어디든") return null
         val keywords = when (region) {
-            "서울/경기/인천" -> listOf("서울", "경기", "인천", "수도권")
-            "강원/충청" -> listOf("강원", "충북", "충남", "대전", "세종", "충청")
-            "경상/부산/대구" -> listOf("경북", "경남", "부산", "대구", "울산", "경상")
-            "전라/제주" -> listOf("전북", "전남", "광주", "제주", "전라")
+            "서울/경기/인천" -> listOf("서울", "경기", "인천")
+            "강원/충청" -> listOf("강원", "충북", "충남", "대전", "세종")
+            "경상/부산/대구" -> listOf("경북", "경남", "부산", "대구", "울산")
+            "전라/제주" -> listOf("전북", "전남", "광주", "제주")
             else -> return null
         }
 
         var expression: BooleanExpression? = null
         for (keyword in keywords) {
-            val nextExpr = animal.careAddr.contains(keyword)
+            val nextExpr = animal.noticeNo.startsWith(keyword) // careAddr의 contains 대신 noticeNo의 startsWith(전방 일치) 사용
             expression = expression?.or(nextExpr) ?: nextExpr
         }
         return expression
