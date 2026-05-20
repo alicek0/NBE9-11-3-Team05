@@ -143,11 +143,9 @@ class AnimalRepositoryImpl(
     private fun sizeCheck(size: String?): BooleanExpression? {
         if (!StringUtils.hasText(size) || size == "상관없음") return null
 
-        val numericWeight = Expressions.numberTemplate(
-            Double::class.javaObjectType,
-            "CAST(REPLACE({0}, '(Kg)', '') AS DECIMAL(10,2))",
-            animal.weight
-        )
+        // QueryDSL의 내장 castToNum을 사용해 Hibernate 6의 스케일 에러를 방지합니다.
+        val numericWeight = Expressions.stringTemplate("REPLACE({0}, '(Kg)', '')", animal.weight)
+            .castToNum(Double::class.javaObjectType)
 
         return when (size) {
             "소형 (품에 쏙 들어오는 크기)" -> numericWeight.loe(7.0)
