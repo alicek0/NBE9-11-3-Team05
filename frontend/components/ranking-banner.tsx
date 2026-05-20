@@ -2,7 +2,7 @@
 
 import { ImageWithFallback } from "@/components/ui/image-with-fallback"
 import Link from "next/link"
-import { Heart, TrendingUp } from "lucide-react"
+import { Heart, Instagram, TrendingUp } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 
@@ -36,9 +36,20 @@ export function RankingBanner({ animals }: RankingBannerProps) {
               <TrendingUp className="w-4 h-4 md:w-5 md:h-5 text-primary" />
             </div>
             <div>
-              <h2 className="text-lg md:text-xl font-bold text-foreground">
-                이번 주 응원 TOP 3
-              </h2>
+              <div className="flex items-center gap-2">
+                <h2 className="text-lg md:text-xl font-bold text-foreground">
+                  이번 주 응원 TOP 3
+                </h2>
+                <a
+                  href="https://www.instagram.com/petmeeting_feed_05/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="PetMeeting Instagram"
+                  className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-primary text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2"
+                >
+                  <Instagram className="h-4 w-4" />
+                </a>
+              </div>
               <p className="text-xs md:text-sm text-muted-foreground whitespace-nowrap">가장 많은 응원을 받은 친구들</p>
             </div>
           </div>
