@@ -183,7 +183,7 @@ interface SurveyProfile {
 const getRecommendationReason = (item: FeedItem, survey: SurveyProfile) => {
   const isDog = item.animalInfo.includes("개") || item.animalInfo.includes("믹스견") || item.animalInfo.includes("푸들")
   const isCat = item.animalInfo.includes("고양이") || item.animalInfo.includes("숏헤어")
-  
+
   let weight = 5.0
   if (item.weight) {
     const weightMatch = item.weight.match(/([\d.]+)/)
@@ -422,7 +422,7 @@ export default function SocialFeedPage() {
     // Build the query parameters for the new backend recommendations endpoint
     const queryParams = new URLSearchParams({
       species: profile.species,
-      animalSize: profile.size, // renamed from size to avoid collision with pagination size
+      animalSize: profile.size,
       region: profile.region,
       housing: profile.housing,
       activity: profile.activity,
@@ -570,7 +570,7 @@ export default function SocialFeedPage() {
 
       {/* Feed Section */}
       <main className="max-w-6xl mx-auto px-4 md:px-6 py-8">
-        
+
         {/* Section Tabs */}
         <div className="flex border-b border-border mb-6">
           <button
@@ -951,7 +951,7 @@ function SurveyModal({ onClose, onComplete }: SurveyModalProps) {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div className="w-full max-w-lg bg-card rounded-3xl shadow-2xl border border-border overflow-hidden flex flex-col transition-all duration-300 transform scale-100">
-        
+
         {/* Modal Header */}
         <div className="px-6 py-4 border-b border-border flex items-center justify-between">
           <div className="flex items-center gap-1.5 text-primary">
@@ -965,7 +965,7 @@ function SurveyModal({ onClose, onComplete }: SurveyModalProps) {
 
         {/* Progress Bar */}
         <div className="w-full bg-secondary h-1.5">
-          <div 
+          <div
             className="bg-primary h-full transition-all duration-300"
             style={{ width: `${(step / 6) * 100}%` }}
           />
@@ -974,7 +974,7 @@ function SurveyModal({ onClose, onComplete }: SurveyModalProps) {
         {/* Modal Content */}
         <div className="p-6 md:p-8 flex-1 min-h-[320px] flex flex-col justify-between">
           <div className="space-y-6">
-            
+
             {/* Step 1: Species */}
             {step === 1 && (
               <div className="space-y-4">

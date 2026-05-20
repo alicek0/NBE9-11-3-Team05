@@ -22,15 +22,17 @@ export default function AboutPage() {
           </div>
 
           <h1 className="text-3xl md:text-5xl font-black tracking-tight leading-tight text-foreground">
-            보호소 공고, 그냥 보여주기만 하면<br />
+            데려올 수 없어서,{" "}
             <span className="bg-gradient-to-r from-primary to-orange-500 bg-clip-text text-transparent">
-              아무도 안 읽습니다.
+              대신 만들었습니다.
             </span>
           </h1>
 
           <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            펫미팅은 유기동물 공고를 조금 다르게 보여주려고 만든 서비스입니다. <br />
-            이름 짓기, 응원, 입양 후기 — 기능마다 만든 이유가 있습니다.
+            보호소 공고를 보다 보면 마음이 무거워집니다. <br />
+            지금 당장 입양이 어려운 사람도 많고, 저희도 그중 하나입니다. <br />
+            그래서 보여주는 것에서 한 걸음 더 나아가고 싶었습니다 — <br />
+            이름 짓기, 응원, 입양 후기. 작은 것들로 시작했습니다.
           </p>
 
           <div className="pt-4 flex justify-center gap-4">
@@ -71,17 +73,17 @@ export default function AboutPage() {
             </div>
 
             <h4 className="text-lg font-semibold text-primary leading-snug">
-              이름이 없으면 기억도 안 납니다.
+              이름이 있어야 기억에 남습니다.
             </h4>
 
             <div className="space-y-4 text-sm md:text-base text-muted-foreground leading-relaxed">
               <p>
-                공공 보호소 공고는 대부분 <span className="font-semibold text-foreground">`[개] 믹스견`</span> 이런 식입니다.
-                행정적으로는 맞는 표기인데, 보다 보면 그냥 스크롤하게 됩니다.
-                어떤 아이인지 감이 안 오니까요.
+                공공 보호소 공고는 대부분 <span className="font-semibold text-foreground">`[개] 믹스견`</span> 이런 식입니다. <br />
+                행정적으로는 맞는 표기인데, 보다 보면 그냥 스크롤하게 됩니다. <br />
+                어떤 아이인지 파악하기 어렵습니다.
               </p>
               <p>
-                이름이 하나 생기면 달라집니다.
+                이름이 하나 생기면 달라집니다. <br />
                 "믹스견"이 "춘식이"가 되는 순간, 왠지 한 번 더 사진을 보게 되더군요.
               </p>
             </div>
@@ -128,15 +130,16 @@ export default function AboutPage() {
 
             <div className="space-y-4 text-sm md:text-base text-muted-foreground leading-relaxed">
               <p>
-                매주 하트 많이 받은 TOP 3은 사이트 상단에 따로 띄우고, 인스타그램 카드뉴스로도 만듭니다.
+                매주 하트 많이 받은 TOP 3은 사이트 상단에 따로 띄우고, <br />
+                인스타그램 카드뉴스로도 만듭니다.
               </p>
               <p>
-                순위를 보여주는 게 맞는 건지 한참 고민했습니다.
+                순위를 보여주는 게 맞는 건지 한참 고민했습니다. <br />
                 인기 없는 애들이 더 묻히는 거 아닐까 싶어서요.
               </p>
               <p>
-                근데 현실을 숨기는 것보다 그냥 보이게 하는 게 낫다고 판단했습니다.
-                며칠째 응원을 못 받은 아이가 보이면, 한 번쯤 눌러보게 되니까요.
+                근데 현실을 숨기는 것보다 그냥 보이게 하는 게 낫다고 판단했습니다. <br />
+                며칠째 응원을 못 받은 아이가 보이면, 한 번쯤 눌러보게 되니까요. <br />
                 예쁘거나 어리지 않아도 눈에 띄게 하고 싶었습니다.
               </p>
             </div>
@@ -151,7 +154,7 @@ export default function AboutPage() {
                 <p className="text-xs text-muted-foreground leading-relaxed">
                   응원 수가 많은 아이는 SNS 홍보로 이어집니다.<br />
                   더 많은 사람 눈에 띄면 입양 가능성도 올라가고요.<br />
-                  숫자가 그냥 숫자로 끝나지 않도록 설계했습니다.
+                  숫자가 행동으로 이어지도록 설계했습니다.
                 </p>
                 <div className="flex justify-center gap-1.5 pt-2">
                   <span className="px-2.5 py-1 rounded-xl bg-background border border-border text-[11px] font-semibold text-muted-foreground">인스타 홍보</span>
@@ -179,12 +182,12 @@ export default function AboutPage() {
 
             <div className="space-y-4 text-sm md:text-base text-muted-foreground leading-relaxed">
               <p>
-                입양 후 일상을 올릴 수 있는 공간입니다.
+                입양 후 일상을 올릴 수 있는 공간입니다. <br />
                 어떻게 적응했는지, 성격이 어떤지, 처음엔 어땠는지 같은 것들이요.
               </p>
               <p>
-                유기동물 입양을 망설이는 이유 중에 "적응 못 할 것 같아서"가 꽤 많습니다.
-                실제 입양한 사람들 얘기를 들으면 생각이 달라지는 경우가 많더군요.
+                유기동물 입양을 망설이는 이유 중에 "적응이 걱정되어서"가 꽤 많습니다. <br />
+                실제 입양한 사람들 얘기를 들으면 생각이 달라지는 경우가 많더군요. <br />
                 그 얘기들이 여기 쌓이면, 망설이는 사람한테 참고가 될 것 같았습니다.
               </p>
             </div>
@@ -197,8 +200,9 @@ export default function AboutPage() {
                 </div>
                 <h4 className="font-bold text-foreground">후기가 만드는 것</h4>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  입양 후기는 과거 기록이기도 하지만, 다음 입양을 끌어내는 힘이기도 합니다.
-                  "우리 집 애도 보호소 출신이에요"라는 한 마디가
+                  입양 후기는 과거 기록이기도 하지만, <br />
+                  다음 입양을 끌어내는 힘이기도 합니다. <br />
+                  "우리 집 애도 보호소 출신이에요"라는 한 마디가 <br />
                   누군가의 마음을 바꿀 수 있습니다.
                 </p>
                 <div className="pt-2">
