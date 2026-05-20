@@ -11,7 +11,7 @@ class RefreshTokenUtil {
         Cookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken).apply {
             isHttpOnly = true
             secure = true
-            setAttribute("SameSite", "Strict")
+            setAttribute("SameSite", "None")
             path = "/"
             maxAge = REFRESH_TOKEN_MAX_AGE
         }.also(response::addCookie)
