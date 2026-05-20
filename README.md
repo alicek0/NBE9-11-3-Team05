@@ -1,8 +1,6 @@
   
   
-  # PetMeeting
-
-  [🐾 펫미팅](https://petmeeting.vercel.app/about)
+  # [🐾 PetMeeting](https://petmeeting.vercel.app/about)
 
   ## 🐾 프로젝트 소개
 
