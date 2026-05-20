@@ -5,6 +5,7 @@ import com.querydsl.core.types.Expression
 import com.querydsl.core.types.Order
 import com.querydsl.core.types.OrderSpecifier
 import com.querydsl.core.types.dsl.BooleanExpression
+import com.querydsl.core.types.dsl.Expressions
 import com.querydsl.core.types.dsl.PathBuilder
 import com.querydsl.jpa.impl.JPAQueryFactory
 import com.team05.petmeeting.domain.animal.entity.Animal
@@ -97,5 +98,94 @@ class AnimalRepositoryImpl(
 
     private fun stateGroupEq(stateGroup: Int?): BooleanExpression? =
         stateGroup?.let { animal.stateGroup.eq(it) }
+
+    override fun findMatched(
+        species: String,
+        size: String,
+        region: String,
+        housing: String,
+        activity: String,
+        experience: String,
+        pageable: Pageable
+    ): Page<Animal> {
+        val kindFilter = if (species == "전체") null else kindEq(species)
+        val sizeFilter = sizeCheck(size)
+
+        val content = queryFactory
+            .selectFrom(animal)
+            .where(
+                kindFilter,
+                regionKeywordsLike(region),
+                beginnerSafetyCheck(experience),
+                sizeFilter,
+                animal.processState.contains("보호중")
+            )
+            .offset(pageable.offset)
+            .limit(pageable.pageSize.toLong())
+            .orderBy(animal.noticeEdt.asc())
+            .fetch()
+
+        val total = queryFactory
+            .select(animal.count())
+            .from(animal)
+            .where(
+                kindFilter,
+                regionKeywordsLike(region),
+                beginnerSafetyCheck(experience),
+                sizeFilter,
+                animal.processState.contains("보호중")
+            )
+            .fetchOne() ?: 0L
+
+        return PageImpl(content, pageable, total)
+    }
+
+    private fun sizeCheck(size: String?): BooleanExpression? {
+        if (!StringUtils.hasText(size) || size == "상관없음") return null
+
+        val numericWeight = Expressions.numberTemplate(
+            Double::class.javaObjectType,
+            "CAST(REPLACE({0}, '(Kg)', '') AS DECIMAL(10,2))",
+            animal.weight
+        )
+
+        return when (size) {
+            "소형 (품에 쏙 들어오는 크기)" -> numericWeight.loe(7.0)
+            "중형 (어디서나 당당한 크기)" -> numericWeight.gt(7.0).and(numericWeight.lt(15.0))
+            "대형 (든든하고 듬직한 크기)" -> numericWeight.goe(15.0)
+            else -> null
+        }
+    }
+
+    private fun regionKeywordsLike(region: String?): BooleanExpression? {
+        if (!StringUtils.hasText(region) || region == "전국 어디든") return null
+        val keywords = when (region) {
+            "서울/경기/인천" -> listOf("서울", "경기", "인천", "수도권")
+            "강원/충청" -> listOf("강원", "충북", "충남", "대전", "세종", "충청")
+            "경상/부산/대구" -> listOf("경북", "경남", "부산", "대구", "울산", "경상")
+            "전라/제주" -> listOf("전북", "전남", "광주", "제주", "전라")
+            else -> return null
+        }
+
+        var expression: BooleanExpression? = null
+        for (keyword in keywords) {
+            val nextExpr = animal.careAddr.contains(keyword)
+            expression = expression?.or(nextExpr) ?: nextExpr
+        }
+        return expression
+    }
+
+    private fun beginnerSafetyCheck(experience: String?): BooleanExpression? {
+        if (experience == null || !experience.contains("처음")) return null
+        val safetyKeywords = listOf("경계", "공격", "입질", "사나", "도망", "예민", "사망", "피해", "물림")
+
+        var safeExpression: BooleanExpression? = null
+        for (keyword in safetyKeywords) {
+            val nextExpr = animal.specialMark.contains(keyword).not()
+            safeExpression = safeExpression?.and(nextExpr) ?: nextExpr
+        }
+
+        return animal.specialMark.isNull.or(safeExpression)
+    }
 
 }

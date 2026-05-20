@@ -4,7 +4,7 @@ import { useState, useEffect, use } from "react"
 import { ImageWithFallback } from "@/components/ui/image-with-fallback"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { ArrowLeft, Heart, Phone, MapPin, Calendar, Info, User as UserIcon, Send, MessageCircle, Edit2, Trash2, PawPrint } from "lucide-react"
+import { ArrowLeft, Heart, Phone, MapPin, Calendar, Info, User as UserIcon, Send, MessageCircle, Edit2, Trash2, PawPrint, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import {
@@ -44,6 +44,138 @@ const normalizeImageUrl = (value?: string): string => {
     return trimmed
   }
   return "/placeholder.svg"
+}
+
+interface SurveyProfile {
+  species: string
+  size: string
+  region: string
+  housing: string
+  activity: string
+  experience: string
+}
+
+const getDetailRecommendationReason = (animal: Animal, survey: SurveyProfile) => {
+  const isDog = animal.breed.includes("개") || animal.breed.includes("믹스견") || animal.breed.includes("푸들") || animal.kind.includes("개")
+  const isCat = animal.breed.includes("고양이") || animal.breed.includes("숏헤어") || animal.kind.includes("고양이")
+  
+  let weight = 5.0
+  if (animal.weight) {
+    const weightMatch = animal.weight.match(/([\d.]+)/)
+    if (weightMatch) {
+      weight = parseFloat(weightMatch[1])
+    }
+  }
+
+  const reasons: string[] = []
+
+  // Region match reason
+  if (survey.region !== "전국 어디든") {
+    let regionPart = ""
+    if (survey.region === "서울/경기/인천") regionPart = "수도권"
+    else if (survey.region === "강원/충청") regionPart = "충청/강원"
+    else if (survey.region === "경상/부산/대구") regionPart = "영남"
+    else if (survey.region === "전라/제주") regionPart = "호남/제주"
+
+    reasons.push(`📍 ${regionPart} 권역 보호시설에 머물고 있어 직접 만나러 가기 수월해요.`)
+  } else {
+    reasons.push(`📍 전국 공공 보호소의 따뜻한 관심이 절실한 아이예요.`)
+  }
+
+  // Environment and weight reason
+  if (survey.housing.includes("아파트") && weight < 7.0) {
+    reasons.push(`🏠 아파트/빌라 등 실내 주거지에서 키우기 안성맞춤인 가벼운 품종(${weight}kg)예요.`)
+  } else if (weight >= 10.0) {
+    reasons.push(`🌳 마당이 있거나 넓은 주택에서 힘차게 뛰놀 수 있는 활기차고 듬직한 체구(${weight}kg)예요.`)
+  } else {
+    reasons.push(`✨ ${weight}kg의 실내외 적응력이 우수하고 온화한 표준 체격이에요.`)
+  }
+
+  // Walk and activity level matching
+  if (survey.activity.includes("매일")) {
+    if (isDog) {
+      reasons.push(`🏃 매일 힘차게 산책하며 에너지를 발산하기 좋아하는 활기 넘치는 댕댕이예요.`)
+    } else {
+      reasons.push(`🧶 매일 깃털 낚시 장난감으로 교감하고 사냥 놀이를 채워주기 좋은 고양이예요.`)
+    }
+  } else {
+    if (isCat) {
+      reasons.push(`💤 독립심과 차분함이 있어, 집사의 바쁜 직장 생활에도 외로움을 덜 느끼는 고양이예요.`)
+    } else {
+      reasons.push(`🐾 성격이 정적이고 차분하여 실내 교감 및 휴식에 안성맞춤인 순둥이 댕댕이예요.`)
+    }
+  }
+
+  // Experience level matching using specialMark 특징
+  const friendlyKeywords = ["온순", "얌전", "친화", "순함", "애교", "잘따름", "좋아", "활발", "착함", "사회성"]
+  const specialMarkLower = (animal.specialMark || "").toLowerCase()
+  const isExplicitlyFriendly = friendlyKeywords.some(word => specialMarkLower.includes(word))
+  const isAdministrativeMemo = ["리더기", "마이크로칩", "등록칩", "이동 제한", "검출", "구조", "발견", "추정"].some(word => specialMarkLower.includes(word))
+
+  if (survey.experience.includes("처음")) {
+    if (animal.specialMark && isExplicitlyFriendly && !isAdministrativeMemo) {
+      reasons.push(`🔰 실제 공고상에 "${animal.specialMark}"라고 기록될 만큼 친화력이 뛰어나서 초보 보호자님께 안성맞춤이에요!`)
+    } else {
+      reasons.push(`🔰 실내 적응과 양육이 수월한 표준적인 활동 성향을 가지고 있어 초보 보호자님도 안심하고 함께 시작할 수 있어요.`)
+    }
+  } else {
+    if (animal.specialMark && !isAdministrativeMemo) {
+      reasons.push(`🤝 실제 공고 특징인 "${animal.specialMark}" 성향을 너른 애정으로 포용하고 이끌어주실 숙련된 보호자님의 깊은 교감이 기대되는 아이예요.`)
+    } else {
+      reasons.push(`🤝 이미 반려동물 동거 경험이 있으신 보호자님의 든든한 사랑과 케어로 더욱 아름다운 인연을 만들어갈 수 있는 친구예요.`)
+    }
+  }
+
+  const idx = Math.abs(Number(animal.animalId || 0)) % reasons.length
+  return reasons[idx] || "✨ 당신의 라이프스타일과 완벽하게 조화를 이루며 따뜻한 사랑을 선물할 소중한 가족 후보예요."
+}
+
+const checkIfAnimalMatchesProfile = (animal: Animal, profile: SurveyProfile): boolean => {
+  // 1. Strict Species Check
+  const breedLower = (animal.breed || "").toLowerCase()
+  const kindLower = (animal.kind || "").toLowerCase()
+  const isDog = breedLower.includes("개") || breedLower.includes("견") || breedLower.includes("독") || breedLower.includes("믹스견") || breedLower.includes("푸들") || kindLower.includes("개")
+  const isCat = breedLower.includes("고양이") || breedLower.includes("묘") || breedLower.includes("캣") || breedLower.includes("숏헤어") || kindLower.includes("고양이")
+
+  if (profile.species === "개" && !isDog) return false
+  if (profile.species === "고양이" && !isCat) return false
+
+  // 2. Beginner Safety Filter
+  if (profile.experience.includes("처음")) {
+    const specialMark = (animal.specialMark || "").toLowerCase()
+    const hasHighRiskKeywords = ["경계", "공격", "입질", "사나", "도망", "예민", "사망", "피해", "물림"].some(word => specialMark.includes(word))
+    if (hasHighRiskKeywords) return false
+  }
+
+  // 3. Region match
+  if (profile.region !== "전국 어디든") {
+    let regionsToMatch: string[] = []
+    if (profile.region === "서울/경기/인천") regionsToMatch = ["서울", "경기", "인천", "수도권"]
+    else if (profile.region === "강원/충청") regionsToMatch = ["강원", "충북", "충남", "대전", "세종", "충청"]
+    else if (profile.region === "경상/부산/대구") regionsToMatch = ["경북", "경남", "부산", "대구", "울산", "경상"]
+    else if (profile.region === "전라/제주") regionsToMatch = ["전북", "전남", "광주", "제주", "전라"]
+
+    const textToSearch = (animal.shelterAddr || "") + (animal.region || "")
+    const hasRegionMatch = regionsToMatch.some(r => textToSearch.includes(r))
+    if (!hasRegionMatch && regionsToMatch.length > 0) return false
+  }
+
+  // 4. Weight / Size match
+  let weight = 5.0
+  if (animal.weight) {
+    const weightMatch = animal.weight.match(/([\d.]+)/)
+    if (weightMatch) {
+      weight = parseFloat(weightMatch[1])
+    }
+  }
+
+  if (profile.housing.includes("아파트") || profile.size.includes("소형")) {
+    if (weight > 7.0) return false
+  } else if (profile.size.includes("대형")) {
+    if (weight < 10.0) return false
+  }
+
+  return true
 }
 
 const normalizeAnimalDetail = (payload: unknown): Animal | null => {
@@ -133,6 +265,7 @@ export default function AnimalDetailPage({ params }: { params: Promise<{ id: str
   const [commentTotalPages, setCommentTotalPages] = useState(1)
   const [commentTotalCount, setCommentTotalCount] = useState(0)
   const COMMENTS_PER_PAGE = 10
+  const [surveyProfile, setSurveyProfile] = useState<SurveyProfile | null>(null)
 
   const extractRemainingToday = (
     payload: { [key: string]: any } | string | number | null
@@ -212,6 +345,17 @@ export default function AnimalDetailPage({ params }: { params: Promise<{ id: str
 
     fetchAnimalDetail()
   }, [resolvedParams.id, user])
+
+  useEffect(() => {
+    try {
+      const savedPref = localStorage.getItem("petmeeting_user_pref")
+      if (savedPref) {
+        setSurveyProfile(JSON.parse(savedPref))
+      }
+    } catch (e) {
+      console.error("Failed to load user preferences:", e)
+    }
+  }, [])
 
   const handleCheer = async () => {
     if (!user) {
@@ -686,6 +830,21 @@ export default function AnimalDetailPage({ params }: { params: Promise<{ id: str
                 )}
               </CardContent>
             </Card>
+
+            {/* Custom Matching Recommendation Reason */}
+            {surveyProfile && checkIfAnimalMatchesProfile(animal, surveyProfile) && (
+              <Card className="border border-primary/20 bg-gradient-to-br from-primary/5 via-accent/5 to-background shadow-sm overflow-hidden rounded-2xl">
+                <CardContent className="p-5 space-y-3">
+                  <div className="flex items-center gap-2 text-primary">
+                    <Sparkles className="w-5 h-5 animate-pulse" />
+                    <span className="font-black text-sm tracking-tight text-primary">나를 위한 맞춤 추천 분석 완료 ✨</span>
+                  </div>
+                  <p className="text-sm font-semibold text-foreground leading-relaxed">
+                    {getDetailRecommendationReason(animal, surveyProfile)}
+                  </p>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Special Mark */}
             {animal.specialMark && (

@@ -15,4 +15,14 @@ interface AnimalRepositoryCustom {
     ): Page<Animal>
 
     fun findDistinctKindFullNames(): List<Tuple>
+
+    fun findMatched(
+        species: String,
+        size: String,
+        region: String,
+        housing: String,
+        activity: String,
+        experience: String,
+        pageable: Pageable
+    ): Page<Animal>
 }

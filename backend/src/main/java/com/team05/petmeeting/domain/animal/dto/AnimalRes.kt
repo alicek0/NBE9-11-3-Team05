@@ -26,7 +26,10 @@ data class AnimalRes(
     val totalCheerCount: Int,
     val temperature: Double,
 
-    val care_reg_no: String?
+    val care_reg_no: String?,
+    val specialMark: String?,
+
+    val recommendationReason: String? = null
 ) {
     constructor(animal: Animal) : this(
         requireNotNull(animal.id),
@@ -52,6 +55,7 @@ data class AnimalRes(
         animal.totalCheerCount,
         animal.getTemperature(),
 
-        animal.shelter?.careRegNo
+        animal.shelter?.careRegNo,
+        animal.specialMark
     )
 }

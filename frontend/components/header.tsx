@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { Search, Bell, Heart, LogOut, PawPrint, Shield, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -14,6 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { cn } from "@/lib/utils"
 
 interface HeaderProps {
   dailyHeartsRemaining?: number
@@ -46,11 +48,19 @@ const extractRemainingToday = (payload: unknown): number | null => {
 }
 
 export function Header({ dailyHeartsRemaining, maxDailyHearts }: HeaderProps) {
+  const pathname = usePathname()
   const { user, logout, isLoading } = useAuth()
   const isAdmin = isAdminUser(user)
   const effectiveMax = maxDailyHearts ?? DEFAULT_MAX_DAILY_HEARTS
   const isControlled = dailyHeartsRemaining != null && maxDailyHearts != null
   const [uncontrolledRemaining, setUncontrolledRemaining] = useState(effectiveMax)
+
+  const isActive = (path: string) => {
+    if (path === "/") {
+      return pathname === "/" || pathname.startsWith("/animals")
+    }
+    return pathname.startsWith(path)
+  }
 
   const effectiveRemaining = useMemo(() => {
     if (isControlled) return Math.max(0, Math.min(effectiveMax, dailyHeartsRemaining!))
@@ -97,23 +107,73 @@ export function Header({ dailyHeartsRemaining, maxDailyHearts }: HeaderProps) {
           {/* Navigation */}
           <nav className="flex items-center gap-0 md:gap-1">
             <Link href="/">
-              <Button variant="ghost" size="sm" className="text-xs sm:text-sm text-foreground font-medium px-1.5 md:px-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                className={cn(
+                  "text-xs sm:text-sm px-1.5 md:px-4 transition-all duration-200",
+                  isActive("/")
+                    ? "text-foreground font-extrabold scale-105"
+                    : "text-muted-foreground font-medium hover:text-foreground"
+                )}
+              >
                 홈
               </Button>
             </Link>
             <Link href="/community">
-              <Button variant="ghost" size="sm" className="text-xs sm:text-sm text-muted-foreground font-medium px-1.5 md:px-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                className={cn(
+                  "text-xs sm:text-sm px-1.5 md:px-4 transition-all duration-200",
+                  isActive("/community")
+                    ? "text-foreground font-extrabold scale-105"
+                    : "text-muted-foreground font-medium hover:text-foreground"
+                )}
+              >
                 커뮤니티
               </Button>
             </Link>
             <Link href="/campaign">
-              <Button variant="ghost" size="sm" className="text-xs sm:text-sm text-muted-foreground font-medium px-1.5 md:px-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                className={cn(
+                  "text-xs sm:text-sm px-1.5 md:px-4 transition-all duration-200",
+                  isActive("/campaign")
+                    ? "text-foreground font-extrabold scale-105"
+                    : "text-muted-foreground font-medium hover:text-foreground"
+                )}
+              >
                 캠페인
               </Button>
             </Link>
             <Link href="/shelter">
-              <Button variant="ghost" size="sm" className="text-xs sm:text-sm text-muted-foreground font-medium px-1.5 md:px-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                className={cn(
+                  "text-xs sm:text-sm px-1.5 md:px-4 transition-all duration-200",
+                  isActive("/shelter")
+                    ? "text-foreground font-extrabold scale-105"
+                    : "text-muted-foreground font-medium hover:text-foreground"
+                )}
+              >
                 보호소
+              </Button>
+            </Link>
+            <Link href="/about">
+              <Button
+                variant="ghost"
+                size="sm"
+                className={cn(
+                  "text-xs sm:text-sm px-1.5 md:px-4 transition-all duration-200",
+                  isActive("/about")
+                    ? "text-foreground font-extrabold scale-105"
+                    : "text-muted-foreground font-medium hover:text-foreground"
+                )}
+              >
+                소개
               </Button>
             </Link>
           </nav>

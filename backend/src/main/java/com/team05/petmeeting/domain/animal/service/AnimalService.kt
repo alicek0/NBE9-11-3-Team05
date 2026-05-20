@@ -75,4 +75,52 @@ class AnimalService(
         return animalPage.map(::AnimalRes)
     }
 
+    fun findMatchedAnimals(
+        species: String,
+        size: String,
+        region: String,
+        housing: String,
+        activity: String,
+        experience: String,
+        pageable: Pageable
+    ): Page<AnimalRes> {
+        val animalsPage = animalRepository.findMatched(species, size, region, housing, activity, experience, pageable)
+
+        return animalsPage.map { animal ->
+            val reason = getRecommendationReason(animal, experience, housing)
+
+            AnimalRes(animal).copy(recommendationReason = reason)
+        }
+    }
+
+    fun getRecommendationReason(animal: Animal, experience: String, housing: String): String {
+        val specialMark = animal.specialMark ?: ""
+        val isBeginner = experience.contains("처음")
+
+        // 아래 내용은 성향 칭찬에서 스킵
+        val isAdminMemo = listOf("리더기", "마이크로칩", "등록칩", "이동 제한", "검출", "구조").any { specialMark.contains(it) }
+
+        // 칭찬할 성향 단어
+        val friendlyKeywords = listOf("온순", "얌전", "친화", "순함", "애교", "잘따름", "좋아", "활발", "사회성")
+        val isExplicitlyFriendly = friendlyKeywords.any { specialMark.contains(it) }
+
+        return when {
+            isBeginner -> {
+                if (isExplicitlyFriendly && !isAdminMemo) {
+                    "🔰 실제 공고상에 \"${specialMark}\"라고 기록될 만큼 친화력이 뛰어나서 초보 보호자님께 안성맞춤이에요!"
+                } else {
+                    "🔰 실내 적응과 양육이 수월한 표준적인 활동 성향을 가지고 있어 초보 보호자님도 안심하고 함께 시작할 수 있어요."
+                }
+            }
+            else -> {
+                if (!isAdminMemo && specialMark.isNotEmpty()) {
+                    "🤝 실제 공고 특징인 \"${specialMark}\" 성향을 너른 애정으로 포용하고 이끌어주실 숙련된 보호자님의 깊은 교감이 기대되는 아이예요."
+                } else {
+                    "🤝 이미 반려동물 동거 경험이 있으신 보호자님의 든든한 사랑과 케어로 더욱 아름다운 인연을 만들어갈 수 있는 친구예요."
+                }
+            }
+        }
+    }
+
+
 }

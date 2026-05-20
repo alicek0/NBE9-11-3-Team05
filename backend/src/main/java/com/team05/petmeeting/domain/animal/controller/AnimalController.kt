@@ -70,4 +70,37 @@ class AnimalController(
         val kindMap = animalService.getKindFullNames()
         return ResponseEntity.ok(kindMap)
     }
+
+    @GetMapping("/recommendations")
+    @Operation(summary = "설문 추천 동물 목록 조회")
+    fun getRecommendations(
+        @RequestParam species: String,
+        @RequestParam size: String,
+        @RequestParam region: String,
+        @RequestParam housing: String,
+        @RequestParam activity: String,
+        @RequestParam experience: String,
+        pageable: Pageable
+    ): ResponseEntity<PageResBody<AnimalRes>> {
+        val page: Page<AnimalRes> = animalService.findMatchedAnimals(
+            species,        // 개 고양이 전체
+            size,           // 소형 중형 대형 상관없음
+            region,         // "서울/경기/인천" "강원/충청" "경상/부산/대구" "전라/제주" "전국 어디든"
+            housing,        // "아파트/원룸 (실내 생활 위주)" "단독주택/마당 (활동 범위가 넓은 환경)"
+            activity,       // "매일 산책 가능 (활동적인 편)"  "주말/가끔 가능 (차분하고 정적인 편)"
+            experience,     // "처음 키워보는 초보 집사"  "키워본 적 있는 숙련된 집사"
+            pageable
+        )
+
+        val response = PageResBody(
+            content = page.content,  // 현재 페이지에 해당하는 List<AnimalRes>
+            page = page.number,  // 현재 보고 있는 페이지 번호 (0부터 시작)
+            size = page.size,  // 페이지 크기 ex.20
+            totalElements = page.totalElements,  // 전체 개수   ex.342
+            totalPages = page.totalPages,  // 전체 페이지 ex.18
+            last = page.isLast // 마지막 페이지 여부
+        )
+
+        return ResponseEntity.ok(response)
+    }
 }
