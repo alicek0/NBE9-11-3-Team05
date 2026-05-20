@@ -4,19 +4,14 @@ import com.team05.petmeeting.domain.animal.dto.external.AnimalItem
 import com.team05.petmeeting.domain.comment.entity.AnimalComment
 import com.team05.petmeeting.domain.shelter.entity.Shelter
 import com.team05.petmeeting.global.entity.BaseEntity
-import jakarta.persistence.CascadeType
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.ManyToOne
-import jakarta.persistence.OneToMany
-import jakarta.persistence.Table
+import jakarta.persistence.*
 import java.time.DateTimeException
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeFormatterBuilder
 import java.time.temporal.ChronoField
-import java.util.Objects
+import java.util.*
 
 @Entity
 @Table(name = "animals")
@@ -193,7 +188,8 @@ class Animal() : BaseEntity() {
 
     fun getTemperature(): Double {
         val cheerGoal = 50.0
-        return totalCheerCount / cheerGoal * 100
+        val temperature = totalCheerCount / cheerGoal * 100
+        return kotlin.math.round(temperature * 10) / 10.0
     }
 
     class Builder {
