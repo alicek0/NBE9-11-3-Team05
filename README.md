@@ -2,6 +2,8 @@
   
   # PetMeeting
 
+  [🐾 펫미팅](https://petmeeting.vercel.app/about)
+
   ## 🐾 프로젝트 소개
 
 **Pet Meeting**은 공공 유기동물 데이터를 기반으로 유기동물 조회, 사용자 참여, 입양 신청, 커뮤니티 기능을 제공하는 참여형 유기동물 입양 플랫폼입니다.
