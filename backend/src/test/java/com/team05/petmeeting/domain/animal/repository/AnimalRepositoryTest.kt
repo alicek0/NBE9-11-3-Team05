@@ -36,6 +36,10 @@ internal class AnimalRepositoryTest {
                     .processState("보호중")
                     .stateGroup(0) // 필수 필드 추가!
                     .totalCheerCount(10)
+                    .weight("10.5(Kg)")
+                    .careAddr("경상남도 진주시")
+                    .specialMark("입질 있음")
+                    .noticeEdt(java.time.LocalDate.of(2024, 12, 31))
                     .build(),
                 builder()
                     .desertionNo("2024002")
@@ -44,6 +48,10 @@ internal class AnimalRepositoryTest {
                     .processState("종료(입양)")
                     .stateGroup(1) // 필수 필드 추가!
                     .totalCheerCount(50)
+                    .weight("5.0(Kg)")
+                    .careAddr("경상남도 창원시")
+                    .specialMark("매우 순함")
+                    .noticeEdt(java.time.LocalDate.of(2024, 10, 10))
                     .build(),
                 builder()
                     .desertionNo("2024003")
@@ -52,6 +60,10 @@ internal class AnimalRepositoryTest {
                     .processState("보호중")
                     .stateGroup(0) // 필수 필드 추가!
                     .totalCheerCount(30)
+                    .weight("3.0(Kg)")
+                    .careAddr("서울특별시 강남구")
+                    .specialMark("사람을 좋아함")
+                    .noticeEdt(java.time.LocalDate.of(2024, 11, 1))
                     .build(),
                 builder()
                     .desertionNo("2024004")
@@ -60,6 +72,10 @@ internal class AnimalRepositoryTest {
                     .processState("보호중")
                     .stateGroup(0) // 필수 필드 추가!
                     .totalCheerCount(5)
+                    .weight("8.5(Kg)")
+                    .careAddr("서울특별시 송파구")
+                    .specialMark("온순함")
+                    .noticeEdt(java.time.LocalDate.of(2024, 12, 1))
                     .build()
             )
         )
@@ -127,5 +143,28 @@ internal class AnimalRepositoryTest {
         Assertions.assertThat(result.getContent()[0].totalCheerCount).isEqualTo(50)
         Assertions.assertThat(result.getContent()[1].totalCheerCount).isEqualTo(30)
         Assertions.assertThat(result.totalElements).isEqualTo(4)
+    }
+
+    @Test
+    @DisplayName("맞춤 추천 쿼리(findMatched) 검증 - 하이버네이트 6 캐스팅 및 페이징 정상 작동")
+    fun testFindMatched() {
+        // given
+        // 2024004 (송파구 개): 8.5kg(중형견), 온순함(초보자용), 서울지역, 보호중 -> 매칭됨
+        // 2024001 (진주시 개): 입질(초보자용 X), 경남지역 -> 매칭 실패
+        val species = "개"
+        val size = "중형 (어디서나 당당한 크기)"
+        val region = "서울/경기/인천"
+        val housing = "아파트/원룸 (실내 생활 위주)"
+        val activity = "매일 산책 가능 (활동적인 편)"
+        val experience = "처음 키워보는 초보 집사"
+        val pageable: Pageable = PageRequest.of(0, 10)
+
+        // when
+        val result: Page<Animal> = animalRepository.findMatched(species, size, region, housing, activity, experience, pageable)
+
+        // then
+        Assertions.assertThat(result.content).hasSize(1)
+        Assertions.assertThat(result.content[0].desertionNo).isEqualTo("2024004")
+        Assertions.assertThat(result.content[0].weight).isEqualTo("8.5(Kg)")
     }
 }
