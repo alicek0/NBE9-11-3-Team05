@@ -15,5 +15,6 @@ enum class AnimalErrorCode(
     ANIMAL_SYNC_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "A-004", "유기동물 데이터 적재 중 오류가 발생했습니다."),
     INITIAL_ANIMAL_SYNC_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "A-005", "유기동물 최초 적재 중 오류가 발생했습니다."),
     UPDATE_ANIMAL_SYNC_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "A-006", "유기동물 업데이트 적재 중 오류가 발생했습니다."),
+    INVALID_SYNC_SECRET(HttpStatus.FORBIDDEN, "A-007", "동기화 요청 권한이 없습니다."),
     ;
 }

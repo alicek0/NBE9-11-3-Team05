@@ -182,6 +182,8 @@
   | POST | `/api/v1/animals/sync/initial` | 초기 데이터 동기화 |
   | POST | `/api/v1/animals/sync/update` | 갱신 데이터 동기화 |
 
+  `주의:` `POST /api/v1/animals/sync*` 엔드포인트는 내부 호출 전용이며 `X-Internal-Secret` 헤더가 필요합니다. 운영 환경에는 `ANIMAL_SYNC_SECRET` 환경변수를 반드시 설정해야 합니다.
+
   ### 피드 / 댓글
 
   | Method | URL | 설명 |

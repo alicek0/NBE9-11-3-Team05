@@ -20,6 +20,7 @@ animal:
     return-type: ${ANIMAL_API_RETURN_TYPE:json}
     timeout-ms: ${ANIMAL_API_TIMEOUT_MS:5000}
   sync:
+    secret: ${ANIMAL_SYNC_SECRET:local-animal-sync-secret}
     initial:
       num-of-rows: ${ANIMAL_SYNC_INITIAL_NUM_OF_ROWS:500}
     update:

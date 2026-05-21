@@ -82,6 +82,7 @@ animal:
   sync:
     default-page-no: ${ANIMAL_SYNC_DEFAULT_PAGE_NO:1}
     default-num-of-rows: ${ANIMAL_SYNC_DEFAULT_NUM_OF_ROWS:10}
+    secret: ${ANIMAL_SYNC_SECRET}
     initial:
       start-date: ${ANIMAL_SYNC_INITIAL_START_DATE:2025-01-01}
       num-of-rows: ${ANIMAL_SYNC_INITIAL_NUM_OF_ROWS:500}
@@ -121,8 +122,10 @@ management:
   endpoints:
     web:
       exposure:
-        include: "prometheus" # /actuator/prometheus 엔드포인트 활성화
+        include: "health,prometheus" # 운영 헬스체크와 메트릭 엔드포인트 활성화
   endpoint:
+    health:
+      enabled: true
     prometheus:
       enabled: true
   metrics:

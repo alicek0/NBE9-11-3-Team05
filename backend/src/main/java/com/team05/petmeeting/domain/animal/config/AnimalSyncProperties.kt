@@ -1,14 +1,20 @@
 package com.team05.petmeeting.domain.animal.config
 
 import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.validation.annotation.Validated
 import java.time.LocalDate
+import jakarta.validation.constraints.NotBlank
 
+@Validated
 @ConfigurationProperties(prefix = "animal.sync")
 class AnimalSyncProperties {
     // 일반 동기화(/sync) 요청의 기본 페이지 번호
     var defaultPageNo: Int = 1
     // 일반 동기화(/sync) 요청의 기본 조회 건수
     var defaultNumOfRows: Int = 10
+    // 내부 동기화 API 호출용 secret
+    @field:NotBlank
+    var secret: String = ""
     // 최초 적재(/sync/initial) 기본 설정
     var initial: Initial = Initial()
     // 업데이트 적재(/sync/update) 기본 설정
