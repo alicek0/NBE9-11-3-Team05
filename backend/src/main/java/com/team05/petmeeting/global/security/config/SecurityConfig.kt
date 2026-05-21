@@ -1,7 +1,6 @@
 package com.team05.petmeeting.global.security.config
 
 import com.team05.petmeeting.global.security.filter.JwtAuthenticationFilter
-import com.team05.petmeeting.global.security.filter.InternalSyncAuthenticationFilter
 import com.team05.petmeeting.global.security.handler.JwtAccessDeniedHandler
 import com.team05.petmeeting.global.security.handler.JwtAuthenticationEntryPoint
 import com.team05.petmeeting.global.security.oauth.CustomOAuth2UserService
@@ -28,7 +27,6 @@ class SecurityConfig(
     private val jwtAuthenticationEntryPoint: JwtAuthenticationEntryPoint,
     private val jwtAccessDeniedHandler: JwtAccessDeniedHandler,
     private val jwtFilter: JwtAuthenticationFilter,
-    private val internalSyncAuthenticationFilter: InternalSyncAuthenticationFilter,
     private val customOAuth2UserService: CustomOAuth2UserService,
     private val oAuth2SuccessHandler: OAuth2SuccessHandler,
 ) {
@@ -76,9 +74,9 @@ class SecurityConfig(
                 authorize(HttpMethod.GET, "/api/v1/campaigns", permitAll)
                 authorize(HttpMethod.GET, "/api/v1/shelters/*", permitAll)
 
-                authorize(HttpMethod.POST, "/api/v1/animals/sync", hasRole("INTERNAL_SYNC"))
-                authorize(HttpMethod.POST, "/api/v1/animals/sync/initial", hasRole("INTERNAL_SYNC"))
-                authorize(HttpMethod.POST, "/api/v1/animals/sync/update", hasRole("INTERNAL_SYNC"))
+                authorize(HttpMethod.POST, "/api/v1/animals/sync", permitAll)
+                authorize(HttpMethod.POST, "/api/v1/animals/sync/initial", permitAll)
+                authorize(HttpMethod.POST, "/api/v1/animals/sync/update", permitAll)
                 authorize(HttpMethod.POST, "/api/v1/donations/webhook", permitAll)
 
                 authorize("/error", permitAll) // 처리 못 한 예외 포워딩에 대한 경로 오픈
@@ -87,7 +85,6 @@ class SecurityConfig(
                 authorize(anyRequest, authenticated)
             }
 
-            addFilterBefore<UsernamePasswordAuthenticationFilter>(internalSyncAuthenticationFilter)
             addFilterBefore<UsernamePasswordAuthenticationFilter>(jwtFilter)
         }
 
