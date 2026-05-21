@@ -31,6 +31,10 @@ services:
       SPRING_PROFILES_ACTIVE: prod
       SPRING_DATA_REDIS_HOST: petmeeting-redis
       SPRING_DATA_REDIS_PORT: 6379
+      JAVA_OPTS: "-Xms128m -Xmx512m"
+
+    mem_limit: 700m
+
     depends_on:
       - redis
     restart: always
