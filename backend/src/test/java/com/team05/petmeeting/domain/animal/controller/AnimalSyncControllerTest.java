@@ -27,9 +27,6 @@ import org.springframework.test.web.servlet.MockMvc;
 // AnimalSyncController의 동기화 엔드포인트가 AnimalSyncService에 요청 값을 올바르게 전달하는지 검증
 class AnimalSyncControllerTest {
 
-    private static final String SYNC_SECRET_HEADER = "X-Internal-Secret";
-    private static final String SYNC_SECRET = "test-sync-secret";
-
     @Autowired
     private MockMvc mockMvc;
 
@@ -49,11 +46,9 @@ class AnimalSyncControllerTest {
     @DisplayName("유기동물 페이지 동기화 요청 성공")
     void syncAnimals() throws Exception {
         AnimalSyncRes response = new AnimalSyncRes("동기화 완료", 3, 120L);
-        given(animalSyncProperties.getSecret()).willReturn(SYNC_SECRET);
         given(animalSyncService.fetchAndSaveAnimals(2, 30)).willReturn(response);
 
         mockMvc.perform(post("/api/v1/animals/sync")
-                        .header(SYNC_SECRET_HEADER, SYNC_SECRET)
                         .param("pageNo", "2")
                         .param("numOfRows", "30")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -69,13 +64,11 @@ class AnimalSyncControllerTest {
     @DisplayName("유기동물 페이지 동기화 요청 시 파라미터가 없으면 설정 기본값을 사용한다")
     void syncAnimals_usesConfiguredDefaults() throws Exception {
         AnimalSyncRes response = new AnimalSyncRes("동기화 완료", 1, 50L);
-        given(animalSyncProperties.getSecret()).willReturn(SYNC_SECRET);
         given(animalSyncProperties.getDefaultPageNo()).willReturn(1);
         given(animalSyncProperties.getDefaultNumOfRows()).willReturn(10);
         given(animalSyncService.fetchAndSaveAnimals(1, 10)).willReturn(response);
 
         mockMvc.perform(post("/api/v1/animals/sync")
-                        .header(SYNC_SECRET_HEADER, SYNC_SECRET)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("동기화 완료"))
@@ -90,13 +83,11 @@ class AnimalSyncControllerTest {
     void syncInitialMonthly() throws Exception {
         AnimalSyncRes response = new AnimalSyncRes("초기 동기화 완료", 10, 300L);
         AnimalSyncProperties.Initial initial = new AnimalSyncProperties.Initial();
-        given(animalSyncProperties.getSecret()).willReturn(SYNC_SECRET);
         initial.setNumOfRows(500);
         given(animalSyncProperties.getInitial()).willReturn(initial);
         given(animalSyncService.runInitialMonthlySync(500)).willReturn(response);
 
         mockMvc.perform(post("/api/v1/animals/sync/initial")
-                        .header(SYNC_SECRET_HEADER, SYNC_SECRET)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("초기 동기화 완료"))
@@ -110,11 +101,9 @@ class AnimalSyncControllerTest {
     @DisplayName("수정일 기준 동기화 요청 성공")
     void syncByUpdatedDate() throws Exception {
         AnimalSyncRes response = new AnimalSyncRes("수정 동기화 완료", 5, 200L);
-        given(animalSyncProperties.getSecret()).willReturn(SYNC_SECRET);
         given(animalSyncService.runUpdateSync(100)).willReturn(response);
 
         mockMvc.perform(post("/api/v1/animals/sync/update")
-                        .header(SYNC_SECRET_HEADER, SYNC_SECRET)
                         .param("numOfRows", "100")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -123,16 +112,5 @@ class AnimalSyncControllerTest {
                 .andExpect(jsonPath("$.elapsedMs").value(200L));
 
         verify(animalSyncService).runUpdateSync(100);
-    }
-
-    @Test
-    @DisplayName("sync secret header가 없으면 동기화 요청이 거부된다")
-    void syncAnimals_withoutSecretHeader_forbidden() throws Exception {
-        given(animalSyncProperties.getSecret()).willReturn(SYNC_SECRET);
-
-        mockMvc.perform(post("/api/v1/animals/sync")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.code").value("A-007"));
     }
 }
