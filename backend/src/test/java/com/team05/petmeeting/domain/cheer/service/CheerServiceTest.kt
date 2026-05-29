@@ -67,12 +67,13 @@ internal class CheerServiceTest {
     @Test
     @DisplayName("cheerAnimal: 정상 동작")
     fun cheerAnimal_success() {
-        // given: userId=1L, animalId=100L
+        // given
+        BDDMockito.given(userRepository.findByIdWithLock(1L)).willReturn(testUser)
+        // 💡 중요: animalRepository.findById는 전반부, 후반부 총 2번 호출되므로 늘Optional.of를 리턴하도록 설정
+        BDDMockito.given(animalRepository.findById(100L)).willReturn(Optional.of(testAnimal))
+        // 💡 중요: 메서드 마지막의 일반 findById(1L) 재조회 모킹 추가
         BDDMockito.given(userRepository.findById(1L)).willReturn(Optional.of(testUser))
-        BDDMockito.given(animalRepository.findById(100L))
-            .willReturn(Optional.of(testAnimal))
 
-        // save 시 인자를 그대로 반환하도록 설정 (컴파일 에러 해결 버전)
         BDDMockito.given(cheerRepository.save(ArgumentMatchers.any(Cheer::class.java)))
             .willAnswer(Answer { invocation: InvocationOnMock? ->
                 invocation!!.getArgument(
@@ -81,7 +82,7 @@ internal class CheerServiceTest {
                 )
             })
 
-        // when: 서비스의 파라미터 순서(userId, animalId)에 맞춰 호출!
+        // when
         val result = cheerService.cheerAnimal(1L, 100L)
 
         // then
@@ -96,11 +97,10 @@ internal class CheerServiceTest {
     @Test
     @DisplayName("cheerAnimal: 일일 응원 제한 초과")
     fun cheerAnimal_limitExceeded() {
-        // given: 이미 5번 응원한 상태
+        // given
         testUser = createUser(1L, 5, LocalDate.now())
-        BDDMockito.given(userRepository.findById(1L)).willReturn(Optional.of(testUser))
-        BDDMockito.given(animalRepository.findById(100L))
-            .willReturn(Optional.of(testAnimal))
+        BDDMockito.given(userRepository.findByIdWithLock(1L)).willReturn(testUser)
+        BDDMockito.given(animalRepository.findById(100L)).willReturn(Optional.of(testAnimal))
 
         // when & then
         Assertions.assertThatThrownBy(ThrowableAssert.ThrowingCallable { cheerService.cheerAnimal(1L, 100L) })
@@ -115,9 +115,11 @@ internal class CheerServiceTest {
     @DisplayName("cheerAnimal: Cheer 객체를 사용자와 동물로 생성해 저장한다")
     fun cheerAnimal_savesCheerWithUserAndAnimal() {
         // given
+        BDDMockito.given(userRepository.findByIdWithLock(1L)).willReturn(testUser)
+        BDDMockito.given(animalRepository.findById(100L)).willReturn(Optional.of(testAnimal))
+        // 💡 중요: 메서드 마지막의 일반 findById(1L) 재조회 모킹 추가
         BDDMockito.given(userRepository.findById(1L)).willReturn(Optional.of(testUser))
-        BDDMockito.given(animalRepository.findById(100L))
-            .willReturn(Optional.of(testAnimal))
+
         BDDMockito.given(cheerRepository.save(ArgumentMatchers.any(Cheer::class.java)))
             .willAnswer(Answer { invocation: InvocationOnMock? ->
                 invocation!!.getArgument(
@@ -129,7 +131,7 @@ internal class CheerServiceTest {
         // when
         cheerService.cheerAnimal(1L, 100L)
 
-        // then: 실제 저장된 Cheer 객체 내부의 관계 검증
+        // then
         Mockito.verify(cheerRepository)
             .save(ArgumentMatchers.argThat(ArgumentMatcher { cheer: Cheer ->
                 cheer.user == testUser &&
@@ -141,13 +143,15 @@ internal class CheerServiceTest {
     @Test
     @DisplayName("cheerAnimal: 전날 응원 기록이 있어도 자정이 지나면 초기화 후 응원 가능하다")
     fun cheerAnimal_resetAfterMidnight() {
-        // 1. Given: 마지막 응원 날짜가 '어제'이고, 이미 5번을 다 쓴 유저
+        // 1. Given
         val yesterday = LocalDate.now().minusDays(1)
         testUser = createUser(1L, 5, yesterday)
 
-        BDDMockito.given(userRepository.findById(1L)).willReturn(Optional.of<User>(testUser))
-        BDDMockito.given(animalRepository.findById(100L))
-            .willReturn(Optional.of(testAnimal))
+        BDDMockito.given(userRepository.findByIdWithLock(1L)).willReturn(testUser)
+        BDDMockito.given(animalRepository.findById(100L)).willReturn(Optional.of(testAnimal))
+        // 💡 중요: 메서드 마지막의 일반 findById(1L) 재조회 모킹 추가
+        BDDMockito.given(userRepository.findById(1L)).willReturn(Optional.of(testUser))
+
         BDDMockito.given(cheerRepository.save(ArgumentMatchers.any(Cheer::class.java)))
             .willAnswer(Answer { invocation: InvocationOnMock? ->
                 invocation!!.getArgument(
@@ -156,18 +160,26 @@ internal class CheerServiceTest {
                 )
             })
 
-        // 2. When: 응원 시도
+        // 2. When
         val result = cheerService.cheerAnimal(1L, 100L)
 
         // 3. Then
-        // 응원이 성공하여 남은 횟수가 4가 되어야 함 (5회 중 1회 사용)
         Assertions.assertThat(result.remaingCheersToday).isEqualTo(4)
-
-        // 유저의 상태가 오늘 날짜로 갱신되었는지 확인
         Assertions.assertThat(testUser.dailyHeartCount).isEqualTo(1)
         Assertions.assertThat(testUser.lastHeartResetDate).isEqualTo(LocalDate.now())
 
         Mockito.verify(cheerRepository, Mockito.times(1))
             .save(ArgumentMatchers.any(Cheer::class.java))
+    }
+
+    @Test
+    @DisplayName("cheerAnimal: 존재하지 않는 사용자의 경우 예외가 발생한다")
+    fun cheerAnimal_userNotFound() {
+        // given: findByIdWithLock이 null을 반환하도록 설정
+        BDDMockito.given(userRepository.findByIdWithLock(1L)).willReturn(null)
+
+        // when & then
+        Assertions.assertThatThrownBy(ThrowableAssert.ThrowingCallable { cheerService.cheerAnimal(1L, 100L) })
+            .isInstanceOf(BusinessException::class.java)
     }
 }

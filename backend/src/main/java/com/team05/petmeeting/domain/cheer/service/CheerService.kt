@@ -46,9 +46,9 @@ class CheerService(
 
     // 응원 부여
     fun cheerAnimal(userId: Long, animalId: Long): CheerRes {
-        // 사용자 조회
-        val user = userRepository.findById(userId)
-            .orElseThrow{ BusinessException(UserErrorCode.USER_NOT_FOUND) }
+        // [유저만 비관적 락으로 조회] -> 조회와 동시에 X-Lock 획득되어 유저 광클 차단
+        val user = userRepository.findByIdWithLock(userId)
+            ?: throw BusinessException(UserErrorCode.USER_NOT_FOUND)
         // 동물 조회
         val animal = animalRepository.findById(animalId)
             .orElseThrow{ BusinessException(AnimalErrorCode.ANIMAL_NOT_FOUND) }
@@ -61,16 +61,22 @@ class CheerService(
             throw BusinessException(CheerErrorCode.DAILY_CHEER_LIMIT_EXCEEDED)
         }
 
-        // cheer 객체 생성 & 저장
+        // [1단계: 유저 도메인 처리]
+        user.useDailyCheer()
+        userRepository.saveAndFlush(user)
+
+        // [2단계: 동물 도메인 처리]
+        // 벌크 연산으로 인해 1차 캐시가 비워짐 (유저 정보는 이미 DB에 flush되었으므로 안전)
+        animalRepository.incrementCheerCount(animalId) // 동물 Row에 배타 락(X-Lock) 획득
+
+        // [3단계: 응원 도메인 처리]
+        // 외래 키 제약 조건으로 인해 Animal과 User에 S-Lock을 시도하지만,
+        // 이미 같은 트랜잭션 내에서 강력한 X-Lock을 쥐고 있으므로 경합 없이 무사 통과
         val cheer = Cheer(user, animal)
         cheerRepository.save(cheer)
-        // user 응원 횟수 증가
-        user.useDailyCheer()
-        userRepository.saveAndFlush(user) // 변경된 user 상태를 DB에 즉시 반영
 
-        animalRepository.incrementCheerCount(animalId) // 원자적 업데이트(동시성 안전), 캐시 비워짐
 
-        // 캐시가 비워졌으므로 DB에서 업데이트된 Animal, User 가져오기
+        // 캐시가 비워졌으므로 다시 조회
         val updatedAnimal = animalRepository.findById(animalId).get()
         val updatedUser = userRepository.findById(userId).get()
 
@@ -83,3 +89,4 @@ class CheerService(
     }
 
 }
+
